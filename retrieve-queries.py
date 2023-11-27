@@ -10,6 +10,13 @@ def fetch_json_data(api_url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
+def extract_prefix_from_query(query_content):
+    # Use regular expression to find the first occurrence of 'prefix' (case-insensitive)
+    match = re.search(r'(?i)prefix', query_content)
+    if match:
+        return query_content[match.start():]
+    return query_content  # Return the whole content if 'prefix' is not found
+
 def extract_and_save_queries(api_url, github_workspace):
     data = fetch_json_data(api_url)
 
