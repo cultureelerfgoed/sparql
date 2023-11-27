@@ -9,7 +9,7 @@ def fetch_json_data(api_url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
-def extract_and_save_queries(api_url, output_folder):
+def extract_and_save_queries(api_url, github_workspace):
     data = fetch_json_data(api_url)
 
     for payload in data:
@@ -19,6 +19,8 @@ def extract_and_save_queries(api_url, output_folder):
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
+             # Use github_workspace as the base for the output folder
+            output_folder = os.path.join(github_workspace, "path/to/your/output/folder")
             filename = os.path.join(output_folder, f"{name}.rq")
             with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
@@ -37,5 +39,8 @@ def extract_and_save_queries(api_url, output_folder):
 
 if __name__ == "__main__":
     api_url = "https://api.linkeddata.cultureelerfgoed.nl/queries/"
-    output_folder_path = "C:\\Users\\Ruben\\Desktop\\rce_queries2"
-    extract_and_save_queries(api_url, output_folder_path)
+   
+   # Use github.workspace as the base for the output folder
+    github_workspace = os.getenv("GITHUB_WORKSPACE")
+    extract_and_save_queries(json_file_path, github_workspace)
+    
