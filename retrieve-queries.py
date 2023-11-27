@@ -29,7 +29,7 @@ def extract_and_save_queries(api_url, github_workspace):
                 if description:
                     # Replace newlines in the description with newline and #+
                     description_lines = description.split('\n')
-                    formatted_description = '\n'.join(f"#+ {line}" for line in description_lines)
+                    formatted_description = '\n'.join(f"#+ description: {line}" for line in description_lines)
                     query_file.write(f"{formatted_description}\n")
                 if service_endpoint:
                     query_file.write(f"#+ service: {service_endpoint}\n\n")
