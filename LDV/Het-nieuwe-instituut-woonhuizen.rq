@@ -1,7 +1,7 @@
 #+ name: Het-nieuwe-instituut-woonhuizen
 #+ description: Alle woonhuizen en vakantiehuizen in Het nieuwe Instituut collectie met Rietveld als Architect.
-#+ description: In totaal 19 huizen waarbij er geen afbeelding is aan gelinkt.
-#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+#- In totaal 19 huizen waarbij er geen afbeelding is aan gelinkt.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
 
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 PREFIX sdo: <https://schema.org/>

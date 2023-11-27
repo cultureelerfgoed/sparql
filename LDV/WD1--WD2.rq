@@ -1,6 +1,6 @@
 #+ name: WD1--WD2
 #+ description: Query om gebouwen die zijn vervaardigd of verbouwd door Gerrit Rietveld. WikiMedia afbeeldingen gebruikt. Query gebaseerd op DataStory Rietveld door Marije Timmermans en Joop Vanderheiden.
-#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 # Query gebaseerd op query's uit DataStory Rietveld, door Marije Timmermans en Joop VanderHeiden.
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

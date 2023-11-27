@@ -1,5 +1,5 @@
 #+ name: Query-6-1-1-1-2-2
-#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>

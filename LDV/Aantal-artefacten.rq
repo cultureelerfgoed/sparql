@@ -1,5 +1,5 @@
 #+ name: Aantal-artefacten
-#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

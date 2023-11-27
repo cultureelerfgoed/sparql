@@ -1,5 +1,5 @@
 #+ name: Beschermde-religieuze-gebouwen-op-kaart
-#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
