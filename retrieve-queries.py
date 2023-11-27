@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+import html
 
 def fetch_json_data(api_url):
     response = requests.get(api_url)
