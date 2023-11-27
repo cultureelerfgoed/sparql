@@ -10,6 +10,13 @@ def fetch_json_data(api_url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
+def replace_problematic_characters(text):
+    # Replace <, >, and / with placeholders
+    text = text.replace('<', '__lt__')
+    text = text.replace('>', '__gt__')
+    text = text.replace('/', '__slash__')
+    return text
+
 def extract_and_save_queries(api_url, github_workspace):
     data = fetch_json_data(api_url)
 
@@ -28,8 +35,8 @@ def extract_and_save_queries(api_url, github_workspace):
                 if name:
                     query_file.write(f"#+ name: {name}\n")
                 if description:
-                    # Replace problematic characters with HTML entities
-                    description = html.escape(description)
+                     # Replace problematic characters with placeholders
+                    description = replace_problematic_characters(description)
                     
                     # Write the first line of description with "#+ description:"
                     first_line, *remaining_lines = description.split('\n')
