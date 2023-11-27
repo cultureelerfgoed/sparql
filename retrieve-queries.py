@@ -20,7 +20,7 @@ def extract_and_save_queries(api_url, github_workspace):
 
         if query_content and name and service_endpoint:
              # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace, "path/to/your/output/folder")
+            output_folder = os.path.join(github_workspace, "LDV")
             filename = os.path.join(output_folder, f"{name}.rq")
             with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
@@ -42,5 +42,5 @@ if __name__ == "__main__":
    
    # Use github.workspace as the base for the output folder
     github_workspace = os.getenv("GITHUB_WORKSPACE")
-    extract_and_save_queries(json_file_path, github_workspace)
+    extract_and_save_queries(api_url, github_workspace)
     
