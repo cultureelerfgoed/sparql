@@ -28,7 +28,17 @@ jobs:
         API_URL: https://api.linkeddata.cultureelerfgoed.nl/queries/
         OUTPUT_FOLDER: "${{ github.workspace }}/LDV"
 
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if git diff --exit-code; then
+          echo "No changes to commit"
+          exit 0
+        fi
+        exit 1
+
     - name: Commit and push changes
+      if: steps.check_changes.outcome == 'failure'
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
