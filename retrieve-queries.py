@@ -16,7 +16,7 @@ def extract_and_save_queries(api_url, github_workspace):
     for payload in data:
         query_content = payload.get('requestConfig', {}).get('payload', {}).get('query', '')
         name = payload.get('name', '')
-        description = payload.get('description', '').replace('\n', ' ').replace('</p>', ' ')
+        description = payload.get('description', '')
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
