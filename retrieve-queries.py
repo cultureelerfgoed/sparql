@@ -23,7 +23,7 @@ def extract_and_save_queries(api_url, github_workspace):
     for payload in data:
         query_content = payload.get('requestConfig', {}).get('payload', {}).get('query', '')
         name = payload.get('name', '')
-        description = payload.get('description', '').split('\n')[0]
+        description = payload.get('description', '')
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
@@ -35,7 +35,10 @@ def extract_and_save_queries(api_url, github_workspace):
                 if name:
                     query_file.write(f"#+ name: {name}\n")
                 if description:
-                    query_file.write(f"#+ description: {description}\n")
+                    # Replace newlines in the description with newline and #+
+                    description_lines = description.split('\n')
+                    formatted_description = '\n'.join(f"#+ description: {line}" for line in description_lines)
+                    query_file.write(f"{formatted_description}\n")
                 if service_endpoint:
                     query_file.write(f"#+ service: {service_endpoint}\n\n")
 
