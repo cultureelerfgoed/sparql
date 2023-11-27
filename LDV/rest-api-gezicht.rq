@@ -8,7 +8,7 @@
 #+ </p>
 #+ Date: dd. 2023-11-20</br>
 #+ Version: 0.5
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 #+ This SPARQL query is designed to retrieve information related to "gezichten," specifically stads- en dorpsgezichten (urban and village views) from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).
 # Define prefixes for the namespaces used in the query

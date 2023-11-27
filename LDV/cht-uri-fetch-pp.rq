@@ -4,7 +4,7 @@
 #+ Wordt gebruikt voor pipeline `nieuwe CHT termen > Excel > .ttl > Poolparty import`. 
 #+ 
 #+ Niet weggooien!
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     SELECT ?uri WHERE {

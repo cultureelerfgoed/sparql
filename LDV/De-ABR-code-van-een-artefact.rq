@@ -1,5 +1,5 @@
 #+ name: De-ABR-code-van-een-artefact
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
 
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
