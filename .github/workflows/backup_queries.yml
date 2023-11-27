@@ -1,0 +1,37 @@
+name: Update Queries
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  update_queries:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      run: |
+        pip install requests
+
+    - name: Run update script
+      run: retrieve-queries.py
+      env:
+        API_URL: https://api.linkeddata.cultureelerfgoed.nl/queries/
+        OUTPUT_FOLDER: "${{ github.workspace }}/LDV"
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git add .
+        git commit -m "Automated update of sparql queries"
+        git push
