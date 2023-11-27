@@ -19,14 +19,15 @@ def extract_and_save_queries(api_url, github_workspace):
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
-             # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace, "LDV")
             filename = os.path.join(output_folder, f"{name}.rq")
             with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
                 if name:
                     query_file.write(f"#+ name: {name}\n")
                 if description:
+                    # Replace problematic characters with HTML entities
+                    description = html.escape(description)
+                    
                     # Write the first line of description with "#+ description:"
                     first_line, *remaining_lines = description.split('\n')
                     query_file.write(f"#+ description: {first_line}\n")
