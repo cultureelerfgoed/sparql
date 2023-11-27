@@ -10,20 +10,13 @@ def fetch_json_data(api_url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
-def replace_problematic_characters(text):
-    # Replace <, >, and / with placeholders
-    text = text.replace('<', '__lt__')
-    text = text.replace('>', '__gt__')
-    text = text.replace('/', '__slash__')
-    return text
-
 def extract_and_save_queries(api_url, github_workspace):
     data = fetch_json_data(api_url)
 
     for payload in data:
         query_content = payload.get('requestConfig', {}).get('payload', {}).get('query', '')
         name = payload.get('name', '')
-        description = payload.get('description', '')
+        description = payload.get('description', '').replace('\n', ' ')
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
