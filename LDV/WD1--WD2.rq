@@ -1,5 +1,5 @@
 #+ name: WD1--WD2
-#+ Query om gebouwen die zijn vervaardigd of verbouwd door Gerrit Rietveld. WikiMedia afbeeldingen gebruikt. Query gebaseerd op DataStory Rietveld door Marije Timmermans en Joop Vanderheiden.
+#+ description: Query om gebouwen die zijn vervaardigd of verbouwd door Gerrit Rietveld. WikiMedia afbeeldingen gebruikt. Query gebaseerd op DataStory Rietveld door Marije Timmermans en Joop Vanderheiden.
 #+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 # Query gebaseerd op query's uit DataStory Rietveld, door Marije Timmermans en Joop VanderHeiden.

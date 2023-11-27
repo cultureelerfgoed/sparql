@@ -1,9 +1,9 @@
 #+ name: cht-uri-fetch-pp
-#+ API service voor het automatisch koppelen van CHT termen aan URI's. 
-#+ 
-#+ Wordt gebruikt voor pipeline `nieuwe CHT termen > Excel > .ttl > Poolparty import`. 
-#+ 
-#+ Niet weggooien!
+#+ description: API service voor het automatisch koppelen van CHT termen aan URI's. 
+#+ description: 
+#+ description: Wordt gebruikt voor pipeline `nieuwe CHT termen > Excel > .ttl > Poolparty import`. 
+#+ description: 
+#+ description: Niet weggooien!
 #+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

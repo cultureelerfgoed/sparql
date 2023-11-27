@@ -1,5 +1,5 @@
 #+ name: rubentest-backup
-#+ backup test
+#+ description: backup test
 #+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
