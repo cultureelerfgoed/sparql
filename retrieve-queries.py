@@ -44,4 +44,3 @@ if __name__ == "__main__":
    # Use github.workspace as the base for the output folder
     github_workspace = os.getenv("GITHUB_WORKSPACE")
     extract_and_save_queries(api_url, github_workspace)
-    
