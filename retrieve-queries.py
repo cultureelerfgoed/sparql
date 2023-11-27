@@ -42,8 +42,8 @@ def extract_and_save_queries(api_url, github_workspace):
                 if service_endpoint:
                     query_file.write(f"#+ service: {service_endpoint}\n\n")
 
-                # Write the SPARQL query content
-                query_file.write(query_content)
+                 # Write the SPARQL query content from the first mentioning of 'prefix'
+                query_file.write(extract_prefix_from_query(query_content))
 
 if __name__ == "__main__":
     api_url = "https://api.linkeddata.cultureelerfgoed.nl/queries/"
