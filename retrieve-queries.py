@@ -35,7 +35,7 @@ def extract_and_save_queries(api_url, github_workspace):
                 if name:
                     query_file.write(f"#+ name: {name}\n")
                 if description:
-                     # Replace problematic characters with placeholders
+                    # Replace problematic characters with placeholders
                     description = replace_problematic_characters(description)
                     
                     # Write the first line of description with "#+ description:"
@@ -43,7 +43,7 @@ def extract_and_save_queries(api_url, github_workspace):
                     query_file.write(f"#+ description: {first_line}\n")
                     
                     # Write the remaining lines with "#+"
-                    formatted_description = '\n'.join(f"#+ {line}" for line in remaining_lines)
+                    formatted_description = '\n'.join(f"#+ {line}" if line.strip() else "#+" for line in remaining_lines)
                     if formatted_description:
                         query_file.write(f"{formatted_description}\n")
                 if service_endpoint:
