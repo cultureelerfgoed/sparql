@@ -1,0 +1,63 @@
+#+ name: rest-api-gezicht
+#+ description: ##### REST API query for the path gezicht(en).</p>
+#+ description: This SPARQL query is designed to retrieve information related to "gezichten," specifically stads- en dorpsgezichten (urban and village views) from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#+ description: - gezichtsnummer, ex.: 1439
+#+ description: - cultuurhistorischObjectnummer, ex.: 10134173
+#+ description: - naam, ex.: Kamerik
+#+ description: - registratiedatum, ex: 1966-08-04
+#+ description: </p>
+#+ description: Date: dd. 2023-11-20</br>
+#+ description: Version: 0.5
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+# Construct a new RDF graph with specific patterns
+construct {
+  $this ?p1 ?o1.
+  ?o1 ?p2 ?o2.
+  ?o2 ?p3 ?o3.
+  ?o3 ?p4 ?o4.
+  ?o4 ?p5 ?o5.
+  ?o5 ?p6 ?o6.
+  ?o6 ?p7 ?o7.
+} where {
+# Focus on the graph named 'instanties-rce' within the specified namespace
+  graph graph:instanties-rce {
+    {
+      select distinct $this {
+        $this
+          a ceo:Gezicht ;
+          ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+          ceo:registratiedatum ?registratiedatum ;
+          ceo:heeftNaam/ceo:naam ?heeftNaam ;
+          ceo:gezichtsnummer ?gezichtsnummer.
+      }
+      limit 5
+      # paginate
+    }
+# Extract additional information about the selected instances
+    $this ?p1 ?o1.
+    optional {
+# Filter out specific properties from the data
+      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+      ?o1 ?p2 ?o2.
+      optional {
+        ?o2 ?p3 ?o3.
+        optional {
+          ?o3 ?p4 ?o4.
+          optional {
+            ?o4 ?p5 ?o5.
+            optional {
+              ?o5 ?p6 ?o6.
+              optional {
+                ?o6 ?p7 ?o7.
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

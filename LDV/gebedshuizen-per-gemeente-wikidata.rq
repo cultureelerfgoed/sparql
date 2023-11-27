@@ -1,0 +1,33 @@
+#+ name: gebedshuizen-per-gemeente-wikidata
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+
+select
+  (sample(?omschrijving) as ?eventDescription)
+  (sample(?adres) as ?eventLabel)
+  ?eventLocation
+  (sample(?afbeelding) as ?eventMedia)
+  (sample(?datumInschrijving) as ?eventDate)
+{
+  ?rijksmonument
+    ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
+    ceo:heeftBasisregistratieRelatie
+      [ ceo:heeftBAGRelatie/ceo:volledigAdres ?adres;
+        ceo:heeftGemeente/skos:prefLabel ?gemeente ];
+    ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/^skos:narrower+ rn:25fac0f1-77a2-4587-ab04-dfcb66959dd8;
+    ceo:heeftGeometrie/geo:asWKT ?eventLocation;
+    ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving;
+    ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  filter not exists { ?rijksmonument ceo:heeftJuridischeStatus rn:3e79bb7c-b459-4998-a9ed-78d91d069227. }
+  service <https://query.wikidata.org/sparql> {
+    [] wdt:P359 ?rijksmonumentnummer;
+       wdt:P18 ?afbeelding.
+  }
+}
+group by ?eventLocation
+limit 100

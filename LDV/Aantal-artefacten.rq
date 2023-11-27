@@ -1,0 +1,34 @@
+#+ name: Aantal-artefacten
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (count(distinct ?artefactUri) as ?totaal) 
+       (count(distinct ?oudeArtefactUri) as ?oud)
+       (count(distinct ?nieuweArtefactUri) as ?nieuw)
+WHERE {  
+  {
+    <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri . 
+  ?artefactUri skos:prefLabel ?artefact .
+   # MINUS { ?artefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/a166e634-a679-42ae-8362-d9d9c69177f9> } . MINUS { ?artefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/d9995dd3-9198-4229-8700-65330be1cbfd>
+    #}
+}
+  UNION
+  {
+    <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?oudeArtefactUri . ?oudeArtefactUri skos:prefLabel ?artefact ; <https://digitaalerfgoed-test.poolparty.biz/def/rnce/codeAbr> ?codeAbr . 
+    #MINUS { ?oudeArtefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/a166e634-a679-42ae-8362-d9d9c69177f9> } . MINUS { ?oudeArtefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/d9995dd3-9198-4229-8700-65330be1cbfd>
+   # } 
+     
+  }
+  UNION
+  {
+    <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?nieuweArtefactUri . FILTER NOT EXISTS { ?nieuweArtefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/codeAbr> ?codeAbr } . 
+    #MINUS { ?nieuweArtefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/a166e634-a679-42ae-8362-d9d9c69177f9> } . MINUS { ?nieuweArtefactUri <https://digitaalerfgoed-test.poolparty.biz/def/rnce/hasConceptStatus> <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/d9995dd3-9198-4229-8700-65330be1cbfd>
+   # }
+   
+    
+  } 
+}
+

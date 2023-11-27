@@ -1,0 +1,48 @@
+#+ name: WD2
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+
+SELECT DISTINCT *
+
+WHERE {
+  SERVICE <https://query.wikidata.org/sparql> {
+ 
+  {
+    SELECT DISTINCT ?item WHERE {
+        #p84: architect
+      ?item p:P84 ?statement0.
+        # wdt:P279 as instance of architect
+      ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld
+       OPTIONAL{?item wdt:P571 ?datum .}
+    
+    }
+   
+  }
+   
+    
+    
+    OPTIONAL{?item wdt:P1705 ?itemlabel .}
+     #OPTIONAL{?statement0 wdt:P571 ?inception .}
+    OPTIONAL{?item wdt:P18 ?image .}
+      OPTIONAL{?item wdt:P571 ?datum .}
+    OPTIONAL{?item wdt:P625 ?geoLocatie .}
+   
+      BIND(YEAR(?datum) AS ?jaar)
+   
+}
+    BIND(strdt(concat('''<h4>{{itemlabel}}</h4><img src="{{image}}"; style="max-width:100px">
+<ul>
+<li>Vervaardigingsjaar: {{jaar}}</li>
+<li>Wikinummer: {{item}}</li>
+</ul>'''), rdf:HTML) as ?geoLocatieLabel)
+
+}
