@@ -19,20 +19,25 @@ def extract_and_save_queries(api_url, github_workspace):
         service_endpoint = payload.get('service', '')
 
         if query_content and name and service_endpoint:
-             # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace, "LDV")
             filename = os.path.join(output_folder, f"{name}.rq")
             with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
                 if name:
                     query_file.write(f"#+ name: {name}\n")
                 if description:
-                    # Replace newlines in the description with newline and #+
-                    description_lines = description.split('\n')
-                    formatted_description = '\n'.join(f"#+ description: {line}" for line in description_lines)
-                    query_file.write(f"{formatted_description}\n")
+                    # Write the first line of description with "#+ description:"
+                    first_line, *remaining_lines = description.split('\n')
+                    query_file.write(f"#+ description: {first_line}\n")
+                    
+                    # Write the remaining lines with "#+"
+                    formatted_description = '\n'.join(f"#+ {line}" for line in remaining_lines)
+                    if formatted_description:
+                        query_file.write(f"{formatted_description}\n")
                 if service_endpoint:
                     query_file.write(f"#+ service: {service_endpoint}\n\n")
+
+                # Write the SPARQL query content
+                query_file.write(query_content)
 
                 # Write the SPARQL query content
                 query_file.write(query_content)
