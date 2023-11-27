@@ -1,0 +1,28 @@
+#+ name: Tijdspan-waarbinnen-artefact-voorkomt
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+
+PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?artefact ?periode
+
+WHERE {
+  ?artefactUri skos:prefLabel ?artefact 
+  ; rnce:hasBeginPeriodAbr ?beginPeriodUri 
+  ; rnce:hasEndPeriodAbr ?endPeriodUri .
+  
+  ?beginPeriodUri skos:prefLabel ?beginPeriode
+  ; rnce:beginYearAbr ?beginYearAbr .
+  ?endPeriodUri skos:prefLabel ?eindPeriode
+  ; rnce:endYearAbr ?endYearAbr .
+  
+ BIND (IF (?beginPeriode = ?eindPeriode, str(?beginPeriode), CONCAT(str(?beginPeriode), " - ", str(?eindPeriode))) AS ?periode) .
+ FILTER (?beginYearAbr >= ?startjaar && ?endYearAbr <= ?eindjaar) .
+}
+
