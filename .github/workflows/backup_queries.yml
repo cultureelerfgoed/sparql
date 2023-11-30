@@ -26,7 +26,7 @@ jobs:
       run: python3 "${{ github.workspace }}/retrieve_queries.py"
       env:
         API_URL: https://api.linkeddata.cultureelerfgoed.nl/queries/
-        OUTPUT_FOLDER: "${{ github.workspace }}/LDV"
+        OUTPUT_FOLDER: "${{ github.workspace }}"
 
    
     - name: Check for changes
