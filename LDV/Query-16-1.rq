@@ -1,3 +1,7 @@
+#+ name: Query-16-1
+#+ description: Query waarbij in de gezocht wordt op functie "kasteel, buitenplaats" en alles wat er onder hangt
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>

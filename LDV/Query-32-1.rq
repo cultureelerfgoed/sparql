@@ -1,3 +1,7 @@
+#+ name: Query-32-1
+#+ description: Stand 14-08-2023 -> 33
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 #+ the query retrieves the municipality name, the monument number, and the residence name for cultural heritage sites using the specified relationships and properties.

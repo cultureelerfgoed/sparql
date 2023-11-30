@@ -1,3 +1,15 @@
+#+ name: rest-api-gezicht
+#+ description: ##### REST API query for the path gezicht(en).</p>
+#- This SPARQL query is designed to retrieve information related to "gezichten," specifically stads- en dorpsgezichten (urban and village views) from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- - gezichtsnummer, ex.: 1439
+#- - cultuurhistorischObjectnummer, ex.: 10134173
+#- - naam, ex.: Kamerik
+#- - registratiedatum, ex: 1966-08-04
+#- </p>
+#- Date: dd. 2023-11-20</br>
+#- Version: 0.5
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 

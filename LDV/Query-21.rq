@@ -1,3 +1,7 @@
+#+ name: Query-21
+#+ description: Welke properties zijn registergegevens (14)
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>

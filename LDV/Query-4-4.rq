@@ -1,3 +1,7 @@
+#+ name: Query-4-4
+#+ description: The query is designed to retrieve information about a hierarchical structure of concepts using the SKOS vocabulary. It selects the child label, parent label, and scope note (if available) for each concept in the hierarchy.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

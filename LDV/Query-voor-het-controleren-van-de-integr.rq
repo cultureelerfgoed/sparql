@@ -1,3 +1,7 @@
+#+ name: Query-voor-het-controleren-van-de-integr
+#+ description: Query voor het controleren van de integriteit van de data
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 # SPARQL Query voor het controleren van de integriteit van de data
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

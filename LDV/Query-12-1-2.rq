@@ -1,3 +1,7 @@
+#+ name: Query-12-1-2
+#+ description: In summary, the query retrieves information about events related to the manufacturing of Dutch national monuments by Rietveld, filters the results based on various criteria, and incorporates data from both the Cultureel Erfgoed dataset and Wikidata.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 #+ description: In summary, the query retrieves information about events related to the manufacturing of Dutch national monuments by Rietveld, filters the results based on various criteria, and incorporates data from both the Cultureel Erfgoed dataset and Wikidata.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>

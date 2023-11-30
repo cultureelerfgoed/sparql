@@ -1,3 +1,6 @@
+#+ name: gebedshuizen-per-gemeente-wikidata
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>

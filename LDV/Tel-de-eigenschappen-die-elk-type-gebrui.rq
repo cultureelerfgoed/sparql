@@ -1,3 +1,12 @@
+#+ name: Tel-de-eigenschappen-die-elk-type-gebrui
+#+ description: SELECT DISTINCT ?type (COUNT(DISTINCT ?p) AS ?c)
+#- WHERE {
+#-    ?s a ?type . 
+#-    ?s ?p ?o . 
+#- }
+#- GROUP BY ?type
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+
 SELECT DISTINCT ?type (COUNT(DISTINCT ?p) AS ?c)
 WHERE {
    ?s a ?type . 

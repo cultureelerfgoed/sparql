@@ -1,3 +1,7 @@
+#+ name: ObjectProperties
+#+ description: ObjectProperties in de ceo ontology
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+
 # CEO objectproperties 156
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

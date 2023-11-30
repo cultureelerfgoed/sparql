@@ -1,3 +1,6 @@
+#+ name: Query-6-1-3-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>

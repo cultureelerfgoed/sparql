@@ -1,3 +1,7 @@
+#+ name: rm-per-jaar-tellen-1
+#+ description: The query retrieves the number of registered monuments per year from the given endpoint. It counts the occurrences of registered monuments and groups the results by the year of registration, displaying the years in ascending order.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 #+ description: The query retrieves the number of registered monuments per year from the given endpoint. It counts the occurrences of registered monuments and groups the results by the year of registration, displaying the years in ascending order.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
