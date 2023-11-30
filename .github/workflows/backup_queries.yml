@@ -32,7 +32,7 @@ jobs:
     - name: Check for changes
       id: git_status
       run: |
-        echo "status=\"$(git status -s)\"" >> $GITHUB_ENV
+        echo "status=\"$(git status -s)\"" >> "$GITHUB_ENV"
 
     - name: Commit and push changes
       run: |
