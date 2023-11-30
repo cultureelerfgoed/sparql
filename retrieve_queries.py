@@ -29,9 +29,9 @@ def fetch_json_data(url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
-def sanitize_filename(name):
+def sanitize_filename(filename):
     # Replace invalid characters with underscores
-    return re.sub(r'[\/:*?"<>|]', '-', name)
+    return re.sub(r'[\/:*?"<>|]', '-', filename)
 
 def extract_and_save_queries(url, github_workspace):
     data = fetch_json_data(url)
