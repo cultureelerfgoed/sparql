@@ -42,14 +42,14 @@ def extract_and_save_queries(url, github_workspace):
         description = payload.get('description', '')
         service_endpoint = payload.get('service', '')
 
-        if query_content and name and service_endpoint:
+       # if query_content and name and service_endpoint:
             # Sanitize the file name
-            sanitized_name = sanitize_filename(name)
+        #    sanitized_name = sanitize_filename(name)
 
             # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace, "LDV")
-            filename = os.path.join(output_folder, f"{sanitized_name}.rq")
-            with open(filename, 'w') as query_file:
+        output_folder = os.path.join(github_workspace, "LDV")
+        filename = os.path.join(output_folder, f"{name}.rq")
+        with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
                 if name:
                     query_file.write(f"#+ name: {name}\n")
