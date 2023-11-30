@@ -1,0 +1,13 @@
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?rijksmonumentnummer ?redengevendeOmschrijving
+WHERE {
+  ?rm ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+      ceo:heeftOmschrijving ?om .
+  ?om ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean> ;
+      ceo:omschrijving ?redengevendeOmschrijving .
+
+}
+LIMIT 100

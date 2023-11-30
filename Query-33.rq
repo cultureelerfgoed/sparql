@@ -1,0 +1,57 @@
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT *
+WHERE {
+  BIND(URI(concat("https://linkeddata.cultureelerfgoed.nl/def/ceo#", ?class)) AS ?inputClass)
+
+  ?inputClass a owl:Class .
+
+  OPTIONAL { ?inputClass dcterms:created ?created }
+  OPTIONAL { ?inputClass dcterms:modified ?modified }
+  OPTIONAL { ?inputClass rdfs:comment ?comment_nl . FILTER(langmatches(lang(?comment_nl), "nl")) }
+  OPTIONAL { ?inputClass rdfs:comment ?comment_en . FILTER(langmatches(lang(?comment_en), "en")) }
+  OPTIONAL { ?inputClass rdfs:label ?label_nl . FILTER(langmatches(lang(?label_nl), "nl")) }
+  OPTIONAL { ?inputClass rdfs:label ?label_en . FILTER(langmatches(lang(?label_en), "en")) }
+  OPTIONAL { ?inputClass rdfs:subClassOf ?subClass }
+  OPTIONAL { ?inputClass skos:example ?example }
+  OPTIONAL { ?inputClass skos:editorialNote ?editorialNote_nl . FILTER(langmatches(lang(?editorialNote_nl), "nl"))  }
+  OPTIONAL { ?inputClass skos:editorialNote ?editorialNote_en . FILTER(langmatches(lang(?editorialNote_en), "en"))  }
+  OPTIONAL { ?inputClass dcterms:description ?description_nl . FILTER(langmatches(lang(?description_nl), "nl"))  }
+  OPTIONAL { ?inputClass dcterms:description ?description_en . FILTER(langmatches(lang(?description_en), "en"))  }
+
+  BIND(COALESCE(str(?created), "niet aanwezig in data") as ?createdStr)
+  BIND(COALESCE(str(?modified), "niet aanwezig in data") as ?modifiedStr)
+  BIND(COALESCE(str(?comment_nl), "niet aanwezig in data") as ?comment_nlStr)
+  BIND(COALESCE(str(?comment_en), "nit in data") as ?comment_enStr)
+  BIND(COALESCE(str(?label_nl), "niet aanwezig in data") as ?label_nlStr)
+  BIND(COALESCE(str(?label_en), "not in data") as ?label_enStr)
+  BIND(COALESCE(str(?subClass), "niet aanwezig in data") as ?subClassStr)
+  BIND(COALESCE(str(?example), "niet aanwezig in data") as ?exampleStr)
+  BIND(COALESCE(str(?editorialNote_nl), "niet aanwezig in data") as ?editorialNote_nlStr)
+  BIND(COALESCE(str(?editorialNote_en), "not in data") as ?editorialNote_enStr)
+  BIND(COALESCE(str(?description_nl), "niet aanwezig in data") as ?description_nlStr)
+  BIND(COALESCE(str(?description_en), "not in data") as ?description_enStr)
+  
+  BIND(str(?inputClass) AS ?inputClassStr)
+
+  BIND('''
+  <div style="max-height:unset; width:800px;">
+    <h3>owl:Class: <a href="{{inputClassStr}}">{{label_nlStr}} | {{label_enStr}}</a></h3>
+    <p>dcterms:created: {{createdStr}}</p>
+    <p>dcterms:modified: {{modifiedStr}}</p>
+    <p>rdfs:comment: {{comment_nlStr}}</p>
+    <p>rdfscomment: {{comment_enStr}}</p>
+    <p>rdfs:subClassOf: <a href="{{subClassStr}}">{{subClassStr}}</a></p>
+    <p>skos:example: <a href="{{exampleStr}}">{{exampleStr}}</a></p>
+    <p>dcterms:description: {{description_nlStr}}</p>
+    <p>dcterms:description: {{description_enStr}}</p>
+    <p>skos:editorialNote: {{editorialNote_nlStr}}</p>
+    <p>skos:editorialNote: {{editorialNote_enStr}}</p>
+  </div>'''^^rdf:HTML AS ?widget)
+}

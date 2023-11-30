@@ -1,0 +1,33 @@
+PREFIX luc: <http://www.ontotext.com/connectors/lucene#>
+PREFIX luc-index: <http://www.ontotext.com/connectors/lucene/instance#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT distinct ?entity ?searchTerm ?plabels ?alabels ?hlabels ?scopeNote
+{
+  BIND(CONCAT("*", ?term, "*") AS ?searchTerm)
+
+  SERVICE <https://cultureelerfgoed-graphdb.poolparty.biz/repositories/cht> {
+    {
+      ?search a luc-index:cht_ft ;
+        luc:query ?searchTerm ;
+        luc:entities ?entity .
+    }
+    UNION
+    {
+      ?search a luc-index:cht_ft ;
+        luc:query ?searchTerm ;
+        luc:entities ?entity .
+    }
+    UNION
+    {
+      ?search a luc-index:cht_ft ;
+        luc:query ?searchTerm ;
+        luc:entities ?entity .
+    }
+    ?entity skos:prefLabel ?plabels .  FILTER (lang(?plabels) = 'nl')
+    OPTIONAL {?entity skos:altLabel ?alabels .  FILTER (lang(?alabels) = 'nl')}
+    OPTIONAL {?entity skos:hiddenLabel ?hlabels .  FILTER (lang(?hlabels) = "nl")}
+    OPTIONAL {?entity skos:scopeNote ?scopeNote . FILTER (lang(?scopeNote) = 'nl')}
+  }
+}
+ORDER BY ?plabels

@@ -1,0 +1,86 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
+
+SELECT DISTINCT ?eventStart ?eventLabel (SAMPLE(?image) AS ?eventMedia) ?eventMediaCaption ?rijksmonumentnummer ?rijksmonument ?item
+{
+#-------------------------------------Dataset 1---------------------------------------------
+#-------------------------------------------------------------------------------------------
+  { 
+    SELECT DISTINCT ?eventStart ?eventLabel ?image ?eventMediaCaption ?rijksmonumentnummer ?rijksmonument
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie.
+        ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+        OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?gebouwType. }
+        OPTIONAL { ?rijksmonument ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor ?actor. }
+        FILTER (CONTAINS(UCASE(?actor), "GERRIT RIETVELD") || CONTAINS(UCASE(?actor), "G.Th. RIETVELD"))
+      }
+#----------------------------------------eventLabel----------------------------------------------
+
+ BIND(strdt(concat('''''', COALESCE(?rijksmonumentnummer, ""),''''''), rdf:HTML) AS ?eventLabel)
+      
+#------------------------------------eventMediaCaption----------------------------------------------
+ BIND(strdt(concat('''
+        <ul>
+        <li>Wikinummer: <a href="''', ?item, '" target="_blank">', ?item, '''</a></li>
+        <li>Beschrijving: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''', uri(?rijksmonumentnummer), '" target="_blank">', str(?rijksmonumentnummer), '</a>','</li></ul>'), rdf:HTML) as ?eventMediaCaption)
+
+    }
+  }
+#-------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
+  
+ UNION
+  
+#-------------------------------------Dataset 2---------------------------------------------
+#-------------------------------------------------------------------------------------------
+  { 
+    SELECT DISTINCT ?eventLabel ?image ?item ?eventMediaCaption (SAMPLE(?eventStartYear) AS ?eventStart) ?itemlabel ?rijksmonumentnummer
+    WHERE {
+      SERVICE <https://query.wikidata.org/sparql> {
+        {
+          SELECT DISTINCT ?item WHERE {
+          ?item p:P84 ?statement0.
+          ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld 
+          }
+        }
+# ------------------------------------------itemLabel---------------------------------------
+        OPTIONAL { ?item (wdt:P1705|rdfs:label) ?itemlabel . FILTER(LANG(?itemlabel) = "nl")}  
+        
+# --------------------------------------Rijksmonumentnummer---------------------------------  
+        OPTIONAL { ?item (wdt:P7135|wdt:P359) ?rijksmonumentnummer .}    
+        
+#----------------------------------------------image-----------------------------------------   
+        # filter alleen image format dat werkt met de tijdlijn visualisatie.
+        OPTIONAL { ?item wdt:P18 ?image . FILTER(REGEX(str(?image), "(?i)\\.(jpg|gif|jpeg|png)", "i"))}
+#-----------------------------------------eventStartDate------------------------------------
+        OPTIONAL{?item (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?eventStartDate . 
+        FILTER(YEAR(?eventStartDate) > 1900)} 
+        BIND(YEAR(?eventStartDate) AS ?eventStartYear)   
+ }
+#-------------------------------------------eventLabel----------------------------------------
+
+    BIND(strdt(concat('''''',COALESCE(?rijksmonumentnummer, ""), ''' ''',
+            COALESCE(?itemlabel, ""),''''''), rdf:HTML) AS ?eventLabel)
+      
+#-------------------------------------------eventMediaCaption-----------------------------------      
+      BIND(strdt(concat('''
+        <ul>
+        <li>Verbouwingsjaar: ''',COALESCE(?eventStartYear, "onbekend"),'''</li>
+<li>Wikinummer: <a href="''', ?item, '" target="_blank">', ?item, '''</a></li>
+  </ul>'''), rdf:HTML) as ?eventMediaCaption)
+    }
+  } 
+}
+

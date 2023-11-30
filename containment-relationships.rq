@@ -1,0 +1,14 @@
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+select ?CHO_X ?eigenschap ?CHO_Y (count(*) as ?aantal) {
+  ?x a ?CHO_X.
+  {
+    bind(ceo:bevatObject as ?eigenschap)
+    ?x ?eigenschap ?y.
+  } union {
+    bind(ceo:ligtInObject as ?eigenschap)
+    ?x ?eigenschap ?y.
+  }
+  ?y a ?CHO_Y.
+}
+group by ?CHO_X ?eigenschap ?CHO_Y
+order by ?eigenschap ?CHO_X ?CHO_Y

@@ -1,0 +1,19 @@
+PREFIX schema: <https://schema.org/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT * WHERE {
+  GRAPH graph:gewesten {
+    ?sub geo:asWKT ?obj ; dc:title ?naam . OPTIONAL {?sub schema:startDate ?van ; schema:endDate ?tot}}
+  #BIND(concat("Gewest: ",?naam, " van: ", ?van, " tot ", ?tot) AS ?objLabel)
+  BIND(
+  CONCAT("Gewest: ", ?naam, " van: ",
+    IF(BOUND(?van), ?van, "onbekend"),
+    " tot ",
+    IF(BOUND(?tot), ?tot, "onbekend")
+  ) AS ?objLabel
+)
+
+} 

@@ -1,0 +1,20 @@
+#+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+# Definieer het PREFIX graph, dat de URL van de endpoint voorstelt.
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+# SELECT: Begin van de query. We gaan het totale aantal triples tellen, 
+# waarbij duizendtallen gescheiden zijn door een punt.
+# replace(str(count(*)),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0.') 
+# gebruikt een regex om een punt toe te voegen voor elk groepje van drie cijfers in het getal, 
+# beginnend vanaf het einde. Dit maakt het getal makkelijker te lezen. 
+# Het resultaat wordt opgeslagen in de variabele ?aantalTriples.
+SELECT (replace(str(count(*)),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0.') as ?aantalTriples)  {
+
+  # GRAPH: Specificeer de graph waarin we geïnteresseerd zijn.
+  GRAPH graph:instanties-rce {
+  
+    # Patroon dat elke mogelijke triple in de graph matcht. In RDF-termen,
+    # ?s staat voor de subjecten, ?p voor de predicaten, en ?o voor de objecten.
+    ?s ?p ?o.
+  }
+}

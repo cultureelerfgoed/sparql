@@ -1,0 +1,41 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT distinct ?label
+#?narrower 
+#?rijksmonument ?datumInschrijving ?labels ?label ?broader ?narrower
+#?labels
+#?jaarInschrijvings ?types (COUNT(?rijksmonument) AS ?aantal) ?hoofdcategorien
+#?rijksmonument ?rm ?datumInschrijving
+#(COUNT(?functie) AS ?functies)
+
+WHERE {
+  
+  ?rijksmonument a ceo:Rijksmonument .
+  ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
+    ?functie ceo:heeftFunctieNaam ?functienaam .
+  {
+    VALUES (?functienaam) {
+      (<https://data.cultureelerfgoed.nl/term/id/rn/03f70e6e-4cda-4501-8545-a738ba6ee868>)
+      (<https://data.cultureelerfgoed.nl/term/id/rn/f8ae6bec-4c9e-4f75-a1b1-0f1a5a36cc75> )
+    }
+  ?functienaam skos:prefLabel ?label.
+  ?functienaam skos:broader ?broader.
+  ?broader skos:narrower+/skos:prefLabel ?narrower.
+ # bind(str(?label) AS ?labels)
+}  
+}
+ # BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
+ # FILTER (?jaarInschrijving >= "1960"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <= "2022"^^<http://www.w3.org/2001/XMLSchema#integer>)
+ # bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
+ # bind(concat(str(?aantal)) as ?aantals)
+ # bind(replace(?hoofdcategorie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?hoofdcategorien)
+ # bind(replace(?type, "\\s\\(.*\\)|\\(.*\\)", "") AS ?types)
+
+ # } 
+#GROUP BY ?jaarInschrijvings ?types ?hoofdcategorien
+#GROUP BY ?jaarInschrijvings
+#ORDER BY ?jaarInschrijvings ?types

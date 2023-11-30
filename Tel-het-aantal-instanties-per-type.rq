@@ -1,0 +1,5 @@
+SELECT  ?type (COUNT (?s) AS ?instanceCount) 
+WHERE {
+   ?s a ?type . 
+}
+GROUP BY  ?type

@@ -1,0 +1,44 @@
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+
+SELECT DISTINCT ?choi ?rmn ?geo ?beeldbank (SAMPLE(?image) AS ?sampleImage) ?afb ?naam
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="{{sampleImage}}" style="max-width: 200px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rmn), '" target="_blank">', STR(?rmn), '</a></li>',
+    '      <li>{{naam}}</li>',
+    '      <li>In: <a href="', STR(?beeldbank), '" target="_blank">Beeldbank</a></li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) AS ?widget)
+
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce>
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/image>
+
+WHERE {
+  ?choi a ceo:Rijksmonument ;
+        ceo:rijksmonumentnummer ?rmn ;
+        ceo:heeftGeometrie/geo:asWKT ?geo .
+
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
+     {
+      ?afb a edm:ProvidedCHO ;
+           edm:aggregatedCHO ?choi ;
+           foaf:depiction ?image ;
+           dc:description ?naam ;
+           edm:isShownAt ?beeldbank .
+    }
+  }
+
+  FILTER (regex(str(?beeldbank), "beeldbank", "i"))
+}
+
+GROUP BY ?choi ?rmn ?geo ?beeldbank ?afb ?naam

@@ -1,0 +1,61 @@
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+construct {
+  $this ?p1 ?o1.
+  ?o1 ?p2 ?o2.
+  ?o2 ?p3 ?o3.
+  ?o3 ?p4 ?o4.
+  ?o4 ?p5 ?o5.
+  ?o5 ?p6 ?o6.
+  ?o6 ?p7 ?o7.
+} where {
+  graph graph:instanties-rce {
+    {
+      select distinct $this {
+        $this
+          a ceo:Rijksmonument;
+          ceo:rijksmonumentnummer ?rijksmonumentnummer.
+
+        bind(?woonplaatsnaam as ?woonplaatsnaam1)
+        optional { 
+          $this ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam2. 
+        }
+        filter(!bound(?woonplaatsnaam1) || ?woonplaatsnaam1 = ?woonplaatsnaam2) 
+        
+        bind(?gemeentecode as ?gemeentecode1)
+        optional { 
+          $this ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?gemeentecode2. 
+        }
+        filter(!bound(?gemeentecode1) || ?gemeentecode1 = ?gemeentecode2)    
+        
+        bind(?provinciecode as ?provinciecode1)
+        optional {
+          $this ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:provinciecode ?provinciecode2.
+        }
+        filter(!bound(?provinciecode1) || ?provinciecode1 = ?provinciecode2)
+      }
+      limit 5
+      # paginate
+    }
+    $this ?p1 ?o1.
+    optional {
+      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+      ?o1 ?p2 ?o2.
+      optional {
+        ?o2 ?p3 ?o3.
+        optional {
+          ?o3 ?p4 ?o4.
+          optional {
+            ?o4 ?p5 ?o5.
+            optional {
+              ?o5 ?p6 ?o6.
+              optional {
+                ?o6 ?p7 ?o7.
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

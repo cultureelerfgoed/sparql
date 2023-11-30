@@ -1,0 +1,27 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?jaarInschrijvings ?types (COUNT(?rijksmonument) AS ?aantal) 
+#?rijksmonument ?rm ?datumInschrijving
+#(COUNT(?functie) AS ?functies)
+
+WHERE {
+  ?rijksmonument a ceo:Rijksmonument .
+  ?rijksmonument ceo:rijksmonumentnummer ?rm.
+  ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+          ?rijksmonument ceo:heeftJuridischeStatus/skos:prefLabel ?grm.
+    FILTER (regex(?grm, "^rijksmonument") || contains(?grm, "voorbeschermd"))
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
+  ?functie ceo:heeftFunctieNaam/skos:prefLabel ?type.
+  BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
+  FILTER (?jaarInschrijving >= "1960"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <= "2022"^^<http://www.w3.org/2001/XMLSchema#integer>)
+  bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
+  bind(concat(str(?aantal)) as ?aantals)
+  bind(replace(?type, "\\s\\(.*\\)|\\(.*\\)", "") AS ?types)
+
+  } 
+GROUP BY ?jaarInschrijvings ?types 
+#?functie ?aantal
+#GROUP BY ?jaarInschrijvings
+ORDER BY ?jaarInschrijvings ?types

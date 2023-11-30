@@ -1,0 +1,54 @@
+#DECLAREER PREFIXES
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix overheid: <http://standaarden.overheid.nl/owms/terms/> 
+
+#QUERY RESULTAAT CLAUSULE, DECLAREER VARIABELEN
+SELECT ?shape_ab ?shape_abLabel ?shape_rm ?shape_rmLabel ?shape_abColor ?shape_rmColor 
+{
+#?magnitude ?datum ?locatieNaam_ab ?shape_ab ?shape_rm ?locatieNaam_rm ?type (str(?rm_n) AS ?rijksmonumentnummer)
+ {
+  ?ab <https://data.netwerkdigitaalerfgoed.nl/ca8725/def/Magnitude> ?magnitude .
+  ?ab <https://data.netwerkdigitaalerfgoed.nl/ca8725/def/YYMMDD> ?datum_ab.
+  ?ab geo:asWKT ?shape_ab .
+  ?ab <https://data.netwerkdigitaalerfgoed.nl/ca8725/def/LOCATION> ?locatieNaam_ab .
+
+#ROEP DE ANDERE DATASET AAN
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+  ?rm a ceo:Rijksmonument .
+  ?rm ceo:rijksmonumentnummer ?rm_n . 
+  ?rm ceo:heeftMonumentAard ?aard .
+  ?rm ceo:heeftGeometrie/geo:asWKT ?shape_rm.
+  ?rm ceo:heeftLocatieAanduiding/ceo:heeftLocatieAdres/ceo:woonplaatsnaam ?locatieNaam_rm .
+  ?rm ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatieNaam_ab .
+  ?rm ceo:heeftLocatieAanduiding/ceo:heeftLocatieAdres/ceo:provincieCode 'GR' .
+  ?rm ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type. 
+
+#QUERY VERFIJNING / AANPASSINGEN
+BIND(str(?rm_n) AS ?rijksmonumentnummer)
+bind(concat('https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rm_n)) as ?url)
+#BIND(strdt(concat(substr(?datum_ab, 7, 4), '-', substr(?datum_ab, 5, 2), '-', substr(?datum_ab, 1, 4)), xsd:date) AS ?datum)
+
+#VUL DE LABELS BIJ DE PUNAISES      
+}
+bind(strdt(concat(
+     '<h3>',coalesce(?locatieNaam_ab),'</h3>',
+     '<dl>',
+     '<dt>Van magnitude:</dt><dd>',?magnitude,'</dd>',
+     '<dt>op datum:</dt><dd>',?datum_ab,'</dd>',
+    '</dl>'),rdf:HTML) as ?shape_abLabel)
+     bind("green" as ?shape_abColor)
+    
+    bind(strdt(concat(
+    '<h5><a href="',str(?url),'" target="_blank">',?rijksmonumentnummer,'</a></h5>',
+    '<dl>',
+    '<dt>Type:</dt><dd>',?type,'</dd>',
+    '</dl>'),rdf:HTML) as ?shape_rmLabel)  
+     bind("purple" as ?shape_rmColor)
+  }}
+
+LIMIT 250

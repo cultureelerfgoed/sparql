@@ -1,0 +1,34 @@
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX overheid: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+SELECT distinct *
+
+WHERE 
+{
+?gebedshuis ceox:heeftDenominatie ?den .
+?den ceox:heeftDenominatieNaam/skos:prefLabel ?denominatie .
+  OPTIONAL {?den ceox:oorspronkelijkeDenominatie ?oorspronkelijkeDenominatie .}
+  OPTIONAL {?den ceox:huidigeDenominatie ?huidigeDenominatie .}
+ ?gebedshuis ceox:heeftGeometrie/wgs84:asWKT ?shape.
+  OPTIONAL {  ?gebedshuis ceox:rijksmonumentnummer ?rm_nr.}
+  OPTIONAL {?gebedshuis ceox:heeftAdresgegevens/ceox:openbareRuimte ?straat.}
+  OPTIONAL {?gebedshuis ceox:heeftAdresgegevens/ceox:huisnummer ?huisnummer.}
+  BIND(concat(?straat, " ", ?huisnummer) AS ?adres)
+   ?gebedshuis ceox:heeftGebeurtenis ?gebouwd.
+?gebouwd ceox:heeftGebeurtenisNaam <https://data.cultureelerfgoed.nl/term/id/rn/a88b115d-ad65-4403-99aa-31210af8bd6d> .
+?gebouwd ceox:heeftDatering/ceox:periode ?periode .
+  FILTER (!regex(?periode, "eeuw", "i"))
+?gebouwd ceox:heeftDatering/ceox:jaar ?jaar.
+
+ } 

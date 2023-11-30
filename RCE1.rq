@@ -1,0 +1,36 @@
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+
+
+SELECT DISTINCT *
+
+
+WHERE{
+ 
+ GRAPH graph:instanties-rce {
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?objectType.
+  ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  ?rijksmonument ceo:heeftOmschrijving/ceo:omschrijving ?eventDescription.
+
+#selecteer alle monumenten van Rietveld in de actor en beschrijving 
+FILTER REGEX(?eventDescription, "gerrit rietveld | Th. Rietveld | G. Rietveld | Th.Rietveld | Gerrit Thomas Rietveld | G.Th. Rietveld", "i")    
+    
+  ?rijksmonument ceo:heeftOmschrijving/ceo:formeelStandpunt "1"^^xsd:boolean .
+OPTIONAL{?rijksmonument ceo:cultuurhistorischObjectnummer ?id .}
+OPTIONAL{?rijksmonument ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatie .}
+OPTIONAL{?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datum .
+      BIND(YEAR(?datum) AS ?jaar)}
+OPTIONAL{?rijksmonument ceo:heeftJuridischeStatus/skos:prefLabel ?collectie . }
+
+OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?geoLocatie.} #MULTIPOLYGON(((5.1485962068792 52.085073758205,5.1485377129388 52.085098805504...
+
+
+
+ }
+
+
+}

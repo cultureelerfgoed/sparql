@@ -1,0 +1,19 @@
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX osmt: <https://data.osm.pldn.nl/wiki/Key:>
+
+SELECT *
+{
+    bind(10 as ?geometryHeight)
+       ?monumentr
+      ceo:rijksmonumentnummer "519327";
+ #     ceo:heeftNaam/ceo:naam "Het Loo" ;
+      ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
+    ?monument geo:hasGeometry/geo:asWKT ?geometry .
+      OPTIONAL {?monumentr ceo:heeftMonumentAard/skos:prefLabel ?aard. }
+      OPTIONAL {?monumentr ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie .}
+  OPTIONAL {?monumentr ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type.}
+  
+

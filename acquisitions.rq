@@ -1,0 +1,12 @@
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX object: <https://linkeddata.cultureelerfgoed.nl/colonialobjects/id/>
+SELECT * WHERE {
+  ?object crm:P30i_custody_transferred_through/crm:P11_had_participant/crm:P1_is_identified_by/crm:P190_has_symbolic_content ?acquisitionSource ;
+       crm:P30i_custody_transferred_through/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?acquisitionDate ;
+       crm:P30i_custody_transferred_through/crm:P67i_is_referred_to_by/crm:P190_has_symbolic_content ?acquisitionMethod ;
+       crm:P30i_custody_transferred_through/crm:P7_took_place_at/rdfs:label ?acquisitionLocation
+       
+} LIMIT 10

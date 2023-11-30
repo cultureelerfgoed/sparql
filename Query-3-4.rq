@@ -1,0 +1,89 @@
+# PREFIX-statements voor het definiëren van de gebruikte prefixes in de query
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+# SELECT-statement die de gewenste variabelen definieert voor de output
+SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept
+    (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR = ", ") AS ?synonyms)
+    (GROUP_CONCAT(DISTINCT ?scopeNote; SEPARATOR = ". - ") AS ?notes)
+    (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
+    (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
+    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+
+# WHERE-clause die de data selecteert voor de output
+WHERE {
+    {
+        # Filtert op concepten waarvan de preferred label overeenkomt met de exacte zoekterm (?zoek)
+        ?concept skos:prefLabel ?prefLabelFilter.
+        FILTER (lcase(str(?prefLabelFilter)) = lcase(?zoek))
+    }
+    UNION
+    {
+        # Filtert op concepten waarvan de alternative label overeenkomt met de exacte zoekterm (?zoek)
+        ?concept skos:altLabel ?altLabelFilter.
+        FILTER (lcase(str(?altLabelFilter)) = lcase(?zoek))
+    }
+    UNION
+    {
+        # Filtert op concepten waarvan de preferred label begint met de zoekterm (?start)
+        ?concept skos:prefLabel ?prefLabelFilter.
+        FILTER (STRSTARTS(lcase(str(?prefLabelFilter)), lcase(?start)))
+    }
+    UNION
+    {
+        # Filtert op concepten waarvan de alternative label begint met de zoekterm (?start)
+        ?concept skos:altLabel ?altLabelFilter.
+        FILTER (STRSTARTS(lcase(str(?altLabelFilter)), lcase(?start)))
+    }
+    UNION
+    {
+        # Filtert op concepten waarvan de preferred label een deel van de zoekterm bevat (?willekeurig)
+        ?concept skos:prefLabel ?prefLabelFilter.
+        FILTER (CONTAINS(lcase(str(?prefLabelFilter)), lcase(?willekeurig)))
+    }
+    UNION
+    {
+        # Filtert op concepten waarvan de alternative label een deel van de zoekterm bevat (?willekeurig)
+        ?concept skos:altLabel ?altLabelFilter.
+        FILTER (CONTAINS(lcase(str(?altLabelFilter)), lcase(?willekeurig)))
+    }
+
+    # Filters op de Nederlandse preferred label van een concept
+    ?concept skos:prefLabel ?prefLabel. FILTER (lang(?prefLabel) = "nl")
+
+    # Optionele filters op de Nederlandse alternative label, scope note, bredere term en smallere term van een concept
+    OPTIONAL { ?concept skos:altLabel ?altLabel. FILTER (lang(?altLabel) = "nl") }
+    OPTIONAL { ?concept skos:scopeNote ?scopeNote. FILTER (lang(?scopeNote) = "nl") }
+    OPTIONAL { ?concept skos:broader ?broader. ?broader skos:prefLabel ?broaderTerm. FILTER (lang(?broaderTerm) = "nl") }
+    OPTIONAL { ?concept skos:narrower ?narrower. ?narrower skos:prefLabel ?narrowerTerm. FILTER (lang(?narrowerTerm) = "nl") }
+    OPTIONAL { ?concept skos:related ?related. ?related skos:prefLabel ?relatedTerm. FILTER (lang(?relatedTerm) = "nl") }
+    OPTIONAL { ?concept rnce:image ?image }
+
+    # Filters op het topconcept, zijn preferred label en de titel van de thesaurus in de juiste taal
+    ?concept skos:broader* ?topConcept . 
+    FILTER NOT EXISTS { ?topConcept skos:broader ?any }
+    ?topConcept skos:prefLabel ?topConceptLabel. FILTER (lang(?topConceptLabel) = "nl")
+    ?topConcept skos:inScheme/dct:title ?thesaurus.
+
+    # BIND-statement dat de HTML-widget genereert met de gewenste variabelen
+    BIND('''
+    <center><img src={{finalImage}} style="max-width: 100px;"></center>
+    <h2><a href="{{concept}}">{{prefLabel}}</a></h2>
+    <p>Synoniemen: {{synonyms}}</p>
+    <p>Definitie: {{notes}}</p>
+    <p>Ruimer begrip: {{broaderTerms}}</p>
+    <p>Topconcept: {{topConceptLabel}} van {{thesaurus}}</p>
+    <p>Enger begrip: {{narrowerTerms}}</p>
+    <p>Gerelateerd: {{relatedTerms}}</p>
+    <p>Uri:<a href="{{concept}}">{{concept}}</a></p>
+    '''^^rdf:HTML as ?widget)
+}
+
+# GROUP BY-clause om de resultaten te groeperen op basis van de preferred label, widget, afbeelding, topconcept label, thesaurus en concept
+GROUP BY ?prefLabel ?widget ?image ?topConceptLabel ?thesaurus ?concept
+
+# ORDER BY-clause om de resultaten te sorteren op thesaurus en preferred label
+ORDER BY ?thesaurus ?prefLabel

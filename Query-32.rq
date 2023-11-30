@@ -1,0 +1,18 @@
+#+ the query retrieves the municipality name, the monument number, and the residence name for cultural heritage sites using the specified relationships and properties.
+#+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?rm ?gemeente ?rmn WHERE {
+  ?rm a ceo:Rijksmonument.
+  # Retrieve the preferred label (name) of the municipality associated with the cultural heritage site
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente/skos:prefLabel ?gemeente.
+  
+  # Retrieve the name of the residence associated with the cultural heritage site
+ # ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaatsnaam.
+  
+  # Retrieve the monument number associated with the cultural heritage site
+ ?rm ceo:rijksmonumentnummer ?rmn.
+}

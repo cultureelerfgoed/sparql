@@ -1,0 +1,40 @@
+PREFIX schema: <http://schema.org/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+
+SELECT DISTINCT * WHERE {
+  
+  
+
+ SERVICE <https://query.wikidata.org/bigdata/namespace/wdq/sparql> {
+    
+   ?stroming wdt:P31 wd:Q968159 . #kunststijl
+   ?stroming rdfs:label ?stromingLabel.
+      FILTER(LANG(?stromingLabel) = "nl")
+    
+    ?gebouw wdt:P149 ?stroming . #architectuurstijl
+    ?gebouw rdfs:label ?itemLabel.
+    FILTER(LANG(?itemLabel) = "nl")
+ 
+    ?gebouw wdt:P131 ?stad .
+     ?stad wdt:P17 wd:Q55 . #nederland
+    ?stad wdt:P131 ?provincie .
+    ?provincie wdt:P31 wd:Q134390 .
+     ?provincie rdfs:label ?provincieLabel.
+      FILTER(?provincieLabel = "Utrecht"@nl)
+    
+    ?gebouw wdt:P625 ?coordinaten .
+    ?gebouw wdt:P18 ?afbeelding .
+    ?gebouw wdt:P31 ?type .
+    ?type rdfs:label ?typeLabel.
+      FILTER(LANG(?typeLabel) = "nl")
+   
+  }
+   }
+LIMIT 100

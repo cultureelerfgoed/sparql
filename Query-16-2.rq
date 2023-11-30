@@ -1,0 +1,39 @@
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT * WHERE {
+ GRAPH graph:instanties-rce {
+  ?complex a ceo:Complex .
+  ?complex ceo:complexnummer ?complexnummer.
+  ?complex ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
+  ?complex ceo:heeftNaam/ceo:naam ?naam.
+#   FILTER (regex(str(?naam), "stelling", "i"))
+#  FILTER (regex(str(?omschrijving), "\\blinie\\b") || regex(str(?omschrijving), "\\bstelling\\b"))
+ #   FILTER (regex(str(?omschrijving), "tweede", "i"))
+  ?complex ceo:heeftRijksmonument ?rijksmonument.
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer;
+   OPTIONAL {?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis . ?gebeurtenis ceo:heeftGebeurtenisNaam <https://data.cultureelerfgoed.nl/term/id/rn/a88b115d-ad65-4403-99aa-31210af8bd6d> ; ceo:heeftDatering ?datering .
+  ?datering ceo:heeftBeginDatering ?beginDatering . ?beginDatering ceo:datum ?bouwjaarBegin . 
+      ?datering ceo:heeftEindDatering ?eindDatering . ?eindDatering ceo:datum ?bouwjaarEind .}
+  OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape.}
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.}
+
+  GRAPH graph:bebouwdeomgeving {
+# {<https://data.cultureelerfgoed.nl/term/id/rn/4cbdb812-a515-473f-bbdf-989ed004a37f> skos:broader ?narrow.}
+#  UNION{
+  <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783> skos:narrower+ ?narrow.
+#  }
+}  
+  ?narrow skos:prefLabel ?label.
+  
+ 
+  BIND(strdt(concat("Bouwjaar: ", ?bouwjaarBegin, " Naam: ", ?naam, " Complexnummer: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?complexnummer),'" target="_blank">',str(?complexnummer),'</a>', " Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a>', " ", ?label),rdf:HTML) as ?shapeLabel)
+  
+  bind(<https://services.rce.geovoorziening.nl/liniesenstellingen/wms?request=GetCapabilities> AS ?mapEndpoint)
+# bind(<http://services.rce.geovoorziening.nl/liniesenstellingen/wms?LAYERS=inundaties%3Alinies&STYLES=&FORMAT=image%2Fpng&SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&CRS=EPSG%3A28992&BBOX=-33260.5109375,280520.2390625,325739.4109375,639520.1609375&WIDTH=400&HEIGHT=400> AS ?mapEndpoint)
+} #LIMIT 100

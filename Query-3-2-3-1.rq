@@ -1,0 +1,53 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX schema: <http://schema.org/>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX lxr: <https://linkeddata.cultureelerfgoed.nl/def/lxr#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX gsp: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>
+
+SELECT
+  (strdt(concat(
+     '<p><a href="',str(?link),'" target="_blank">',uri(?rmn),'</a>',?plaatsnaam,'</p>',
+     '<ul>',group_concat(distinct concat('<li>',str(?eventStart),'-',str(?diepte),': ',str(?magnitude),': ',str(?aantal),'</li>');separator=''),'</ul>',
+     '<p>Beving</p>',
+      '<ul>',str(max(?eventLabels)),'</ul>'),rdf:HTML) as ?geoLabel)
+?geo ?rmn ?shape ?geoColor ?shapeColor ?eventStart ?shapeLabel 
+(COUNT(?eventStart) as ?aantal)
+(group_concat(distinct concat('<li>',str(?eventLabel),'</li>');separator='') as ?eventLabels)
+  
+#?rmn ?eventLabels ?eventStart ?date ?tijd ?diepte ?magnitude ?geo
+WHERE {
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/aardbeving/services/aardbeving/sparql> {
+    ?event a schema:Event.
+    ?event schema:name ?eventLabel.
+    ?event schema:startDate ?eventStart.
+    ?event schema:date ?date. 
+    ?event schema:startTime ?tijd.
+    ?event gsp:asWKT ?shape.  
+    ?event lxr:diepte ?diepte.
+    ?event lxr:magnitude ?magnitude.
+    ?event ceox:woonplaatsnaam ?plaatsnaam .
+  }
+  ?rm a ceo:Rijksmonument.
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaatsnaam.
+  ?rm ceo:rijksmonumentnummer ?rmn.
+  OPTIONAL {?rm ceo:heeftGeometrie/gsp:asWKT ?geo.}
+Bind(?afstandinmeters as ?afstand)
+bind ("black" as ?geoColor)
+bind ("orange" as ?shapeColor)
+#de date is amerikaans dus die zetten we ff om naar "normale" weergave  
+BIND(concat(substr(str(?date), 9, 2), "-", substr(str(?date), 6, 2), "-", substr(str(?date), 1, 4)) AS ?new_date)
+  bind(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/",uri(?rmn)) as ?link)
+FILTER((geof:distance(?geo,?shape, uom:meter)) < ?afstand )
+ # FILTER(geof:distance(?geo, ?shape, uom:meter) <= 50)
+  
+
+  BIND(?tijd as ?shapeLabel)
+  
+}
+GROUP BY ?rmn ?aantal ?geo ?eventLabel ?eventStart ?date ?tijd ?diepte ?magnitude ?link ?geoLabel ?shape ?geoColor ?shapeColor ?shapeLabel ?plaatsnaam
+ORDER BY ?eventStart

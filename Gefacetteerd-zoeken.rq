@@ -1,0 +1,28 @@
+PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (STR(?artefact_facet1) AS ?artefact_facet1)
+       (STR(?artefact_facet2) AS ?artefact_facet2)
+       (STR(?artefact_facet3) AS ?artefact_facet3)
+	   (STR(?artefact_facet4) AS ?artefact_facet4)
+       
+WHERE {
+  <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower 	     ?artefactUri_facet1 .
+  ?artefactUri_facet1 skos:prefLabel ?artefact_facet1 .   
+  
+  ?artefactUri_facet1 skos:narrower ?artefactUri_facet2 .
+  ?artefactUri_facet2 skos:prefLabel ?artefact_facet2 .
+  
+  ?artefactUri_facet2 skos:narrower ?artefactUri_facet3 .
+  ?artefactUri_facet3 skos:prefLabel ?artefact_facet3 .
+  
+  ?artefactUri_facet3 skos:narrower ?artefactUri_facet4 .
+  ?artefactUri_facet4 skos:prefLabel ?artefact_facet4 .
+ 
+  }
+            
+    
+  
+

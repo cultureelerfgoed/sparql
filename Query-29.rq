@@ -1,0 +1,75 @@
+#+ This query searches a dataset using the Simple Knowledge Organization System (SKOS) vocabulary, and retrieves information about a specific concept based on its preferred label (prefLabel), alternative labels (altLabel), scope notes (scopeNote), as well as broader and narrower terms (broader and narrower).
+#+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+# This line starts the SELECT statement, indicating that the output of the query will include these variables.
+SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept
+    (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR = ", ") AS ?synonyms)
+    (GROUP_CONCAT(DISTINCT ?scopeNote; SEPARATOR = ". - ") AS ?notes)
+    (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
+    (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
+    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+
+# The WHERE clause determines what data is selected for the output. The variables listed in the SELECT statement above will be defined here.
+WHERE {
+    {
+        ?concept skos:prefLabel ?prefLabelFilter.
+        FILTER (CONTAINS(lcase(str(?prefLabelFilter)), lcase(?fuzzy)))
+    }
+    UNION
+    {
+        ?concept skos:altLabel ?altLabelFilter.
+        FILTER (CONTAINS(lcase(str(?altLabelFilter)), lcase(?fuzzy)))
+    }
+    # This line binds the lowercase version of the unbound variable ?zoek to the new variable ?searchTerm.
+  #  BIND(lcase(?fuzzy) AS ?searchTerm)
+
+    # This line finds all concepts whose preferred label, when converted to lowercase, matches the search term. The resulting concepts are bound to the ?concept variable, and their preferred labels are bound to the ?prefLabelFilter variable.
+#    ?concept skos:prefLabel ?prefLabelFilter. FILTER (CONTAINS(lcase(str(?prefLabelFilter)), ?searchTerm))
+
+
+    # This OPTIONAL clause finds alternate labels for the concept(s) found above, if they exist. The FILTER function ensures that only Dutch labels are selected. 
+   OPTIONAL { ?concept skos:altLabel ?altLabel. FILTER (lang(?altLabel) = "nl") }
+   # This line binds the Dutch preferred label of the concept(s) to the ?prefLabel variable.
+    ?concept skos:prefLabel ?prefLabel. FILTER (lang(?prefLabel) = "nl")
+
+    # This OPTIONAL clause finds the scope note(s) for the concept(s), if they exist, and filters for those in Dutch.
+    OPTIONAL { ?concept skos:scopeNote ?scopeNote. FILTER (lang(?scopeNote) = "nl") }
+
+    # This OPTIONAL clause finds broader concepts for the concept(s), if they exist, and binds their Dutch preferred labels to the ?broaderTerm variable.
+    OPTIONAL { ?concept skos:broader ?broader. ?broader skos:prefLabel ?broaderTerm. FILTER (lang(?broaderTerm) = "nl") }
+
+    # This OPTIONAL clause finds narrower concepts for the concept(s), if they exist, and binds their Dutch preferred labels to the ?narrowerTerm variable.
+    OPTIONAL { ?concept skos:narrower ?narrower. ?narrower skos:prefLabel ?narrowerTerm. FILTER (lang(?narrowerTerm) = "nl") }
+    OPTIONAL { ?concept rnce:image ?image }
+  # Query for top concept
+  ?concept skos:broader* ?topConcept . 
+  FILTER NOT EXISTS { ?topConcept skos:broader ?any }
+  ?topConcept skos:prefLabel ?topConceptLabel. FILTER (lang(?topConceptLabel) = "nl")
+       ?topConcept skos:inScheme/dct:title ?thesaurus.
+  
+    # This is where we bind the widget HTML. We use the BIND function to create a new variable ?widget that contains HTML code. 
+    # The HTML code is populated with the variables we have defined above.
+
+    BIND('''
+<center><img src={{finalImage}} style="max-width: 100px;"></center>
+    <h2><a href="{{concept}}">{{prefLabel}}</a></h2>
+    <p>Synoniemen: {{synonyms}}</p>
+    <p>Definitie: {{notes}}</p>
+    <p>Ruimer begrip: {{broaderTerms}}</p>
+    <p>Topconcept: {{topConceptLabel}} van {{thesaurus}}</p>
+    <p>Enger begrip: {{narrowerTerms}}</p>
+    <p>{{concept}}</p>
+    '''^^rdf:HTML as ?widget)
+}
+GROUP BY ?prefLabel ?widget ?image ?topConceptLabel ?thesaurus ?synonyms ?concept
+# The GROUP BY statement is used with the GROUP_CONCAT function in the SELECT clause to aggregate the alternate labels, scope notes, broader terms, and narrower terms for each concept.
+
+# The LIMIT statement limits the output of the query to just one row. It's currently commented out, meaning that the query will return all matching rows.
+#LIMIT 1
+ORDER BY ?thesaurus ?prefLabel

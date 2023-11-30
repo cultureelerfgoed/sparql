@@ -1,0 +1,38 @@
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+PREFIX sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+PREFIX kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+
+SELECT DISTINCT * WHERE {
+
+  ?sub a ceo:Rijksmonument .
+  BIND(xsd:integer(?perceel) AS ?intPerceel)
+  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
+  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
+  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
+
+OPTIONAL { ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?origineleGemeentecode }
+     FILTER (BOUND(?origineleGemeentecode))
+
+BIND (
+    IF(STRLEN(STR(?origineleGemeentecode)) = 1, CONCAT("000", STR(?origineleGemeentecode)),
+      IF(STRLEN(STR(?origineleGemeentecode)) = 2, CONCAT("00", STR(?origineleGemeentecode)),
+      IF(STRLEN(STR(?origineleGemeentecode)) = 3, CONCAT("0", STR(?origineleGemeentecode)),
+      IF(STRLEN(STR(?origineleGemeentecode)) = 4, STR(?origineleGemeentecode), 
+      "invalid")))) AS ?aangepasteGemeentecode)
+
+ # FILTER (?aangepasteGemeentecode != "invalid")
+
+  SERVICE <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+    ?otherSub a sor:Perceel.
+    ?otherSub sor:perceelnummer ?intPerceel .
+    ?otherSub kad:akrAanduiding ?gem.
+ #   ?otherSub dc:identifier ?aangepasteGemeentecode. 
+  }
+
+}
+LIMIT 100
