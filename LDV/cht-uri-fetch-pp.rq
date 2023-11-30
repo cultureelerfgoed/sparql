@@ -1,0 +1,7 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    SELECT ?uri WHERE {
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+    
+        ?uri skos:prefLabel ?term .
+    }}

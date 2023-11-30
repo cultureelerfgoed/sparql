@@ -1,0 +1,13 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sdo: <https://schema.org/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT DISTINCT ?material (COUNT(?material) AS ?count) 
+WHERE {
+  ?object a sdo:VisualArtwork;
+  sdo:artform ?artform;
+  sdo:material ?material.
+  FILTER (datatype(?material) = xsd:string) 
+} 
+GROUP BY ?material
+ORDER BY ?material

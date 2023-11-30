@@ -1,0 +1,18 @@
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX vbw: <https://data.verkeersborden-wegen.nl/def/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?geometry ?name ?hasId ?bordTypeLabel
+WHERE {
+  ?verkeersbord rdf:type vbw:Verkeersbord.
+  ?verkeersbord vbw:HasID ?hasId.
+  ?verkeersbord vbw:HasBordType ?bordType.
+  ?verkeersbord vbw:HeeftWegNaam ?name.
+  ?verkeersbord geo:hasGeometry ?geometryResource.
+  ?geometryResource geo:asWKT ?geometry.
+
+  # Extract the label from the end of the URI
+  BIND(STRAFTER(str(?bordType), "BordType_") AS ?bordTypeLabel)
+   
+}
+ORDER BY ?bordTypeLabel ?name

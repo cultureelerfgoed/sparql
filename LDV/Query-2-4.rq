@@ -1,0 +1,11 @@
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT distinct * WHERE {
+  ?s a ceo:Rijksmonument.
+  ?s ceo:heeftOmschrijving/ceo:omschrijving ?description .
+  ?s ceo:rijksmonumentnummer ?rm.
+ # FILTER (regex(?description, "\\bmsterdams", "i"))
+  FILTER (regex(?description, "\\.[\\s\\r\\n]+en ", "i") && regex(?description, "\\.[\\s\\r\\n]+en ", ""))
+  FILTER (!regex(?description, "\\.[\\s\\r\\n]+En "))
+} LIMIT 100

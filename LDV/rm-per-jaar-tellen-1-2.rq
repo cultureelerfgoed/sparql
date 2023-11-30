@@ -1,0 +1,19 @@
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+
+SELECT  ?jaarInschrijvings (COUNT(?rijksmonument) AS ?number)
+
+WHERE {
+  GRAPH graph:instanties-rce {
+  ?rijksmonument a ceo:Rijksmonument .
+   ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+  BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
+  bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
+  bind(concat(str(?number)) as ?numbers)
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  } }
+GROUP BY ?jaarInschrijvings
+ORDER BY ?jaarInschrijvings

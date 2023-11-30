@@ -1,0 +1,20 @@
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+select ?wkt ?wktLabel {
+  ?rijksmonument
+    a ceo:Rijksmonument;
+    ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
+    ceo:heeftGeometrie/geo:asWKT ?wkt;
+    ceo:heeftLocatieAanduiding/ceo:locatienaam 'Apeldoorn'.
+  optional { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl. }
+  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+    ?vbo sor:maaktDeelUitVan/sor:oorspronkelijkBouwjaar ?bouwjaar.
+  }
+  bind(strdt(concat(
+    '<dl><dt>Bouwjaar</dt><dd>',str(?bouwjaar),'</dd>',
+    if(bound(?stijl),concat('<dt>Stijl</dt><dd>',str(?stijl),'</dd></dl>'),'')),rdf:HTML) as ?wktLabel)
+}

@@ -1,0 +1,62 @@
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+construct {
+  $this ?p1 ?o1.
+  ?o1 ?p2 ?o2.
+  ?o2 ?p3 ?o3.
+  ?o3 ?p4 ?o4.
+  ?o4 ?p5 ?o5.
+  ?o5 ?p6 ?o6.
+  ?o6 ?p7 ?o7.
+} where {
+  graph graph:instanties-rce {
+    {
+      select distinct $this {
+        $this
+          a ceo:Vondsten;
+          ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer.
+        bind(?archis2Vondstnummer as ?archis2Vondstnummer1)
+        optional {
+          $this ceo:archis2Vondstnummer ?archis2Vondstnummer2.
+        }
+        filter(!bound(?archis2Vondstnummer1) || ?archis2Vondstnummer1 = ?archis2Vondstnummer2)
+        
+        bind(?vondstlocaties as ?vondstlocaties1)
+        optional {
+          $this ceo:ligtInObject ?vondstlocaties2.
+          ?vondstlocaties2 a ceo:Vondstlocatie.
+        }
+        filter(!bound(?vondstlocaties1) || ?vondstlocaties1 = ?vondstlocaties2)
+        
+        bind(?archeologischeComplexen as ?archeologischeComplexen1)
+        optional {
+          $this ceo:ligtInObject ?archeologischeComplexen2.
+          ?archeologischeComplexen2 a ceo:ArcheologischComplex.
+        }
+        filter(!bound(?archeologischeComplexen1) || ?archeologischeComplexen1 = ?archeologischeComplexen2)
+      }
+      limit 5
+      # paginate
+    }
+    $this ?p1 ?o1.
+    optional {
+      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+      ?o1 ?p2 ?o2.
+      optional {
+        ?o2 ?p3 ?o3.
+        optional {
+          ?o3 ?p4 ?o4.
+          optional {
+            ?o4 ?p5 ?o5.
+#            optional {
+#              ?o5 ?p6 ?o6.
+#              optional {
+#                ?o6 ?p7 ?o7.
+#              }
+#            }
+          }
+        }
+      }
+    }
+  }
+}

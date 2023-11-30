@@ -1,0 +1,55 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX overheid: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+
+SELECT DISTINCT ?geoLocatieLabel ?rijksmonumentnummer ?geoLocatie ?image ?beschrijving ?gebouwType ?functie ?rijksmonument
+
+WHERE {
+  GRAPH graph:instanties-rce {
+    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie.
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?rijksmonument ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
+    ?rijksmonument ceo:heeftOmschrijving ?beschrijving .
+
+    OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?gebouwType. }
+    MINUS { ?rijksmonument ceo:heeftJuridischeStatus rn:3e79bb7c-b459-4998-a9ed-78d91d069227. }
+    OPTIONAL { ?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape. }
+    OPTIONAL { ?rijksmonument ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor ?actor. }
+
+    FILTER (CONTAINS(UCASE(?actor), "RIETVELD") || CONTAINS(UCASE(?omschrijving), "GERRIT RIETVELD") ||
+    CONTAINS(UCASE(?omschrijving), "G.Th. RIETVELD")) 
+  }
+  SERVICE <https://query.wikidata.org/sparql> {
+    ?wikirm wdt:P1435 wd:Q916333.
+    ?wikirm wdt:P18 ?image.
+    ?wikirm wdt:P359 ?wikidataRijksmonumentnummer.
+    #OPTIONAL{?wikirn wdt:P18 ?afbeelding .}
+    ?wikirm wdt:P625 ?geoLocatie .
+
+    FILTER (?wikidataRijksmonumentnummer = ?rijksmonumentnummer)
+
+  }
+  
+
+
+
+  BIND(strdt(concat('''<h4>Rijksmonument: {{rijksmonumentnummer}}</h4><img src="{{image}}"; style="max-width:100px">
+<ul>
+<li>Gebouwsoort: {{gebouwType}}</li>
+<li>Functie: {{functie}}</li>
+<li>Beschrijving: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a>','</li></ul>'), rdf:HTML) as ?geoLocatieLabel)
+  
+}

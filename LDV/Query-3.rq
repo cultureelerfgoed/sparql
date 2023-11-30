@@ -1,0 +1,21 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+select ?jaarInschrijving ?stijl ?provincie (count(?rm) as ?aantalRM)
+where { ?rm a ceo:Rijksmonument ; ceo:datumInschrijvingInMonumentenregister ?datumIn ; 
+  ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl .
+    BIND(year(xsd:dateTime(?datumIn)) as ?jaarInschrijvingX)
+ . BIND(STR(?jaarInschrijvingX) AS ?jaarInschrijving) 
+ . FILTER (?jaarInschrijving >= "1990"^^xsd:string && ?jaarInschrijving <= "2000"^^xsd:string) 
+ .  MINUS { ?rm ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel "n.v.t."^^xsd:string} 
+ ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie/skos:prefLabel ?provincie;
+      ceo:heeftJuridischeStatus/skos:prefLabel ?grm;
+    FILTER (regex(?grm, "^rijksmonument") || contains(?grm, "voorbeschermd"))
+} 
+group by ?jaarInschrijving ?stijl ?provincie
+having (count(?stijl) > 10)
+order by ?provincie ?jaarInschrijving ?aantalRM

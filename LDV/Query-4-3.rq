@@ -1,0 +1,32 @@
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?gemeente ?periode (count(distinct(?rijksmonument)) as ?aantal_rijksmonumenten)
+
+WHERE {
+  GRAPH graph:instanties-rce{
+  ?rijksmonument a ceo:Rijksmonument;
+ # ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov;
+    ceo:datumInschrijvingInMonumentenregister ?inschrijving;
+  ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .
+ #   ?gemeente skos:prefLabel ?label.
+
+  
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  ?prov skos:prefLabel ?provincie
+  BIND(year(xsd:dateTime(?inschrijving)) as ?jaarInschrijving)
+  
+
+  BIND (
+   IF(?jaarInschrijving > 1960 && ?jaarInschrijving <= 1973, "Piek 1", 
+    IF(?jaarInschrijving >= 1997 && ?jaarInschrijving <= 2002, "Piek 2", "Buiten pieken")) AS ?periode)
+ 
+}
+
+}
+order by desc(?aantalRM) ?periode 
+LIMIT 100

@@ -1,0 +1,11 @@
+# SPARQL Query voor het controleren van de integriteit van de data
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?s WHERE {
+  # Kies triples waar ?s het subject is en heeft een rdf:type
+  ?s rdf:type ?type .
+
+  # FILTER NOT EXISTS kan gebruikt worden om te controleren of er geen andere triples zijn waar ?s het subject is
+  FILTER NOT EXISTS { ?s ?p ?o . FILTER(?p != rdf:type) }
+}

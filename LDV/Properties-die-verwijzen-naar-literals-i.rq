@@ -1,0 +1,12 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+SELECT ?g ?pred (COUNT(*) as ?triples)
+WHERE {
+    GRAPH ?g {
+       ?s a ceo:Rijksmonument .
+       ?s ?pred ?o .
+  }}
+GROUP BY ?g ?pred 
+ORDER BY ?g DESC(?triples)

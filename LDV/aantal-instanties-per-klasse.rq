@@ -1,0 +1,13 @@
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>  # Definieert het prefix "ceo" voor de namespace URI.
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>  # Definieert het prefix "rdfs" voor de namespace URI.
+
+select ?klasse (replace(count(?instantie),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0,') as ?aantalInstanties) {  # Selecteert de klasse en berekent het aantal instanties per klasse.
+  GRAPH graph:instanties-rce {
+
+  ?instantie a/rdfs:subClassOf* ?klasse.  # Zoekt naar instanties die behoren tot of ondergeschikt zijn aan een bepaalde klasse.
+
+  filter(strstarts(str(?klasse),str(ceo:))) # Filtert alleen de klassen die zich in de CEO-namespace bevinden.
+  }}
+group by ?klasse  # Groepeert de resultaten op basis van de klasse.
+order by ?klasse  # Sorteert de resultaten op basis van de klasse.

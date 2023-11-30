@@ -1,0 +1,30 @@
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT * WHERE {
+ GRAPH graph:instanties-rce { 
+  ?complex a ceo:Complex .
+  ?complex ceo:complexnummer ?complexnummer.
+  ?complex ceo:heeftHoofdobject ?hoofdobject.
+  ?complex ceo:heeftKennisregistratie/ceo:naam ?naam.
+  ?complex ceo:heeftKennisregistratie/ceo:omschrijving ?omschrijving.
+  Filter regex(?omschrijving, "buitenplaats", "i")
+  ?complex ceo:heeftRijksmonument ?rijksmonument.
+  ?hoofdobject ceo:rijksmonumentnummer ?hoofdobjectnummer.
+  ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  ?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape .
+  }
+  BIND(strdt(concat("Naam: ", ?naam, " Complexnummer: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?complexnummer),'" target="_blank">',str(?complexnummer),'</a>', " Hoofdobjectnr: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?hoofdobjectnummer),'" target="_blank">',str(?hoofdobjectnummer),'</a>'," Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a>'),rdf:HTML) as ?shapeLabel)
+  bind( "black" AS ?shapeColor)
+#  bind(?hoofdobject AS ?shape_HLabel)
+#  bind(?rijksmonument AS ?shape_RLabel)
+#   bind("orange" AS ?shape_RColor)
+#  bind("red" AS ?shape_HColor)
+    
+#  bind(<https://service.pdok.nl/rws/ahn3/wms/v1_0?request=getcapabilities&service=wms> AS ?mapEndpoint)
+   bind(<https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?request=GetCapabilities&service=wms> AS ?mapEndpoint)
+  
+} #LIMIT 100

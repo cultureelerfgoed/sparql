@@ -1,0 +1,8 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sdo: <https://schema.org/>
+PREFIX object: <https://linkeddata.cultureelerfgoed.nl/colonialheritage/colonialobjects/id/>
+SELECT * WHERE {
+  ?object sdo:locationCreated/sdo:name ?locationCreated ;
+          sdo:contentLocation/sdo:name ?contentLocation
+} LIMIT 10

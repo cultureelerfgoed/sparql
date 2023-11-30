@@ -1,0 +1,47 @@
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX schema: <http://schema.org/>
+
+SELECT distinct ?rijksmonument ?naam_architect (count(distinct(?kb_works)) as ?werken_kb)  WHERE {
+ 
+
+SERVICE <https://query.wikidata.org/sparql>
+    {
+ 
+  ?rijksmonument wdt:P84 ?architect.
+  ?architect wdt:P214 ?viaf .
+  ?rijksmonument wdt:P625 ?shape. 
+  ?rijksmonument wdt:P359 ?rijksmonumentnummer. 
+ 
+    BIND(URI(CONCAT("http://viaf.org/viaf/", ?viaf)) as ?viaf_wd)
+   
+    }
+  
+service <http://data.bibliotheken.nl/sparql> {
+    
+    ?kb_architect a schema:Person .
+    ?kb_architect schema:sameAs ?viaf_wd. 
+    ?kb_works schema:author ?kb_architect .
+    ?kb_architect rdfs:label ?naam_architect.
+    ?kb_works schema:name ?kb_title .
+      }
+  GRAPH graph:instanties-rce {
+    ?rijksmonumentrce a ceo:Rijksmonument.
+    ?rijksmonumentrce ceo:heeftKennisregistratie/ceo:heeftFunctieNaam rn:6fa5f251-cd84-4f3a-acb7-7c219df2540f . # /Kerk
+    ?rijksmonumentrce ceo:rijksmonumentnummer ?rijksmonumentnummer .
+   # ?rijksmonumentrce ceo:heeftGeometrie/geo:asWKT ?shape .
+
+  MINUS {?rijksmonumentrce ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  }
+  BIND(CONCAT("Rijksmonumentnummer: ", ?rijksmonumentnummer, " || Architect: ", ?naam_architect, " || Voorbeeld werk in KB: ", ?kb_title) as ?shapeLabel)
+}
+ORDER BY ?kb_title
+#LIMIT 10

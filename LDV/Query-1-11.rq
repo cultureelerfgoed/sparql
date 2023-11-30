@@ -1,0 +1,9 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select ?subject ?predicate ?object
+
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/image-1>
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/image>
+WHERE {
+  ?subject ?predicate ?object .
+}

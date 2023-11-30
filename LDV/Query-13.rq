@@ -1,0 +1,41 @@
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?geo ?geoLabel {
+ { select
+    ?geo
+    ?label
+    ?bouwjaar
+      (group_concat(concat('<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rm_nr),'" target="_blank">',str(?rm_nr),'</a>'); separator=', ') as ?nummers)
+
+      (group_concat(distinct ?type; separator=', ') as ?types)
+    {
+ ?vuurtoren ceox:heeftFunctieNaam 
+      <https://data.cultureelerfgoed.nl/term/id/rn/e1caeac0-0ff1-4651-823c-458eb2c9c286> 
+ ; ceo:rijksmonumentnummer ?rm_nr .
+      
+  optional {?vuurtoren rdfs:label ?label}
+#  optional {?vuurtoren ceox:jaarInGebruikname ?jaarInGebruikname}
+  optional {?vuurtoren ceox:jaarBuitendienststelling ?jaarBuitendienststelling}
+  ?vuurtoren ceox:MarineTraffic_id ?MarineTraffic_id
+  optional {?vuurtoren ceox:bouwjaar ?bouwjaar}
+  optional {?vuurtoren ceox:ARLHS_id ?ARLHS_id}
+  #optional {?vuurtoren ceox:hoogte ?hoogte}
+ # OPTIONAL {?vuurtoren ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.}
+  ?vuurtoren ceo:heeftGeometrie/geo:asWKT ?geo.
+      
+    }    
+    group by ?geo ?label ?bouwjaar
+  }
+  bind(strdt(concat(
+    '<h3>',coalesce(?label,'Geen naam in het monumentenregister'),'</h3>',
+    '<dl>',
+      '<dt>Bouwjaar:</dt><dd>',?bouwjaar,'</dd>',
+      '<dt>Nummer:</dt><dd>',?nummers,'</dd>',
+  #    '<dt>Aard:</dt><dd>',?aard,'</dd>',
+    '</dl>'),rdf:HTML) as ?geoLabel)
+} order by ?label                                                                                           
+                                                                                          

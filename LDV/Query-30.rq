@@ -1,0 +1,50 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept
+    (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR = ", ") AS ?synonyms)
+    (GROUP_CONCAT(DISTINCT ?scopeNote; SEPARATOR = ". - ") AS ?notes)
+    (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
+    (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
+    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+WHERE {
+    {
+        ?concept skos:prefLabel ?prefLabelFilter.
+        FILTER (STRSTARTS(lcase(str(?prefLabelFilter)), lcase(?start)))
+    }
+    UNION
+    {
+        ?concept skos:altLabel ?altLabelFilter.
+        FILTER (STRSTARTS(lcase(str(?altLabelFilter)), lcase(?start)))
+    }
+
+  #  FILTER (STRSTARTS(lcase(str(?start)), "got"))
+
+    OPTIONAL { ?concept skos:altLabel ?altLabel. FILTER (lang(?altLabel) = "nl") }
+    ?concept skos:prefLabel ?prefLabel. FILTER (lang(?prefLabel) = "nl")
+    OPTIONAL { ?concept skos:scopeNote ?scopeNote. FILTER (lang(?scopeNote) = "nl") }
+    OPTIONAL { ?concept skos:broader ?broader. ?broader skos:prefLabel ?broaderTerm. FILTER (lang(?broaderTerm) = "nl") }
+    OPTIONAL { ?concept skos:narrower ?narrower. ?narrower skos:prefLabel ?narrowerTerm. FILTER (lang(?narrowerTerm) = "nl") }
+    OPTIONAL { ?concept rnce:image ?image }
+
+    ?concept skos:broader* ?topConcept . 
+    FILTER NOT EXISTS { ?topConcept skos:broader ?any }
+    ?topConcept skos:prefLabel ?topConceptLabel. FILTER (lang(?topConceptLabel) = "nl")
+    ?topConcept skos:inScheme/dct:title ?thesaurus.
+
+    BIND('''
+    <center><img src={{finalImage}} style="max-width: 100px;"></center>
+    <h2><a href="{{concept}}">{{prefLabel}}</a></h2>
+    <p>Synoniemen: {{synonyms}}</p>
+    <p>Definitie: {{notes}}</p>
+    <p>Ruimer begrip: {{broaderTerms}}</p>
+    <p>Topconcept: {{topConceptLabel}} van {{thesaurus}}</p>
+    <p>Enger begrip: {{narrowerTerms}}</p>
+    <p>{{concept}}</p>
+    '''^^rdf:HTML as ?widget)
+}
+GROUP BY ?prefLabel ?widget ?image ?topConceptLabel ?thesaurus ?concept
+ORDER BY ?thesaurus ?prefLabel
