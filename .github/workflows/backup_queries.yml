@@ -26,13 +26,13 @@ jobs:
       run: python3 "${{ github.workspace }}/retrieve_queries.py"
       env:
         API_URL: https://api.linkeddata.cultureelerfgoed.nl/queries/
-        OUTPUT_FOLDER: "${{ github.workspace }}/LDV"
+        OUTPUT_FOLDER: "${{ github.workspace }}"
 
    
     - name: Check for changes
       id: git_status
       run: |
-        echo "status=$(git status -s)" >> $GITHUB_ENV
+        echo "status=\"$(git status -s)\"" >> $GITHUB_ENV
 
     - name: Commit and push changes
       run: |

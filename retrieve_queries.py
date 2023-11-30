@@ -29,8 +29,8 @@ def fetch_json_data(url):
     else:
         raise Exception(f"Failed to fetch JSON data. Status code: {response.status_code}")
 
-def extract_and_save_queries(api_url, github_workspace):
-    data = fetch_json_data(api_url)
+def extract_and_save_queries(url, github_workspace):
+    data = fetch_json_data(url)
 
     for payload in data:
         query_content = payload.get('requestConfig', {}).get('payload', {}).get('query', '')
@@ -62,4 +62,4 @@ if __name__ == "__main__":
    
    # Use github.workspace as the base for the output folder
     github_workspace = os.getenv("GITHUB_WORKSPACE")
-    extract_and_save_queries(api_url, github_workspace)
+    extract_and_save_queries(url, github_workspace)
