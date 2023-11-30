@@ -1,0 +1,35 @@
+# Query om usermanagement en conceptScheme data te fixen
+# Delete triples where a user has a specific username in a given graph
+delete {
+    graph ?g {
+        ?user <http://schema.semantic-web.at/users/username> ?name .
+    }
+}
+# Insert triples with the same user but a modified username in the same graph
+insert {
+    graph ?g {
+        ?user <http://schema.semantic-web.at/users/username> ?nameSelect .
+    }
+}
+# Specify the conditions for deletion and insertion
+where {
+    # Specify the graph, user, and username triples to be considered
+    graph ?g {
+        ?user <http://schema.semantic-web.at/users/username> ?name .
+    }
+    # Subquery to select the graph, user, and the minimum username
+    {
+        # Specify the graph, user, and username triples for the subquery
+        select ?g ?user (min(?name) as ?nameSelect)
+        where {
+            # Specify the graph, user, and username triples for the subquery
+            graph ?g {
+                ?user <http://schema.semantic-web.at/users/username> ?name
+            }
+            # Filter the graphs based on a regex pattern
+            filter(regex(str(?g),"/thesaurus/users$"))
+        }
+        # Group the results by graph and user, and filter based on the count of distinct usernames
+        group by ?g ?user having (count (distinct ?name) > 1)
+    }
+}
