@@ -1,0 +1,21 @@
+# Als je een uri wilt / moet hergebruiken
+# Define the SKOS namespace prefix
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+# Insert data into a specific named graph (https://data.cultureelerfgoed.nl/akb/thesaurus)
+INSERT DATA {
+  GRAPH <https://data.cultureelerfgoed.nl/akb/thesaurus> {
+    
+    # Define a new SKOS concept with URI: https://data.cultureelerfgoed.nl/akb/aaae85d9-4908-3dc3-965e-0daeeb8b7fb5
+    <https://data.cultureelerfgoed.nl/akb/aaae85d9-4908-3dc3-965e-0daeeb8b7fb5> a skos:Concept ;
+      
+      # Set the broader concept URI for the new concept
+      skos:broader <https://data.cultureelerfgoed.nl/akb/cb58cae6-ae1c-4f7b-9929-3e25c023eadf> ;
+      
+      # Set the preferred label in Dutch for the new concept
+      skos:prefLabel "Gemeente Tholen"@nl .
+    
+    # Define an existing concept with URI: https://data.cultureelerfgoed.nl/akb/cb58cae6-ae1c-4f7b-9929-3e25c023eadf
+    <https://data.cultureelerfgoed.nl/akb/cb58cae6-ae1c-4f7b-9929-3e25c023eadf> skos:narrower <https://data.cultureelerfgoed.nl/akb/aaae85d9-4908-3dc3-965e-0daeeb8b7fb5> .
+  }
+}
