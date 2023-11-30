@@ -40,7 +40,7 @@ def extract_and_save_queries(url, github_workspace):
 
         if query_content and name and service_endpoint:
              # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace, "LDV")
+            output_folder = os.path.join(github_workspace)
             filename = os.path.join(output_folder, f"{name}.rq")
             with open(filename, 'w') as query_file:
                 # Write the name, description, and service endpoint at the top of the file
