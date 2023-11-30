@@ -1,0 +1,16 @@
+# selecteer alle skos en custom properties
+SELECT DISTINCT ?p 
+
+# Aanpassen GRAPH bij ieder project
+WHERE {
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/rn/thesaurus> {
+    ?s ?p ?o . 
+
+    # Uit filteren dcterms, ppt predicates, rdf, owl
+    FILTER NOT EXISTS {
+      ?s ?p ?o . 
+      FILTER REGEX(STR(?p), "skos|purl|syntax|ppt|owl", "i") .
+    }
+  }
+} 
+ORDER BY ?p
