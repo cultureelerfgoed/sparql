@@ -1,3 +1,6 @@
+#+ name: kapotte-query
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX schema: <https://schema.org/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>

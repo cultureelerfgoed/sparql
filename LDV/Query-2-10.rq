@@ -1,3 +1,6 @@
+#+ name: Query-2-10
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/kamarac/Verkeersbordenwegen/services/Verkeersbordenwegen/sparql
+
 PREFIX vbw: <https://data.verkeersborden-wegen.nl/def/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

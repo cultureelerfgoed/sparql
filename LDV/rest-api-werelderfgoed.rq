@@ -1,3 +1,16 @@
+#+ name: rest-api-werelderfgoed
+#+ description: ####REST API query for the path werelderfgoed.</p>
+#- This SPARQL query is designed to retrieve information about Dutch UNESCO World Heritage Sites (Unesco Werelderfgoederen in Dutch) from the Cultural Heritage Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- 
+#- - werelderfgoednummer, ex: 1349
+#- - cultuurfistorischObjectnummer, ex: 10134675
+#- - heeftNaam, ex: Hollandse Waterlinies
+#- - registratiedatum, ex: 2021-11-22
+#- </p>
+#- Date: dd. 2023-11-20</br>
+#- Version: 0.5
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {

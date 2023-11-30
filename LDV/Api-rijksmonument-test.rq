@@ -1,3 +1,6 @@
+#+ name: Api-rijksmonument-test
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

@@ -1,3 +1,6 @@
+#+ name: Query-26
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/services/erfgeo/sparql
+
 PREFIX schema: <https://schema.org/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

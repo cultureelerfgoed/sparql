@@ -1,3 +1,7 @@
+#+ name: Query-Het-Nieuwe-Instituut-tijdlijn
+#+ description: Een tijdlijn met alle objecten vervaardigd door Gerrit Rietveld in het collectie van Het Nieuwe Instituut.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
 PREFIX rel: <http://purl.org/vocab/relationship/>
 PREFIX dct: <http://purl.org/dc/terms/>

@@ -1,3 +1,6 @@
+#+ name: Collectie-Het-Nieuwe-Instituut-Gerrit-Ri
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
 PREFIX sdo: <https://schema.org/>
 PREFIX rel: <http://id.loc.gov/vocabulary/relators/>

@@ -1,3 +1,9 @@
+#+ name: rest-api-grondsporen
+#+ description: REST API query for the path grondsporen.
+#- 
+#- Due to the time-out issue, levels 6 and 7 of nesting from line 44 to 49 were commented out.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {

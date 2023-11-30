@@ -1,3 +1,6 @@
+#+ name: Rijksmonumenten-in-Prenten-in-Oude-Teken
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Prenten-en-Oude-Tekeningen/services/Prenten-en-Oude-Tekeningen/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

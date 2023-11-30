@@ -1,3 +1,6 @@
+#+ name: KTT-en-Reliwiki
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>

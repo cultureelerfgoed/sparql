@@ -1,3 +1,6 @@
+#+ name: HNI-4
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
 PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
 PREFIX sdo: <https://schema.org/>
 PREFIX rel: <http://purl.org/vocab/relationship/>

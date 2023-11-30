@@ -1,3 +1,7 @@
+#+ name: colonial-cht
+#+ description: Query om mogelijke koppelingen tussen collectie metadata en de Cultuurhistorische Thesaurus te evalueren. Collectie en thesaurus zijn inwisselbaar zolang de strings 1-op-1 te koppelen zijn.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/ruben-schalk/colonial/services/europeana-colonial/sparql
+
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX schema: <https://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

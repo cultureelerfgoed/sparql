@@ -1,3 +1,6 @@
+#+ name: Wikidata-en-Rijksmonumenten-van-n-1950
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX wdt:  <http://www.wikidata.org/prop/direct/>
 prefix wde: <http://www.wikidata.org/entity/>

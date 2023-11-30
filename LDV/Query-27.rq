@@ -1,3 +1,7 @@
+#+ name: Query-27
+#+ description: This query searches a dataset using the Simple Knowledge Organization System (SKOS) vocabulary, and retrieves information about a specific concept based on its preferred label (prefLabel), alternative labels (altLabel), scope notes (scopeNote), as well as broader and narrower terms (broader and narrower).
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>

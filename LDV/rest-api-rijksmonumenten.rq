@@ -1,3 +1,6 @@
+#+ name: rest-api-rijksmonumenten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {

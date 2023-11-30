@@ -1,3 +1,9 @@
+#+ name: resti-api-complexen
+#+ description: REST API query for the path complexen.
+#- 
+#- Due to the time-out issue, level 7 of nesting from line 37 to 39 was commented out.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {

@@ -1,3 +1,6 @@
+#+ name: Query-2-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/services/erfgeo/sparql
+
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>

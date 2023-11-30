@@ -1,3 +1,6 @@
+#+ name: Construct-vuurtorens-wikidata
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>

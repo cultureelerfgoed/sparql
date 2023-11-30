@@ -1,3 +1,6 @@
+#+ name: EGM-aantal-RM-20000
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

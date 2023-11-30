@@ -1,3 +1,7 @@
+#+ name: vuurtorens-rm-wikidata
+#+ description: Vuurtorens als Rijksmonument vindbaar op Wikidata
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

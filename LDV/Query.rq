@@ -1,3 +1,8 @@
+#+ name: Query
+#+ description: Deze query transformeert rd-wkt geometrie naar gewoon wkt geometrie.
+#- Deze query gebruikt afstand.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>

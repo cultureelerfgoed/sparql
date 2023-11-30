@@ -1,3 +1,7 @@
+#+ name: bif-vs-contains
+#+ description: Comparison of results when searching the CHT for "oplegger" using `bif:contains` vs. `CONTAINS`
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT distinct ?uri ?prefLabel

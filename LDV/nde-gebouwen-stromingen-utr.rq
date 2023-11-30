@@ -1,3 +1,7 @@
+#+ name: nde-gebouwen-stromingen-utr
+#+ description: Wikidata query die kunststromingen en architectuurstijlen verbindt en daarvan de op Wikidata bekende gebouwen ophaalt per provincie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX schema: <http://schema.org/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

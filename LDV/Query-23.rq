@@ -1,3 +1,7 @@
+#+ name: Query-23
+#+ description: verdwenen dorpen uit erfgeo
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/services/erfgeo/sparql
+
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX gsp: <http://www.opengis.net/ont/geosparql#>
