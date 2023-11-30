@@ -1,4 +1,4 @@
-name: Daily Python Script Execution
+name: Backup sparql queries
 
 on:
   schedule:
@@ -30,7 +30,7 @@ jobs:
 
     - name: Execute Python script
       run: |
-        python your_script.py
+        python retrieve_queries.py
         changes=$(git status --porcelain)
         if [ -n "$changes" ]; then
           git add .
