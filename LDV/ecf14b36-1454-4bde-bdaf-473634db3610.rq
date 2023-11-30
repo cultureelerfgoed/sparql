@@ -1,0 +1,29 @@
+#+ name: ecf14b36-1454-4bde-bdaf-473634db3610
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select distinct ?rijksmonument_r ?shape ?rijksmonument_w (SAMPLE(?geografische_locatie_w) as ?wikiloco) ?rijksmonumentnummer_w
+WHERE {
+
+SERVICE <https://query.wikidata.org/sparql>
+    {
+  ?rijksmonument_w wdt:P1435 wd:Q916333.
+  ?rijksmonument_w wdt:P31 wd:Q39715.
+  ?rijksmonument_w wdt:P359 ?rijksmonumentnummer_w. 
+  ?rijksmonument_w wdt:P625 ?geografische_locatie_w.   
+  }
+ {
+  ?rijksmonument_r a ceo:Rijksmonument ;
+                     ceo:rijksmonumentnummer ?rijksmonumentnummer_w.
+                     OPTIONAL {?rijksmonument_r ceo:heeftGeometrie/geo:asWKT ?shape.}
+   }}
+
+limit 100

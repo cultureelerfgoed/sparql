@@ -1,0 +1,22 @@
+#+ name: Query-7-1
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX schema: <http://schema.org/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+select   ("green" as ?eventColor) ?event ?eventLabel ?programma ?eventStart ?eventEnd ?eventDescription ?eventMedia ?caption (?eventLabel as ?eventMediaCaption)  ("wikimedia" as ?eventMediaCredit)
+{ GRAPH graph:aanwijzingenmonumenten {
+   ?event a schema:Event;
+   schema:name ?eventLabel;
+   schema:superEvent ?programma;
+    schema:startDate ?eventStart;
+    OPTIONAL { ?event schema:endDate ?eventEnd.}
+     OPTIONAL {?event schema:description ?description.}
+    OPTIONAL {?event schema:image ?eventMedia.}
+    OPTIONAL {?event schema:caption ?caption.}
+  }
+  BIND(concat(?programma, " - ", ?description) AS ?eventDescription)
+} #LIMIT 10

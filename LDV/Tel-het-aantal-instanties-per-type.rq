@@ -1,0 +1,13 @@
+#+ name: Tel-het-aantal-instanties-per-type
+#+ description: SELECT  ?type (COUNT (?s) AS ?instanceCount) 
+#- WHERE {
+#-    ?s a ?type . 
+#- }
+#- GROUP BY  ?type
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+
+SELECT  ?type (COUNT (?s) AS ?instanceCount) 
+WHERE {
+   ?s a ?type . 
+}
+GROUP BY  ?type

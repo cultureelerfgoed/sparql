@@ -1,0 +1,24 @@
+#+ name: Wikidata-en-Rijksmonumenten-van-n-1950
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX wdt:  <http://www.wikidata.org/prop/direct/>
+prefix wde: <http://www.wikidata.org/entity/>
+prefix wd: <http://www.wikidata.org/entity/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+
+
+SELECT ?rijksmonument ?datum_van_oprichting_of_creatie ?naam ?geografische_locatie ?rijksmonumentnummer WHERE {
+  SERVICE <https://query.wikidata.org/sparql> {
+
+  ?rijksmonument wdt:P1435 wd:Q916333.
+  ?rijksmonument wdt:P571 ?datum_van_oprichting_of_creatie. 
+  OPTIONAL { ?rijksmonument wdt:P625 ?geografische_locatie. }
+  OPTIONAL { ?rijksmonument wdt:P359 ?rijksmonumentnummer. }
+  FILTER(?bouwjaar >= "1950"^^<http://www.w3.org/2001/XMLSchema#integer>)
+  }
+  BIND(year(xsd:dateTime(?datum_van_oprichting_of_creatie)) as ?bouwjaar)  
+
+}

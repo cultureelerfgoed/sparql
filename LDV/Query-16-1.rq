@@ -1,0 +1,35 @@
+#+ name: Query-16-1
+#+ description: Query waarbij in de gezocht wordt op functie "kasteel, buitenplaats" en alles wat er onder hangt
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT * WHERE {
+ GRAPH graph:instanties-rce { 
+  ?rijksmonument ceo:isOnderdeelVanComplex ?complex.
+  ?complex ceo:complexnummer ?complexnummer.
+  ?complex ceo:heeftKennisregistratie/ceo:naam ?naam.
+  ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape .}
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.
+   MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  }
+  GRAPH graph:bebouwdeomgeving {
+  {<https://data.cultureelerfgoed.nl/term/id/rn/79a73171-6443-4378-8975-de73e222d4e9> skos:broader ?narrow.}
+  UNION{
+  <https://data.cultureelerfgoed.nl/term/id/rn/4bb244a7-0a1e-4586-805a-f4de1b84a54d> skos:narrower ?narrow.}
+    ?narrow skos:prefLabel ?label.
+  MINUS {?narrow skos:prefLabel ?label. FILTER (CONTAINS(?label, "toren")|| CONTAINS(?label, "poort"))}
+  }
+  
+  BIND(strdt(concat("Naam: ", ?naam, " Complexnummer: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?complexnummer),'" target="_blank">',str(?complexnummer),'</a>', " Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a>'),rdf:HTML) as ?shapeLabel)
+  BIND("black" AS ?shapeColor)
+    
+  #bind(<https://service.pdok.nl/rws/ahn3/wms/v1_0?request=getcapabilities&service=wms> AS ?mapEndpoint)
+  bind(<https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?request=GetCapabilities&service=wms> AS ?mapEndpoint)
+} #LIMIT 100

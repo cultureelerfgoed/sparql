@@ -1,0 +1,60 @@
+#+ name: Query-1-3
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+
+SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image) AS ?sampleImage)
+(GROUP_CONCAT(DISTINCT CONCAT('<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', uri(?rmn), '" target="_blank">', ?temple_name, '</a>'); SEPARATOR=" of ") AS ?temple_name_us)
+(GROUP_CONCAT(DISTINCT ?occupation; SEPARATOR=", ") as ?occupations)
+(GROUP_CONCAT(DISTINCT ?status; SEPARATOR=", ") as ?statuss)
+(if(bound(?birthYear), ?birthYear, " - ") as ?by)
+(if(bound(?deathYear), ?deathYear, " - ") as ?dy)
+  
+('''<div style="background-color:rgba(0,0,0,.2);">
+   <center><img src="{{sampleImage}}" style="max-width: 150px;">
+<p>In de {{temple_name_us}} te {{plaats}} rust </p>
+   <i>{{statuss}}</i>
+   <h2>{{name}}</h2>
+   <h4><i>{{occupations}}</i></h4>
+   <br><br>
+   <h2>&#10086;{{by}} - &#9841;{{dy}}</h2></center>'''^^rdf:HTML as ?widget)
+
+WHERE {
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/praalgraven> {
+    ?temple rdf:type ceox:Gebedshuis ;
+            ceox:rijksmonumentnummer ?rmn ;
+            ceox:huidigeNaam ?temple_name .
+
+  }
+  
+  Graph <https://linkeddata.cultureelerfgoed.nl/rce/gebedshuizen/graphs/default> {
+   ?temple ceox:heeftAdresgegevens/ceox:woonplaats ?plaats.
+  }
+  
+  SERVICE <https://query.wikidata.org/sparql> {
+    ?wikirm wdt:P1435 wd:Q916333.
+    ?wikirm wdt:P18 ?image.
+    ?wikirm wdt:P359 ?rmn.
+  }   
+  
+  ?temple ceox:hoortBij ?grave .
+  ?grave rdf:type ceox:Grafmonument ;
+         ceox:IsTerNagedachtenisVan ?person .
+  ?person rdf:type foaf:Person .
+
+  OPTIONAL { ?person ceox:naam ?name }
+  OPTIONAL { ?person ceox:geboortejaar ?birthYear }
+  OPTIONAL { ?person ceox:overlijdensjaar ?deathYear }
+  OPTIONAL { ?person ceox:beroepEnRang ?occupation }
+  OPTIONAL { ?person ceox:status ?status }
+ 
+}
+
+ORDER BY DESC (?birthYear)
+#LIMIT 10

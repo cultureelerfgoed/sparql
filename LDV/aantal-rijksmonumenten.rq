@@ -1,0 +1,17 @@
+#+ name: aantal-rijksmonumenten
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?rijksmonument (count(?i) as ?aantal) {
+  ?i a ceo:Rijksmonument.
+  ?i ceo:heeftType ?c.
+  ?c ceo:heeftTypeNaam/skos:prefLabel ?rijksmonument.
+
+} 
+group by ?rijksmonument
+order by desc(?aantal)
+

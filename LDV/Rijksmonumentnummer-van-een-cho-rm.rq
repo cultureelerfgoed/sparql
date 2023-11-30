@@ -1,0 +1,10 @@
+#+ name: Rijksmonumentnummer-van-een-cho-rm
+#+ description: Query om bij een CHO uuid het rijksmonumentnummer te vinden.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT * WHERE {
+  ?s a ceo:Rijksmonument ; ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ; ceo:rijksmonumentnummer ?rijksmonumentnummer .
+} LIMIT 10

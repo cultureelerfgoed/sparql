@@ -1,0 +1,45 @@
+#+ name: Query-1-1-1
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Prenten-en-Oude-Tekeningen/services/Prenten-en-Oude-Tekeningen/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix la: <https://linked.art/ns/terms/>
+prefix cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+
+select DISTINCT *
+ WHERE {
+  ?pot1 a cidoc:E22_Human-Made_Object.
+  ?pot1 cidoc:P2_has_type <https://data.cultureelerfgoed.nl/term/id/rn/2b73b05a-b83a-423d-a95a-3633664d00b8>.
+  ?pot1 cidoc:P129i_is_subject_of/rdfs:label ?onderwerp .
+  OPTIONAL {?pot1 cidoc:P62_depicts ?depiction.}
+  OPTIONAL {?depiction rdfs:label ?label.
+  ?pot1 cidoc:P129i_is_subject_of ?ff.
+  ?ff cidoc:P65_shows_visual_item ?ff2.
+  ?ff2 la:digitally_shown_by ?a.
+    ?a la:access_point ?b.}
+  ?depiction cidoc:P190_has_symbolic_content ?pot_mon.
+ 
+SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql>
+     {
+  ?choi a ceo:Rijksmonument. 
+  ?choi ceo:heeftGeometrie/geo:asWKT ?geo.   
+    OPTIONAL {?choi ceo:heeftNaam/ceo:naam ?rmnaam.}
+  ?choi ceo:rijksmonumentnummer ?pot_mon.
+    }
+    SERVICE <https://query.wikidata.org/sparql>
+{
+  ?wikirm wdt:P1435 wd:Q916333.
+  OPTIONAL {?wikirm wdt:P18 ?afbeelding.}
+  ?wikirm wdt:P359 ?pot_mon.
+    OPTIONAL {?wikirm wdt:P8897 ?test.}
+  }
+
+   BIND(strdt(concat('<img src="',str(?b),'" style="max-width: 100px;">','</a>','<img src="',str(?afbeelding),'" style="max-width: 100px;">','</a>','</p>',"Titel: ",?label,'</p>','</p>',"Onderwerp: ",?onderwerp,'</p>', "Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?pot_mon),'" target="_blank">',str(?pot_mon),'</a>','<p>', "Reliwiki: ",'<a href="https://reliwiki.nl/?curid=',uri(?test),'" target="_blank">',str(?test),'</a>'),rdf:HTML) AS ?widget)
+}
+limit 150

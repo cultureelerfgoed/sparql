@@ -1,0 +1,17 @@
+#+ name: grafiek-functies-groot
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?type (count(?i) as ?aantal) {
+  ?i a ceo:Rijksmonument.
+  ?i ceo:heeftOorspronkelijkeFunctie ?f.
+  ?f ceo:heeftFunctieNaam/skos:prefLabel ?type.
+
+} 
+group by ?type
+#having (count(?i) <= 3)
+order by desc(?aantal)

@@ -1,0 +1,19 @@
+#+ name: lege-eigenschappen
+#+ description: Eigenschappen die niet gebruikt worden in instantiegegevens.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select distinct ?eigenschap {
+  # Er zijn twee soorten eigenschappen: met een datatype of met een object.
+  { ?eigenschap a owl:DatatypeProperty. } union { ?eigenschap a owl:ObjectProperty. }
+  # We willen alleen de eigenschappen in de CEO namespace zien.
+  filter(strstarts(str(?eigenschap),str(ceo:)))
+  # Alleen niet-gebruikte ('lege') eigenschappen.
+  filter not exists {
+    ?eigenschap0 rdfs:subPropertyOf* ?eigenschap.
+    [] ?eigenschap0 [].
+  }
+}
+order by ?eigenschap

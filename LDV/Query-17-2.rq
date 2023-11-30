@@ -1,0 +1,17 @@
+#+ name: Query-17-2
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+
+SELECT ?subject ?label 
+WHERE {
+    ?subject rdf:type ceo:Rijksmonument.
+    ?subject ceo:heeftOmschrijving ?desc.
+    ?desc ceo:omschrijving ?label.
+   FILTER(bif:contains(?label, "koetshuis")) #1580 met "'idem zonder
+ # FILTER(contains(?label, "KOETSHUIS")) #1395 577 in KAPITALEN
+ #  filter regex(?label, "koetshuisje", "i")
+}

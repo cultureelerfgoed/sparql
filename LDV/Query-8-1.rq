@@ -1,0 +1,17 @@
+#+ name: Query-8-1
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?choi ?rm WHERE {
+  GRAPH graph:instanties-rce {
+  ?choi a ceo:Rijksmonument .
+        ?choi ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 .
+  ?choi ceo:rijksmonumentnummer ?rm .
+    
+} 
+}

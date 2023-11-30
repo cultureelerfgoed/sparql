@@ -1,0 +1,14 @@
+#+ name: Properties-met-de-bijbehorende-Class
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+SELECT DISTINCT ?property ?class
+WHERE {
+  ?s a ceo:Vondsten;
+     ?property ?o .
+  ?o a ?class .
+  FILTER(!isLiteral(?o))
+}

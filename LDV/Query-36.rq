@@ -1,0 +1,56 @@
+#+ name: Query-36
+#+ description: Deze query haalt informatie op over rijksmonumenten en de bijbehorende afbeeldingen van cultureel erfgoedobjecten, en creëert HTML-widgets met links naar de Beeldbank en het Monumentenregister voor weergave. Het resultaat is beperkt tot 100 rijen.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql
+
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+
+SELECT DISTINCT ?choi ?rmn ?geo ?beeldbank (SAMPLE(?image) AS ?sampleImage) ?afb ?naam
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="{{sampleImage}}" style="max-width: 200px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rmn), '" target="_blank">', STR(?rmn), '</a></li>',
+    '      <li>{{naam}}</li>',
+    '      <li>In: <a href="', STR(?beeldbank), '" target="_blank">Beeldbank</a></li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) AS ?widget)
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="{{sampleImage}}" style="max-width: 200px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rmn), '" target="_blank">', STR(?rmn), '</a></li>',
+    '      <li>{{naam}}</li>',
+    '      <li>In: <a href="', STR(?beeldbank), '" target="_blank">Beeldbank</a></li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) AS ?geoLabel)
+
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/image>
+FROM <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce>
+
+WHERE {
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql> {
+    ?choi a ceo:Rijksmonument .  # Select Rijksmonument objects
+    ?choi ceo:rijksmonumentnummer ?rmn.  # Retrieve the Rijksmonumentnummer
+    ?choi ceo:heeftGeometrie/geo:asWKT ?geo  # Retrieve the geometry information
+  }
+
+  ?afb a edm:ProvidedCHO .  # Select ProvidedCHO objects
+  ?afb edm:aggregatedCHO ?choi.  # Link to the corresponding Rijksmonument (?choi)
+  ?afb foaf:depiction ?image.  # Retrieve the image
+  ?afb dc:description ?naam.  # Retrieve the description
+  ?afb edm:isShownAt ?beeldbank.  # Retrieve the Beeldbank link
+  FILTER (regex(str(?beeldbank), "beeldbank" , "i"))  # Filter by Beeldbank link containing "beeldbank"
+}
+
+LIMIT 100

@@ -1,0 +1,39 @@
+#+ name: Query-19
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX wdt:<http://www.wikidata.org/prop/direct/>
+PREFIX wd:<http://www.wikidata.org/entity/>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo:<https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wgs84:<http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geo:<http://www.opengis.net/ont/geosparql#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema:<https://schema.org/>
+
+SELECT distinct * WHERE {
+
+  ?rijksmonument ceo:rijksmonumentnummer ?eventDescription.
+  ?rijksmonument ceo:heeftNaam/ceo:naam ?eventLabel.
+  ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftGebeurtenisNaam <https://data.cultureelerfgoed.nl/term/id/rn/a88b115d-ad65-4403-99aa-31210af8bd6d>.
+  ?gebeurtenis ceo:heeftDatering ?datering .
+  ?datering ceo:heeftBeginDatering ?beginDatering .
+  ?datering ceo:heeftEindDatering ?eindDatering .
+  ?eindDatering ceo:datum ?eventEnd .
+  ?beginDatering ceo:datum ?eventStart .
+  ?rijksmonument ceo:heeftGeometrie/geo:asWKT ?destination.
+
+#  SERVICE <https://query.wikidata.org/sparql>
+#{
+#  ?wikirm wdt:P1435 wd:Q916333.
+#  ?wikirm wdt:P18 ?eventMedia.
+#  ?wikirm wdt:P359 ?eventDescription.
+#  }
+   bind(?destination as ?eventLocation)  
+} 
+order by ?eventStart
+LIMIT 100

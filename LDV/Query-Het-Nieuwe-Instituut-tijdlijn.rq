@@ -1,0 +1,60 @@
+#+ name: Query-Het-Nieuwe-Instituut-tijdlijn
+#+ description: Een tijdlijn met alle objecten vervaardigd door Gerrit Rietveld in het collectie van Het Nieuwe Instituut.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rel: <http://purl.org/vocab/relationship/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX schema: <https://schema.org/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
+
+
+SELECT DISTINCT
+?object
+(MAX(?titel) AS ?eventLabel)
+(MAX(?collectie) AS ?colectieNaam)
+(MAX(?objectType) AS ?eventMediaAlt)
+(MAX(?id) AS ?collectieID) 
+(MAX(?startjaar) AS ?eventDate)
+(MAX(?beschrijving) AS ?eventDescription)
+(MAX(?media) AS ?eventMedia)
+(MAX(?media) AS ?eventMediaLink)
+(MAX(?type) AS ?eventType)
+
+WHERE{
+
+    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+
+     VALUES ?property { dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent}
+
+?object ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+
+OPTIONAL{?object schema:identifier ?id .}
+OPTIONAL{?object schema:description|schema:abstract ?beschrijving .}
+OPTIONAL{?object skos:prefLabel|rico:title|schema:name ?titel .}
+OPTIONAL{?object dct:contributor/schema:name|thesau:5234/schema:name ?contributor .}
+OPTIONAL{?object schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?objectType .}
+OPTIONAL{?object schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .}
+OPTIONAL{?object schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .}
+      OPTIONAL{?object (schema:associatedMedia/schema:image) ?media1 .}
+    OPTIONAL {?object (schema:url) ?media2 .}
+
+      BIND(COALESCE(?media1, ?media2) AS ?media)
+      
+      BIND(IF(REGEX(?titel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw", 
+          IF(REGEX(?titel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel", 
+            IF(REGEX(?titel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
+          
+          )) AS ?type)
+    }}}
+
+GROUP BY ?object ?eventType
+ 
+  
+
+

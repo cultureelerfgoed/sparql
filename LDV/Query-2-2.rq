@@ -1,0 +1,27 @@
+#+ name: Query-2-2
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/services/erfgeo/sparql
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+#PREFIX geo2: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX pleio:<https://pleiades.stoa.org/places/vocab#>
+
+SELECT distinct *
+WHERE {
+  GRAPH graph:pleiades {
+  ?place wgs84:lat ?lats ;
+         wgs84:long ?longs ;
+   dc:title ?naamL ;
+   dct:alternative ?naamN ;
+  geo:asWKT ?shape .
+  BIND(xsd:integer(?lats) AS ?lat)
+  BIND(xsd:integer(?longs) AS ?long)
+  FILTER (?lat >= 49.0 && ?lat <= 50.9 && ?long >= 5.0 && ?long <= 6.0)
+    BIND(concat("Romeinse naam: ",?naamL, ". Huidige naam ", ?naamN) as ?shapeLabel)
+    
+}
+}

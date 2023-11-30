@@ -1,0 +1,28 @@
+#+ name: 0b5c25da-150e-4fc6-b994-62f73b41243b
+#+ description: Of als tabel
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wdt:  <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+SELECT DISTINCT ?rijksmonument ?rijksmonumentnummer ?naam (sample(?geografische_locatie) AS ?geo) (sample(?afbeelding) AS ?plaatje) ?gebruikt_materiaal 
+{
+service <https://query.wikidata.org/sparql> 
+  {
+  ?rijksmonument wdt:P1435 wd:Q916333.
+  ?rijksmonument rdfs:label ?naam .
+  FILTER (lang(?naam) = "nl")
+  ?rijksmonument wdt:P31 wd:Q39715.
+  ?rijksmonument wdt:P359 ?rijksmonumentnummer .
+  ?rijksmonument wdt:P625 ?geografische_locatie. 
+  ?rijksmonument wdt:P18 ?afbeelding. 
+  OPTIONAL { ?rijksmonument wdt:P186/rdfs:label ?gebruikt_materiaal. 
+    FILTER (lang(?gebruikt_materiaal) = "nl")}
+}
+}
+ORDER BY ?rijksmonumentnummer
+
+LIMIT 100

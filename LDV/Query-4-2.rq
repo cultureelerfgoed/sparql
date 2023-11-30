@@ -1,0 +1,53 @@
+#+ name: Query-4-2
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+SELECT 
+?provincie ?result
+(count(distinct(?rijksmonument)) as ?aantalRM)
+(sum(?bevolkingsaantal) as ?bevolkingsAantal)
+(str(?aantalRM*10000/?bevolkingsAantal) as ?aantalMonumentenPer10000Inwoners)
+
+WHERE {
+  {
+  ?rijksmonument a ceo:Rijksmonument;
+  ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie2;
+  ceo:datumInschrijvingInMonumentenregister ?inschrijving
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  
+  BIND(year(xsd:dateTime(?inschrijving)) as ?jaarInschrijving)
+  
+
+  BIND (
+   IF(?jaarInschrijving > 1960 && ?jaarInschrijving <= 1973, "Piek 1", 
+    IF(?jaarInschrijving >= 1997 && ?jaarInschrijving <= 2002, "Piek 2", "Buiten pieken")) AS ?result)
+}
+  union
+  {
+  GRAPH graph:bevolkingsaantal { 
+    ?provincie2 ceox:heeftBevolking ?b.
+    ?b ceox:bevolkingsaantal ?bevolkingsaantal;
+     ceox:registratiejaar ?registratiejaar.
+     
+    
+    BIND (
+      IF(contains(?registratiejaar, "1965"), "Piek 1", 
+    IF(contains(?registratiejaar, "1997"), "Piek 2", "Buiten pieken")) AS ?result)
+    
+  }
+ 
+}
+      
+?provincie2 skos:prefLabel ?provincie
+  
+  Filter(?result in ("Piek 1", "Piek 2"))
+}
+#group by ?provincie ?result

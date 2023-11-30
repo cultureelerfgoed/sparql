@@ -1,0 +1,49 @@
+#+ name: Het-Nieuwe-Instituut-Collectie-Rotterdam
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+
+
+SELECT DISTINCT
+?rijksmonument
+(MAX(?titel) AS ?eventLabel)
+(MAX(?collectie) AS ?eventMediaAlt)
+(MAX(?locatie) AS ?Locatie)
+(MAX(?id) AS ?collectieID) #geen idee van wat
+(MAX(?creator) AS ?ontwerper)
+(MAX(?startjaar) AS ?eventDate)
+(MAX(?beschrijving) AS ?eventDescription)
+
+
+WHERE{
+
+    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+
+ 
+ ?rijksmonument rico:isAgentAssociatedWithAgent <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> ;
+                skos:prefLabel ?beschrijving .
+OPTIONAL{?rijksmonument rico:titel ?titel .}
+OPTIONAL{?rijksmonument rico:scopeAndContent ?collectie .}
+OPTIONAL{?rijksmonument rico:hasOrHadIdentifier/skos:prefLabel ?id .}
+
+OPTIONAL{?rijksmonument rico:title ?titel .}
+OPTIONAL{?rijksmonument rico:isOrWasHolderOf/schema:foundingLocation/rdfs:label ?locatie .}
+OPTIONAL{?rijksmonument rico:date/skos:prefLabel ?periode.}
+OPTIONAL{?rijksmonument rico:date/rico:hasBeginningDate ?startjaar.}
+OPTIONAL{?rijksmonument rico:date/rico:hasEndDate ?eindjaar.}
+
+?rijksmonument rico:isAgentAssociatedWithAgent ?urlCreator.
+OPTIONAL{?urlCreator schema:name ?creator .}
+FILTER (str(?urlCreator) = "https://collectiedata.hetnieuweinstituut.nl/id/people/12546")
+
+  }
+}
+} 
+GROUP BY ?rijksmonument

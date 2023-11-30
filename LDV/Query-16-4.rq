@@ -1,0 +1,30 @@
+#+ name: Query-16-4
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?rijksmonument ?standpunt_omschrijving ?omschrijving
+       (GROUP_CONCAT(DISTINCT ?functienaam_; separator="|") as ?functienaam)
+       (GROUP_CONCAT(DISTINCT ?stijl_; separator="|") as ?stijl)
+       (GROUP_CONCAT(DISTINCT ?type_; separator="|") as ?type) 
+WHERE {
+  GRAPH graph:instanties-rce {
+    { 
+    ?rijksmonument a ceo:Rijksmonument.
+    ?rijksmonument ceo:heeftOmschrijving ?standpunt_omschrijving.
+    ?standpunt_omschrijving ceo:omschrijving ?omschrijving .
+    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+   MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+ OPTIONAL { ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functienaam_.}
+ OPTIONAL {  ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl_.}
+  OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type_.}
+  FILTER(STRLEN(?omschrijving) >= 111 && STRLEN(?omschrijving) <=175)
+}
+  }
+}GROUP BY ?rijksmonument ?standpunt_omschrijving ?omschrijving
+order by ?rijksmonument
+#LIMIT 100

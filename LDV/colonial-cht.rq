@@ -1,0 +1,25 @@
+#+ name: colonial-cht
+#+ description: Query om mogelijke koppelingen tussen collectie metadata en de Cultuurhistorische Thesaurus te evalueren. Collectie en thesaurus zijn inwisselbaar zolang de strings 1-op-1 te koppelen zijn.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/ruben-schalk/colonial/services/europeana-colonial/sparql
+
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX schema: <https://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (count(distinct(?obj)) as ?terms) (count(distinct(?uri_cht)) as ?cht_matches) WHERE {
+ 
+  ?sub dct:medium|dct:subject|schema:artform ?obj .
+  
+  BIND(strlang(?obj, "nl") AS ?obj_nl)
+  
+SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql> {
+   
+    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+  
+      optional{   ?uri_cht skos:prefLabel|skos:altLabel|skos:hiddenLabel ?obj_nl . }
+    
+    }}
+} LIMIT 10

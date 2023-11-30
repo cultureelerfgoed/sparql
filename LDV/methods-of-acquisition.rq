@@ -1,0 +1,10 @@
+#+ name: methods-of-acquisition
+#+ description: Query displaying methods of acquisitions of colonial objects.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/colonialheritage/colonialobjects/services/colonialobjects/sparql
+
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+SELECT ?acquisitionMethod (count(?acquisitionMethod) as ?acquisitionMethodcount) WHERE {
+  ?object crm:P30i_custody_transferred_through/crm:P67i_is_referred_to_by/crm:P190_has_symbolic_content ?acquisitionMethod .
+} 
+GROUP BY ?acquisitionMethod
+ORDER BY DESC(?acquisitionMethodcount)

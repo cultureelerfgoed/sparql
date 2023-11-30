@@ -1,0 +1,49 @@
+#+ name: Query-16-1-1
+#+ description: Query waarbij in de gezocht wordt op functie "Winkels" en alles wat er onder hangt
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT * WHERE {
+ GRAPH graph:instanties-rce { 
+  ?rijksmonument a ceo:Rijksmonument .
+  ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape .}
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  }
+  GRAPH graph:bebouwdeomgeving {
+  {<https://data.cultureelerfgoed.nl/term/id/rn/05606ed7-8375-401d-965d-9300010fc6c1> skos:broader ?narrow.}
+  UNION{
+  <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646> skos:narrower+ ?narrow.}
+    ?narrow skos:prefLabel ?label.
+  }
+GRAPH graph:wikirm {
+{
+  ?wikirm ceo:rijksmonumentnummer ?rijksmonumentnummer. 
+  ?wikirm wdt:P18 ?afbeelding. 
+  }
+}
+    BIND(strdt(concat('<img src="',str(?imageLink),'" style="max-width: 400px;"'),rdf:HTML) as ?geoLabel)
+
+}
+#LIMIT 100
+#  bind(strdt(concat(
+#'<div style="position: relative;">',
+#  '<a href="https://data.netwerkdigitaalerfgoed.nl/Rijksmuseum/collection/browser?resource=',encode_for_uri(?item),'" target="_blank">',
+#    '<img src="',str(?imageLink),'" style="max-width: 400px;">',
+#  '</a>',
+#  '<h1 style="position: absolute; top: -11px; left: 0; width: 100%; line-height: 0px;">',
+#    '<span style="color: white; font: bold 12px/24px Helvetica, Sans-Serif; line-height: 1.5em; letter-spacing: -1.05px; background: rgb(0, 0, 0); background: rgba(0, 0, 0, 0.7); padding: 2px;">',str(?naamRCE),'</span>',
+#  '</h1>',
+#  '<h2 style="position: absolute; bottom: -11px; left: 0; width: 100%;">',
+#    '<span style="color: white; font: bold 15px/45px Helvetica, Sans-Serif; letter-spacing: -1.05px; background: rgb(0, 0, 0); background: rgba(0, 0, 0, 0.7); padding: 1px;">',str(?provider),'</span>',
+#  '</h2>',
+#'</div>'),rdf:HTML)  as ?geoLabel)
+

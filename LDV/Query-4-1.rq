@@ -1,0 +1,31 @@
+#+ name: Query-4-1
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?province ?period (count(distinct(?rijksmonument)) as ?number_nationalMonuments)
+
+WHERE {
+  GRAPH graph:instanties-rce{
+  ?rijksmonument a ceo:Rijksmonument;
+  ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov;
+  ceo:datumInschrijvingInMonumentenregister ?inschrijving}
+  
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  ?prov skos:prefLabel ?province
+  BIND(year(xsd:dateTime(?inschrijving)) as ?jaarInschrijving)
+  
+
+  BIND (
+   IF(?jaarInschrijving > 1960 && ?jaarInschrijving <= 1973, "Spike 1", 
+    IF(?jaarInschrijving >= 1997 && ?jaarInschrijving <= 2002, "Spike 2", "Outside spikes")) AS ?period)
+ 
+}
+
+
+order by desc(?aantalRM) ?period 

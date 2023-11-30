@@ -1,0 +1,39 @@
+#+ name: Zeeland-2
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo:<https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?rijksmonumentnummer
+       (GROUP_CONCAT(?naam; separator=', ') AS ?naam)
+       (GROUP_CONCAT(?adres; separator=', ') AS ?adres)
+       (COALESCE(replace(str(?postcode_x), "([0-9])([A-Z])", "$1 $2"), '') AS ?postcode)
+       ?gemeente ?redengevende_omschrijving
+       (GROUP_CONCAT(?functie; separator=', ') AS ?functie)
+    #   (REPLACE(?redengevende_omschrijving, "\n", "") AS ?redengevende_omschrijving_c)
+WHERE {
+  ?rm ceo:rijksmonumentnummer ?rijksmonumentnummer .
+  # juridische status: rijksmonument
+  ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+
+  # andere eigenschappen
+  ?rm ceo:datumInschrijvingInMonumentenregister ?datumInschrijvingInMonumentenregister .
+  optional {?rm ceo:heeftNaam/ceo:naam ?naam} .
+  optional {?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres} .
+  # postcode + splitsen postcode  4455TK naar 4455 TK
+  optional {?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode .}
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente/skos:prefLabel ?gemeente .
+  ?rm ceo:heeftOmschrijving/ceo:omschrijving ?redengevende_omschrijving.
+  ?rm ceo:heeftOmschrijving/ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+  #FILTER regex(?redengevende_omschrijving, "\n", "i")
+  
+  optional { ?rm ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie . }
+  optional {?rm ceo:heeftGeometrie/ceo:asWKT-RD ?geometrie} .
+
+  # selectie provincie Zeeland
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie <http://standaarden.overheid.nl/owms/terms/Zeeland_(provincie)>
+}
+GROUP BY ?rijksmonumentnummer ?gemeente ?redengevende_omschrijving ?postcode_x
+ORDER BY ?rijksmonumentnummer

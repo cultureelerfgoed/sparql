@@ -1,0 +1,11 @@
+#+ name: 7b59259d-4c39-48b8-b5f0-646f593ec418
+#+ description: Query om bij een CHO objectnummer het rijksmonumentnummer te vinden. Maar ook om bij en rijksmonumentnummer een CHO objectnummer te zoeken.
+#- Een zogenaamd "Fransje".
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT * WHERE {
+  ?rijksmonument a ceo:Rijksmonument ; ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ; ceo:rijksmonumentnummer ?rijksmonumentnummer .
+} LIMIT 10

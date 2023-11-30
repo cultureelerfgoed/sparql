@@ -1,0 +1,52 @@
+#+ name: Query-4-4
+#+ description: The query is designed to retrieve information about a hierarchical structure of concepts using the SKOS vocabulary. It selects the child label, parent label, and scope note (if available) for each concept in the hierarchy.
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
+#+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT (?childLabel AS ?node) (?parentLabel AS ?parent) ?scopeNote {
+  # Retrieve the preferred label of the root concept
+  ?topConcept skos:prefLabel ?root.
+
+  # Retrieve concepts that have a transitive "broader" relationship with the root concept
+  ?concept skos:broader+ ?topConcept.
+
+  # Retrieve the preferred label of each child concept
+  ?concept skos:prefLabel ?childLabel.
+
+  # Retrieve the scope note of each child concept (optional)
+  OPTIONAL { ?concept skos:scopeNote ?scopeNote }
+
+  # Retrieve the parent concept and its label for each child concept (optional)
+  OPTIONAL {
+    ?parentConcept skos:narrower ?concept.
+    ?parentConcept skos:prefLabel ?parentLabel.
+  }
+
+  # Filter the results
+  FILTER(LANG(?parentLabel) = "nl" || !BOUND(?parentConcept))  # Filter based on parent label and existence of parent concept
+  FILTER(LANG(?root) = "nl")  # Filter based on root label language
+  FILTER(LANG(?childLabel) = "nl")  # Filter based on child label language
+  # Size and Color values can be assigned based on your requirements
+  # Modify the values below accordingly
+  #BIND("" as ?size)  # Example: Assigning a fixed size of 1 to all leaf nodes
+  #BIND("" as ?color)  # Example: Assigning a fixed color value of 1.0 to all leaf nodes
+  
+    VALUES (?root ?topConcept) {
+    ("abstracte begrippen" <https://data.cultureelerfgoed.nl/term/id/cht/7433e248-ff09-429d-9d57-a39737e413a2>)
+    ("activiteiten" <https://data.cultureelerfgoed.nl/term/id/cht/26248efb-16f3-4fc2-bd0b-244626594eb9>)
+    ("actoren en organismen" <https://data.cultureelerfgoed.nl/term/id/cht/e64acd7a-b323-414a-a9bc-8def7616fe8b>)
+    ("fysieke kenmerken" <https://data.cultureelerfgoed.nl/term/id/cht/24656072-e4a3-424b-bcde-b9ab4dbb7593>)
+    ("materialen" <https://data.cultureelerfgoed.nl/term/id/cht/aa872ce6-a74c-4f81-96ec-6ee0e717f92a>)
+    ("objecten" <https://data.cultureelerfgoed.nl/term/id/cht/bece25a6-eb64-46e8-85a8-2a7991f02a2c>)
+    ("stijlen en perioden" <https://data.cultureelerfgoed.nl/term/id/cht/63cca950-f545-467a-9d70-db3a2b21bba3>)
+  }  
+}
+
+LIMIT 5000  # Limit the number of results to 5000
+
+  
+
+

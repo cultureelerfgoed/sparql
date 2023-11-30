@@ -1,0 +1,170 @@
+#+ name: api
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix api: <https://linkeddata.cultureelerfgoed.nl/def/api#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+construct {
+  ?bagRelatie
+    api:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+  ?basisregistratieRelatie
+    api:bagRelaties ?bagRelatie;
+    api:brkRelaties ?brkRelatie.
+  ?brkRelatie
+    api:gemeentecode ?gemeentecode;
+    api:perceelnummer ?perceelnummer;
+    api:sectie ?sectie.
+  ?functie
+    api:functie ?functieNaam;
+    api:status ?functieStatus.
+  ?geometrie
+    api:herkomst ?herkomst;
+    api:kwaliteit ?kwaliteit;
+    api:status ?geometrieStatus;
+    api:waarde ?punt.
+  _:hoofdobjectVanComplex
+    api:href ?hoofdobjectVanComplexUri.
+  _:link
+    api:hoofdobjectVanComplex _:hoofdobjectVanComplex;
+    api:onderdeelVanComplex _:onderdeelVanComplex;
+    api:self _:self.
+  _:onderdeelVanComplex
+    api:href ?onderdeelVanComplexUri.
+  ?locatieAanduiding123
+    api:adressen
+      ?locatieAanduiding1,
+      ?locatieAanduiding2,
+      ?locatieAanduiding3.
+  ?locatieAanduiding1
+    api:huisnummer ?huisnummer;
+    api:openbareRuimte ?openbareRuimte;
+    api:postcode ?postcode;
+    api:woonplaatsnaam ?woonplaatsnaam.
+  ?locatieAanduiding2
+    api:gemeente ?gemeentenaam;
+    api:gemeentecode ?gemeentecode;
+    api:gemeenteOwms ?gemeenteOwms.
+  ?locatieAanduiding3
+    api:provincie ?provincienaam;
+    api:provinciecode ?provinciecode;
+    api:provincieOwms ?provincieOwms.
+  ?locatieAanduiding4
+    api:locatienaam ?locatieAanduidingNaam;
+    api:nummer ?locatieAanduidingNummer;
+    api:status ?locatieAanduidingStatus.
+  ?punt
+    api:coordinates
+      ?latitude,
+      ?longitude;
+    api:type 'Point'.
+  ?rijksmonument
+    a api:Rijksmonument;
+    api:_links _:link;
+    api:basisregistratieRelaties ?basisregistratieRelatie;
+    api:bebouwdeKomType ?bebouwdeKomType;
+    api:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
+    api:functies ?functie;
+    api:geometrie ?geometrie;
+    api:juridischeStatus ?juridischeStatusLabel;
+    api:locatieaanduidingen
+      ?locatieAanduiding123,
+      ?locatieAanduiding4;
+    api:monumentAard ?monumentAard;
+    api:namen ?naam;
+    api:omschrijvingen ?omschrijving;
+    api:rijksmonumentnummer ?rijksmonumentnummer;
+    api:types ?type;
+    api:stijlEnCulturen ?stijlencultuur.
+  _:self
+    api:href ?selfUri.
+}
+where {
+  ?rijksmonument
+    a ceo:Rijksmonument;
+    ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
+    ceo:heeftJuridischeStatus/skos:prefLabel ?juridischeStatusLabel;
+    ceo:heeftMonumentAard/skos:prefLabel ?monumentAard;
+    ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  optional {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
+    bind(iri(concat(str(?basisregistratieRelatie),'-locatieAanduiding123')) as ?locatieAanduiding123)
+    optional {
+      ?basisregistratieRelatie ceo:heeftBAGRelatie ?bagRelatie.
+      ?bagRelatie
+        ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie;
+        ceo:woonplaatsnaam ?woonplaatsnaam.
+      optional { ?bagRelatie ceo:huisnummer ?huisnummer. }
+      optional { ?bagRelatie ceo:openbareRuimte ?openbareRuimte. }
+      optional { ?bagRelatie ceo:postcode ?postcode. }
+      bind(iri(concat(str(?bagRelatie),'-locatieAanduiding1')) as ?locatieAanduiding1)
+    }
+    optional {
+      ?basisregistratieRelatie ceo:heeftBRKRelatie ?brkRelatie.
+      ?brkRelatie ceo:perceelnummer ?perceelnummer.
+      optional { ?basisregistratieRelatie ceo:heeftGemeente ?gemeenteOwms. }
+      optional {
+        ?basisregistratieRelatie ceo:heeftProvincie ?provincieOwms.
+        ?provincieOwms skos:prefLabel ?provincienaam0.
+        bind(str(?provincienaam0) as ?provincienaam)
+      }
+      optional { ?brkRelatie ceo:gemeentecode ?gemeentecode. }
+      optional { ?brkRelatie ceo:gemeentenaam ?gemeentenaam. }
+      optional { ?brkRelatie ceo:provinciecode ?provinciecode. }
+      optional { ?brkRelatie ceo:sectie ?sectie. }
+      bind(iri(concat(str(?brkRelatie),'-locatieAanduiding2')) as ?locatieAanduiding2)
+      bind(iri(concat(str(?brkRelatie),'-locatieAanduiding3')) as ?locatieAanduiding3)
+    }
+  }
+  optional { ?rijksmonument ceo:heeftBebouwdeKomType/skos:prefLabel ?bebouwdeKomType. }
+  optional { ?rijksmonument ceo:heeftBouwkundigeKwaliteit ?bouwkundigeKwaliteit. }#
+  optional {
+    ?rijksmonument ceo:heeftGeometrie ?geometrie.
+    ?geometrie geo:asWKT ?wkt.
+    bind(iri(concat(str(?geometrie),'-punt')) as ?punt)
+    bind(strbefore(strafter(str(?wkt), 'POINT('), ' ') as ?latitude1)
+    bind(strbefore(strafter(str(?wkt), ' '), ')') as ?longitude1)
+    bind(strbefore(strafter(str(?wkt), 'POLYGON(('), ' ') as ?latitude2)
+    bind(strbefore(strafter(str(?wkt), ' '), ',') as ?longitude2)
+    bind(if(?latitude1!='' && ?longitude1!='', ?longitude1, ?longitude2) as ?longitude)
+    bind(if(?latitude1!='', ?latitude1, ?latitude2) as ?latitude)
+    optional { ?geometrie ceo:heeftGeometrieKwaliteit/skos:prefLabel ?kwaliteit. }
+    optional { ?geometrie ceo:heeftGeometrieStatus/skos:prefLabel ?geometrieStatus. }
+    optional { ?geometrie ceo:heeftHerkomst/skos:prefLabel ?herkomst. }
+  }
+  optional {
+    ?rijksmonument ceo:heeftHuidigeFunctie ?functie.
+    ?functie ceo:heeftFunctieNaam/skos:prefLabel ?functieNaam.
+    bind('huidige functie' as ?functieStatus)
+  }
+  optional {
+    ?rijksmonument ceo:heeftLocatieAanduiding ?locatieAanduiding4.
+    ?locatieAanduiding4 ceo:locatieAanduidingnummer ?locatieAanduidingNummer.
+    optional { ?locatieAanduiding4 ceo:heeftLocatieAanduidingStatus/skos:prefLabel ?locatieAanduidingStatus. }
+    optional { ?locatieAanduiding4 ceo:locatienaam ?locatieAanduidingNaam. }
+  }
+  optional { ?rijksmonument ceo:heeftMateriaal ?materiaal. }#
+  optional { ?rijksmonument ceo:heeftNaam/ceo:naam ?naam. }#
+  optional { ?rijksmonument ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving. }
+  optional {
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
+    ?functie ceo:heeftFunctieNaam/skos:prefLabel ?functieNaam.
+    bind('oorspronkelijke functie' as ?functieStatus)
+  }
+  optional { ?rijksmonument ceo:heeftStijlEnCultuur ?stijlencultuur. }#
+  bind('https://linkeddata.cultureelerfgoed.nl/api/v1/' as ?apiPrefix)
+
+  bind(iri(concat(?apiPrefix,'complexen/')) as ?hoofdobjectVanComplex)
+  bind(strdt(str(?hoofdobjectVanComplex),xsd:anyURI) as ?hoofdobjectVanComplexUri)
+
+  bind(iri(concat(str(?apiPrefix),'complexen?rijksmonument=',encode_for_uri(str(?cultuurhistorischObjectnummer)))) as ?onderdeelVanComplex)
+  bind(strdt(str(?onderdeelVanComplex),xsd:anyURI) as ?onderdeelVanComplexUri)
+
+  bind(iri(concat(?apiPrefix,'rijksmonumenten/',?cultuurhistorischObjectnummer)) as ?self)
+  bind(strdt(str(?self),xsd:anyURI) as ?selfUri)
+
+  bind(iri(concat(str(ceo:),'link_',?cultuurhistorischObjectnummer)) as ?link)
+}

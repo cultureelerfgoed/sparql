@@ -1,0 +1,18 @@
+#+ name: location-origin-content
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/colonialheritage/colonialobjects/services/colonialobjects/sparql
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sdo: <https://schema.org/>
+SELECT ?location (count(?locationCreated) as ?created) (count(?contentLocation) as ?content) WHERE {
+  {
+    [] sdo:locationCreated/sdo:name ?location 
+    BIND (?location AS ?locationCreated) 
+  }
+  UNION
+  {
+    [] sdo:contentLocation/sdo:name ?location .
+    BIND (?location AS ?contentLocation) 
+  }
+} 
+GROUP BY ?location
+ORDER BY DESC(?created)

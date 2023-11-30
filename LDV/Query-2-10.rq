@@ -1,0 +1,26 @@
+#+ name: Query-2-10
+#+ service: https://api.linkeddata.cultureelerfgoed.nl/datasets/kamarac/Verkeersbordenwegen/services/Verkeersbordenwegen/sparql
+
+PREFIX vbw: <https://data.verkeersborden-wegen.nl/def/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?geometry ?name ?hasId ?bordTypeLabel ?geometryLabel
+WHERE {
+  ?verkeersbord rdf:type vbw:Verkeersbord.
+  ?verkeersbord vbw:HasID ?hasId.
+  ?verkeersbord vbw:HasBordType ?bordType.
+  ?verkeersbord vbw:HeeftWegNaam ?name.
+  ?verkeersbord geo:hasGeometry ?geometryResource.
+  ?geometryResource geo:asWKT ?geometry.
+
+  # Extract the label from the end of the URI
+  BIND(STRAFTER(str(?bordType), "BordType_") AS ?bordTypeLabel)
+  
+  # Create the shapeLabel based on the available data
+  BIND(strdt(CONCAT('<h3>', COALESCE(?name, 'Geen naam'), '</h3>', '<dl>',
+    '<dt>Bord Type</dt><dd>', ?bordTypeLabel, '</dd>',
+      '</dl>'),rdf:HTML) AS ?geometryLabel)
+ 
+}
