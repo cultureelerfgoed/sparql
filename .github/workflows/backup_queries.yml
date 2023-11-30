@@ -1,4 +1,4 @@
-name: Update queries
+name: Daily Python Script Execution
 
 on:
   schedule:
@@ -23,13 +23,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
+    - name: Set Git user
+      run: |
+        git config --global user.email "r.schalk@cultureelerfgoed.nl"
+        git config --global user.name "rschalkrce"
+
     - name: Execute Python script
       run: |
-        python retrieve_queries.py
+        python your_script.py
         changes=$(git status --porcelain)
         if [ -n "$changes" ]; then
           git add .
-          git commit -m "Automated update of queries"
+          git commit -m "Automated update"
           git push
         else
           echo "No changes to commit."
