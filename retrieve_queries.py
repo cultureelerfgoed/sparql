@@ -58,8 +58,12 @@ def extract_and_save_queries(url, github_workspace):
                 query_file.write(query_content)
 
 if __name__ == "__main__":
-    api_url = "https://api.linkeddata.cultureelerfgoed.nl/queries/"
-   
-   # Use github.workspace as the base for the output folder
-    github_workspace = os.getenv("GITHUB_WORKSPACE")
-    extract_and_save_queries(url, github_workspace)
+    start_url = 'https://api.linkeddata.cultureelerfgoed.nl/queries/'
+        
+    # Step 1: Get all "next" URLs
+    all_urls = get_next_urls(start_url)
+
+    # Step 2: Iterate over each URL and extract/save queries
+    for url in all_urls:
+        github_workspace = os.getenv("GITHUB_WORKSPACE")
+        extract_and_save_queries(url, github_workspace)
