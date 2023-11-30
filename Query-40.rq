@@ -1,9 +1,0 @@
-PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT ?materiaal WHERE {
-  <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri . 
-  ?artefactUri skos:prefLabel ?artefact ; rnce:hasMaterialAbr/skos:prefLabel ?material . filter (lang(?material) = "nl") . bind(str(?material) as ?materiaal)
-
-}

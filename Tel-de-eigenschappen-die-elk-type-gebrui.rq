@@ -1,6 +1,0 @@
-SELECT DISTINCT ?type (COUNT(DISTINCT ?p) AS ?c)
-WHERE {
-   ?s a ?type . 
-   ?s ?p ?o . 
-}
-GROUP BY ?type

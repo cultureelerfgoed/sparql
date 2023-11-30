@@ -1,9 +1,0 @@
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT distinct * WHERE {
-  ?s a ceo:Rijksmonument.
-  ?s ceo:heeftOmschrijving/ceo:omschrijving ?oms .
-  FILTER (strlen(?oms) >= 1500 && STRLEN(?oms) <= 2000) 
-  
-} LIMIT 10

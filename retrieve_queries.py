@@ -47,7 +47,7 @@ def extract_and_save_queries(url, github_workspace):
             sanitized_name = sanitize_filename(name)
 
             # Use github_workspace as the base for the output folder
-            output_folder = os.path.join(github_workspace)
+            output_folder = os.path.join(github_workspace, "LDV")
             filename = os.path.join(output_folder, f"{sanitized_name}.rq")
             with open(filename, 'w') as query_file:
                 # ... (unchanged)
