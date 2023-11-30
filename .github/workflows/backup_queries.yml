@@ -34,7 +34,7 @@ jobs:
         changes=$(git status --porcelain)
         if [ -n "$changes" ]; then
           git add .
-          git commit -m "Automated update"
+          git commit -m "Automated backup of SPARQL queries"
           git push
         else
           echo "No changes to commit."
