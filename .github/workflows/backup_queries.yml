@@ -23,7 +23,7 @@ jobs:
         pip install requests
 
     - name: Run update script
-      run: python3 "${{ github.workspace }}/retrieve-queries.py"
+      run: python3 "${{ github.workspace }}/retrieve_queries.py"
       env:
         API_URL: https://api.linkeddata.cultureelerfgoed.nl/queries/
         OUTPUT_FOLDER: "${{ github.workspace }}/LDV"
