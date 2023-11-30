@@ -1,5 +1,6 @@
-#+ name: Query-7
-PREFIX schema: <http://schema.org/>
+#+ name: verdelinggeslacht
+#+ description: Query gemaakt aan de hand van fake data voor presentatie Duurzaam
+PREFIX schema: <https://schema.org/>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

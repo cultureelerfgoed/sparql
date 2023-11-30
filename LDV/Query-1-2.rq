@@ -1,0 +1,11 @@
+#+ name: Query-1-2
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# We berekenen het aantal instanties per klasse, waarbij voor de leesbaarheid de duizentallen met een komma aangeven.
+select ?klasse (replace(count(distinct ?instantie),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0,') as ?aantalInstanties) {
+  ?instantie a/rdfs:subClassOf* ?klasse.
+  # Laat alleen klassen zien die in de CEO namespace zitten.
+  filter(strstarts(str(?klasse),str(ceo:)))
+}
+group by ?klasse
+order by ?klasse
