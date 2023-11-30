@@ -1,0 +1,5 @@
+# zoek naar depricated termen
+SELECT DISTINCT * WHERE {
+   GRAPH <https://data.cultureelerfgoed.nl/term/id/cht2/thesaurus/deprecated> {
+     ?s ?p ?o}
+ } LIMIT 100
