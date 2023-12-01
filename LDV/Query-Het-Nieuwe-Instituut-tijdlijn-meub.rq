@@ -1,5 +1,4 @@
-#+ name: Query-Het-Nieuwe-Instituut-tijdlijn
-#+ description: Een tijdlijn met alle gebouwen (schetsen) vervaardigd door Gerrit Rietveld in het collectie van Het Nieuwe Instituut.
+#+ name: Query-Het-Nieuwe-Instituut-tijdlijn-meub
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
@@ -52,7 +51,7 @@ OPTIONAL{?object schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePub
             IF(REGEX(?titel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
           
           )) AS ?type)
-      FILTER(?type = "gebouw")
+      FILTER(?type = "meubel")
     }}}
 
 GROUP BY ?object ?eventType ?eventLabel

@@ -53,7 +53,7 @@ OPTIONAL{?object schema:dateCreated/cidoc:P82a_begin_of_the_begin ?startjaar .}
     }}}
 
 GROUP BY ?object ?eventType
-LIMIT 10
+LIMIT 5
 
   
 

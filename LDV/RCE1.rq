@@ -37,3 +37,4 @@ OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?geoLocatie.} #MULTIPOLYGO
 
 
 }
+LIMIT 5

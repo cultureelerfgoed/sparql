@@ -46,9 +46,9 @@ OPTIONAL{?object schema:dateCreated/cidoc:P82a_begin_of_the_begin ?startjaar .}
 
       BIND(COALESCE(?media1, ?media2) AS ?media)
       
-      BIND(IF(REGEX(?titel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw", 
-          IF(REGEX(?titel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel", 
-            IF(REGEX(?titel, "(interieur|zaal|inrichting)", "i"), "interieur", 
+      BIND(IF(REGEX(?titel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouwen", 
+          IF(REGEX(?titel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubels", 
+            IF(REGEX(?titel, "(interieur|zaal|inrichting)", "i"), "interieurs", 
             IF(REGEX(?titel, "(schetsen)", "i"), "overig", ""))
           
           )) AS ?type)
