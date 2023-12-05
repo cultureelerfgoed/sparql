@@ -1,8 +1,11 @@
 #+ name: rest-api-rijksmonumenten
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
+PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
 construct {
   $this ?p1 ?o1.
   ?o1 ?p2 ?o2.
@@ -17,7 +20,14 @@ construct {
       select distinct $this {
         $this
           a ceo:Rijksmonument;
-          ceo:rijksmonumentnummer ?rijksmonumentnummer.
+          ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+          ceo:heeftMonumentAard/skos:prefLabel ?monumentaard ;
+          ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?oorspronkelijkeFunctie ;
+          ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+          ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode ;
+          ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?volledigAdres ;
+          ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:openbareRuimte ?straat ;
+          ceo:heeftJuridischeStatus/skos:prefLabel ?status.
 
         bind(?woonplaatsnaam as ?woonplaatsnaam1)
         optional { 
@@ -31,6 +41,12 @@ construct {
         }
         filter(!bound(?gemeentecode1) || ?gemeentecode1 = ?gemeentecode2)    
         
+        bind(?gemeentenaam as ?gemeentenaam1)
+        optional { 
+          $this ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeentenaam2. 
+        }
+        filter(!bound(?gemeentenaam1) || ?gemeentenaam1 = ?gemeentenaam2)
+ 
         bind(?provinciecode as ?provinciecode1)
         optional {
           $this ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:provinciecode ?provinciecode2.

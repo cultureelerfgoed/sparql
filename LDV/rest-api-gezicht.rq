@@ -3,6 +3,7 @@
 #- This SPARQL query is designed to retrieve information related to "gezichten," specifically stads- en dorpsgezichten (urban and village views) from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
 #- - gezichtsnummer, ex.: 1439
 #- - cultuurhistorischObjectnummer, ex.: 10134173
+#- - gezichtsstatus, ex.: rijksbeschermd stads- of dorpsgezicht
 #- - naam, ex.: Kamerik
 #- - registratiedatum, ex: 1966-08-04
 #- </p>
@@ -10,6 +11,7 @@
 #- Version: 0.5
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
@@ -30,6 +32,7 @@ construct {
         $this
           a ceo:Gezicht ;
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+          ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus ;
           ceo:registratiedatum ?registratiedatum ;
           ceo:heeftNaam/ceo:naam ?heeftNaam ;
           ceo:gezichtsnummer ?gezichtsnummer.
