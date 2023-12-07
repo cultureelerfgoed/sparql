@@ -1,0 +1,21 @@
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX ied:<https://data.indischherinneringscentrum.nl/schema/>
+
+#DELETE {
+#  GRAPH <https://data.indischherinneringscentrum.nl/ied/thesaurus> {
+#    ?concept ied:imageURL ?imageUrl .
+#  }
+#}
+CONSTRUCT {
+    ?concept ied:imageURL ?imageUrls .
+
+#  INSERT {
+#  GRAPH <https://data.indischherinneringscentrum.nl/ied/thesaurus> {
+#    ?concept ied:imageURL ?imageUrls .
+#}
+}
+WHERE {
+   ?concept ied:imageURL ?imageUrl .
+              BIND(str(?imageUrl) AS ?imageUrls)
+
+  }
