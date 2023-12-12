@@ -1,5 +1,5 @@
 #+ name: Query-28
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/colonialheritage/colonialobjects/services/colonialobjects/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/colonialobjects/services/colonialobjects/sparql
 
 PREFIX schema: <https://schema.org/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

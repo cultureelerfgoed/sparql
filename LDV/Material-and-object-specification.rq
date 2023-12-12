@@ -1,5 +1,5 @@
 #+ name: Material-and-object-specification
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/colonialheritage/colonialobjects/services/colonialobjects/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/colonialobjects/services/colonialobjects/sparql
 
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX sdo: <https://schema.org/>

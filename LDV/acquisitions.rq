@@ -1,5 +1,5 @@
 #+ name: acquisitions
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/colonialheritage/colonialobjects/services/colonialobjects/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/colonialobjects/services/colonialobjects/sparql
 
 PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
