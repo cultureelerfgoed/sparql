@@ -26,7 +26,7 @@ construct {
 } where {
   graph graph:instanties-rce {
     {
-      select distinct $this {
+      select distinct $this ?werelderfgoednummer ?url {
         $this
           a ceo:Werelderfgoed ;
           ceo:heeftWerelderfgoedstatus/skos:prefLabel ?werelderfgoedstatus ;
@@ -34,7 +34,7 @@ construct {
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
           ceo:registratiedatum ?registratiedatum ;
           ceo:heeftNaam/ceo:naam ?heeftNaam .
-          
+      bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
       }
       limit 5
       # paginate

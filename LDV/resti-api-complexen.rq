@@ -13,7 +13,7 @@ construct {
   ?o3 ?p4 ?o4.
   ?o4 ?p5 ?o5.
   ?o5 ?p6 ?o6.
-  ?o6 ?p7 ?o7.
+  ?o6 ?p7 ?o78. 
 } where {
   graph graph:instanties-rce {
     {
