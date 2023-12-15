@@ -20,7 +20,9 @@ construct {
       select distinct $this {
         $this
           a ceo:Complex;
+          ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
           ceo:complexnummer ?complexnummer.
+        
         bind(?rijksmonumenten as ?rijksmonumenten1)
         optional {
           $this ceo:heeftHoofdobject ?rijksmonumenten2.
