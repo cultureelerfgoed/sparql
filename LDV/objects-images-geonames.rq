@@ -7,6 +7,7 @@ PREFIX sdo: <https://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
 SELECT DISTINCT ?object ?image (SAMPLE(?coordinates_r) AS ?coordinates) ?coordinatesLabel WHERE {
   ?object foaf:depiction ?image;
           sdo:locationCreated/skos:closeMatch ?geoname.
@@ -17,6 +18,6 @@ SELECT DISTINCT ?object ?image (SAMPLE(?coordinates_r) AS ?coordinates) ?coordin
         FILTER (datatype(?lat) = xsd:float) 
         FILTER (datatype(?long) = xsd:float) 
       }
-  bind(concat('POINT(', ?long ,' ', ?lat, ')') as ?coordinates_r) 
+  bind(bif:st_point(?long , ?lat) as ?coordinates_r) 
   bind('<a href="{{object}}"><img src="{{image}}" width=100></a>'^^rdf:HTML as ?coordinatesLabel)
 }
