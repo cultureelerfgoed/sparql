@@ -23,14 +23,14 @@ SELECT * WHERE {
  <https://data.cultureelerfgoed.nl/term/id/rn/05606ed7-8375-401d-965d-9300010fc6c1> skos:narrower+ ?narrow.}
     ?narrow skos:prefLabel ?label.
   }
- 
+GRAPH graph:instanties-rce {
    ?rijksmonument a ceo:Rijksmonument .
   ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
   OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape .}
   ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.
    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:pandIdentificatie ?id .
   MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
-
+}
 SERVICE <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql>
   {
   ?bag a bag:Pand . 

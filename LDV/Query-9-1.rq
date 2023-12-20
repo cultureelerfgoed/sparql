@@ -9,6 +9,7 @@ PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
+select ?jaarInschrijving (sum(?aantal) as ?inschrijvingen) {
 SELECT ?jaarInschrijving (COUNT(distinct(?rijksmonument)) AS ?aantal)  WHERE {
   ?rijksmonument a ceo:Rijksmonument.
   ?rijksmonument ceo:heeftJuridischeStatus/skos:prefLabel ?grm.
@@ -36,5 +37,7 @@ SELECT ?jaarInschrijving (COUNT(distinct(?rijksmonument)) AS ?aantal)  WHERE {
   FILTER (CONTAINS(?gebeurtenisNaam, "vervaardiging"))
   MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
   BIND(concat(?bovenuri, " - ", ?eindBouwjaars, " Rmn: ", ?rmn) AS ?geometrieLabel)
-}
+} 
+  
 LIMIT 100
+  } order by ?jaarInschrijving

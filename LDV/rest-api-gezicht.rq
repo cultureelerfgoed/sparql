@@ -18,6 +18,7 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 # Construct a new RDF graph with specific patterns
 construct {
   $this ?p1 ?o1.
+  $this ceo:gezichtsnummer ?url.
   ?o1 ?p2 ?o2.
   ?o2 ?p3 ?o3.
   ?o3 ?p4 ?o4.
@@ -42,6 +43,9 @@ construct {
     }
 # Extract additional information about the selected instances
     $this ?p1 ?o1.
+        filter(?p1 != ceo:gezichtsnummer)
+    $this ceo:gezichtsnummer ?gezichtsnummer .
+    bind(concat('https://archisarchief.cultureelerfgoed.nl/Beschermde_Gezichten/BG',str(?gezichtsnummer)) as ?url)
     optional {
 # Filter out specific properties from the data
       filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
