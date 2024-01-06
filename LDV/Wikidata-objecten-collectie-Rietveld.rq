@@ -18,7 +18,7 @@ PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 
-SELECT DISTINCT ?item ?eventLabel (MIN(?image) AS ?eventMedia) (MIN(?jaar) AS ?eventDate) 
+SELECT DISTINCT (?item AS ?voorwerpURI) ?eventLabel (MIN(?image) AS ?eventMedia) (MIN(?jaar) AS ?eventDate) 
  WHERE {
    SERVICE <https://query.wikidata.org/sparql> {
    ?item p:P170|p:P287 ?statement0.
