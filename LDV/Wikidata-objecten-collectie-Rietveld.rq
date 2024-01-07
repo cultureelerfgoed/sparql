@@ -18,7 +18,8 @@ PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 
-SELECT DISTINCT (?item AS ?voorwerpURI) ?eventLabel (MIN(?image) AS ?eventMedia) (MIN(?jaar) AS ?eventDate) 
+SELECT DISTINCT ?bron (?item AS ?voorwerpURI) ?id ?ontwerperNaam ?eventLabel (MIN(?image) AS ?eventMedia) ?voorwerpType (MIN(?jaar) AS ?eventDate) (?beschrijving AS ?eventDescription)
+(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad)
  WHERE {
    SERVICE <https://query.wikidata.org/sparql> {
    ?item p:P170|p:P287 ?statement0.
@@ -30,7 +31,8 @@ SELECT DISTINCT (?item AS ?voorwerpURI) ?eventLabel (MIN(?image) AS ?eventMedia)
 # filter alleen image format dat werkt met de tijdlijn visualisatie.
    OPTIONAL { ?item wdt:P18 ?image . FILTER(REGEX(str(?image), "(?i)\\.(jpg|gif|jpeg|png)", "i"))}
    OPTIONAL{?item (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?periode .
-   BIND(YEAR(?periode) AS ?jaar)}
+   BIND(STR(YEAR(?periode)) AS ?jaar)}
+   VALUES (?bron) {("Wikidata")}
   }
 }
-   GROUP BY ?item ?eventLabel ?eventMedia ?eventDate
+   GROUP BY ?item ?eventLabel ?eventMedia ?eventDate ?bron ?id ?ontwerperNaam ?voorwerpType ?beschrijving
