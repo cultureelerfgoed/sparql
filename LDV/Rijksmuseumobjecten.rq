@@ -80,13 +80,24 @@ SELECT * WHERE {
 #------------------------------Dataset 2 Wikidata-------------------------------------------
 #------------------------------------------------------------------------------------------- 
 {
-SELECT DISTINCT ?bron (?item AS ?voorwerpURI) ?id ?ontwerperNaam ?eventLabel (MIN(?image) AS ?eventMedia) ?voorwerpType (MIN(?jaar) AS ?eventDate) (?beschrijving AS ?eventDescription)
-(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad)
+SELECT DISTINCT ?bron (?item AS ?voorwerpURI) ?id ?ontwerperNaam 
+  ?eventLabel (MIN(?image) AS ?eventMedia) ?voorwerpType (MIN(?jaar) AS ?eventDate) 
+  (?beschrijving AS ?eventDescription)
+
+(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad) 
  WHERE {
    SERVICE <https://query.wikidata.org/sparql> {
    ?item p:P170|p:P287 ?statement0.
    ?statement0 (ps:P170|ps:P287/(wdt:170*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld 
+
    
+# ------------------------------------------eventDescription---------------------------------------
+
+     OPTIONAL {
+    ?item (p:31|schema:description|rdfs:comment|schema:comment) ?beschrijving.
+    FILTER(LANGMATCHES(LANG(?beschrijving), "nl"))
+  }
+
 # ------------------------------------------eventLabel---------------------------------------
    OPTIONAL { ?item (p:31|rdfs:label) ?eventLabel . FILTER(LANG(?eventLabel) = "nl")} 
 #----------------------------------------------image-----------------------------------------   
