@@ -1,4 +1,4 @@
-#+ name: RCE1--WD1-tijdreeks
+#+ name: pivot-gebouwen-Rietveld
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -23,30 +23,23 @@ PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 
 SELECT DISTINCT 
-?widget ?bron ?gebouw (COALESCE(?rijksmonumentnummer, "nvt") AS ?rijksmonumentnummer)
-(COALESCE(?eventStart, "onbekend") AS ?eventStart) ?eventLabel (SAMPLE(?afbeelding) AS ?eventMedia) ?eventMediaCaption 
+?bron
+(COALESCE(?rijksmonumentnummer1, ?rijksmonumentnummer2) AS ?rijksmonumentnummer) 
+(COALESCE(?eventStart2, ?eventStart1, ?eventStart3) AS ?eventStart) 
+(COALESCE(?eventLabel2, ?eventLabel1, ?eventLabel2, "") AS ?eventLabel)
+(COALESCE(?afbeelding2, ?afbeelding3, ?afbeelding1)  AS ?eventMedia) 
+
   
    
   
 {
  
-   bind('''
-<h2>{{eventLabel}}</h2>
-<img src="{{eventMedia}}">
-<ul>
-  <li>Beschrijving: {{eventMediaCaption}}</li>
-  <li>Datum: {{eventStart}}</li>
-  <li>Rijksmonumentnummer: {{rijksmonumentnummer}}</li>
-  <li>Bron: {{bron}}</li>
-  
-</ul>'''^^rdf:HTML as ?widget)
 
-  
 
 #-------------------------------Dataset 1 Rijksmonumenten-----------------------------------
 #-------------------------------------------------------------------------------------------
   { 
-    SELECT DISTINCT ?bron ?gebouw ?rijksmonumentnummer  ?eventStart ?eventLabel ?afbeelding ?eventMediaCaption 
+    SELECT DISTINCT ?bron ?gebouw ?rijksmonumentnummer1  ?eventStart1 ?eventLabel1 ?afbeelding1 ?eventMediaCaption 
     WHERE {
       GRAPH graph:instanties-rce {
 
@@ -59,7 +52,7 @@ OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
 
         
         #?gebouw ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie.
-        ?gebouw ceo:rijksmonumentnummer ?rijksmonumentnummer.
+       OPTIONAL{ ?gebouw ceo:rijksmonumentnummer ?rijksmonumentnummer1.}
         #OPTIONAL { ?gebouw ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?gebouwType. }
         OPTIONAL { ?gebouw ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor ?actor. }
       FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*", "i")    
@@ -67,16 +60,16 @@ OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
       VALUES ( ?bron) {('Rijksdienst voor Cultureelerfgoed')}
 #----------------------------------------eventLabel----------------------------------------------
 
- BIND(strdt(concat('''''', COALESCE(?rijksmonumentnummer, ""),''''''), rdf:HTML) AS ?eventLabel)
+ BIND(strdt(concat('''''', COALESCE(?rijksmonumentnummer1, ""),''''''), rdf:HTML) AS ?eventLabel)
       
 #------------------------------------eventMediaCaption----------------------------------------------
  BIND(strdt(concat('''
         <ul>
         <li>Wikinummer: <a href="''', ?gebouw, '" target="_blank">', ?gebouw, '''</a></li>
         <li>Beschrijving: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''', 
-                   uri(?rijksmonumentnummer), '" target="_blank">', 
-                   str(?rijksmonumentnummer), '</a>','</li></ul>'), rdf:HTML) as ?eventMediaCaption)
-           FILTER(BOUND(?afbeelding))
+                   uri(?rijksmonumentnummer1), '" target="_blank">', 
+                   str(?rijksmonumentnummer1), '</a>','</li></ul>'), rdf:HTML) as ?eventMediaCaption)
+          
 
     }
   }
@@ -89,8 +82,9 @@ OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
 #--------------------------------Dataset 2 Wikidata-----------------------------------------
 #-------------------------------------------------------------------------------------------
   { 
-    SELECT DISTINCT ?bron ?eventLabel ?afbeelding
-      ?gebouw ?eventMediaCaption (SAMPLE(?eventStartYear) AS ?eventStart) ?rijksmonumentnummer
+    SELECT DISTINCT ?bron (SAMPLE(?eventLabel) AS ?eventLabel2) (SAMPLE(?afbeelding) AS ?afbeelding2)
+      ?eventMediaCaption
+      (SAMPLE(?eventStartYear) AS ?eventStart2) (MAX(?rijksmonumentnummer) AS ?rijksmonumentnummer2)
     WHERE {
       SERVICE <https://query.wikidata.org/sparql> {
         {
@@ -126,8 +120,11 @@ OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
         <li>Verbouwingsjaar: ''',COALESCE(?eventStartYear, "onbekend"),'''</li>
 <li>Wikinummer: <a href="''', ?gebouw, '" target="_blank">', ?gebouw, '''</a></li>
   </ul>'''), rdf:HTML) as ?eventMediaCaption)
+  
     }
+  GROUP BY ?rijksmonumentnummer ?bron ?gebouw ?eventMediaCaption
   } 
+  
 
 #-------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------
@@ -140,13 +137,13 @@ OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
   SELECT DISTINCT
   ?bron
 ?gebouw
-(MAX(?titel) AS ?eventLabel)
+(MAX(?titel) AS ?eventLabel3)
 (MAX(?collectie) AS ?colectieNaam)
 (MAX(?objectType) AS ?eventMediaAlt)
 (MAX(?id) AS ?collectieID) 
-(MAX(?startjaar) AS ?eventStart)
+(MAX(?startjaar) AS ?eventStart3)
 (MAX(?beschrijving) AS ?eventMediaCaption)
-?afbeelding
+?afbeelding3
 (MAX(?type) AS ?eventType)
 
 WHERE{
@@ -166,6 +163,7 @@ OPTIONAL{?gebouw schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:n
 OPTIONAL{?gebouw schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .}
       OPTIONAL{?gebouw (schema:associatedMedia/schema:image) ?afbeelding1 .}
     OPTIONAL {?gebouw (schema:url|schema:associatedMedia/schema:image) ?afbeelding2 .}
+      OPTIONAL{?gebouw skos:prefLabel|skos:altLabel ?titel}
 
       BIND(COALESCE(?afbeelding1, ?afbeelding2) AS ?afbeelding)
       
@@ -178,10 +176,8 @@ OPTIONAL{?gebouw schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePub
       VALUES (?bron) {('Het Nieuwe Instituut')}
     }}}
 
-GROUP BY ?bron ?gebouw ?eventType ?eventLabel ?afbeelding
+GROUP BY ?bron ?gebouw ?eventType ?eventLabel ?afbeelding3
 }
 
   }
 
-order by ?eventMedia
-LIMIT 10
