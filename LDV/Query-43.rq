@@ -1,0 +1,41 @@
+#+ name: Query-43
+#+ description: Query die koppeling aangeeft tussen ABR en Archis data, specifiek de omschrijving vindplaats.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+SELECT ?vindplaats ?muntsoort ?locatieomschrijving
+
+WHERE { 
+  <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/ffe203d7-f94f-47db-bf83-8ce66f658ab7> skos:narrower ?artefactUri_facet1 .
+  ?artefactUri_facet1 skos:prefLabel ?artefact_facet1 .
+  
+  ?artefactUri_facet1 skos:narrower ?artefactUri_facet2 .
+  ?artefactUri_facet2 skos:prefLabel ?munttype .
+
+  ?artefactUri_facet2 skos:narrower ?artefactUri_facet3 .
+  ?artefactUri_facet3 skos:prefLabel ?muntsoort .
+  
+
+  BIND(IRI(REPLACE(STR(?artefactUri_facet2), "https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/", "https://data.cultureelerfgoed.nl/term/id/rn/")) AS ?typeNaamUri_facet2)
+  BIND(IRI(REPLACE(STR(?artefactUri_facet3), "https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/", "https://data.cultureelerfgoed.nl/term/id/rn/")) AS ?typeNaamUri_facet3)
+  
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    {
+      ?vondst a ceo:Vondsten ; ceo:ligtInObject ?ligtInUri . ?ligtInUri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?vindplaats ;
+             ceo:heeftOmschrijving/ceo:omschrijving ?locatieomschrijving .
+      ?vondst ceo:heeftType/ceo:heeftTypeNaam ?typeNaamUri_facet2 .
+      
+    } UNION {
+      ?vondst a ceo:Vondsten ; ceo:ligtInObject ?ligtInUri . ?ligtInUri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?vindplaats ;
+             ceo:heeftOmschrijving/ceo:omschrijving ?locatieomschrijving .
+      ?vondst ceo:heeftType/ceo:heeftTypeNaam ?typeNaamUri_facet3 .
+      
+    } 
+  } BIND(CONCAT("vondstlocatie:", STRAFTER(STR(?ligtInUri), "vondstlocatie/")) AS ?ligtIn)
+}   
+GROUP BY ?vindplaats ?muntsoort ?locatieomschrijving
+ORDER BY ?vindplaats

@@ -1,0 +1,72 @@
+#+ name: pivot-gebouwen-Rietveld-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
+PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rel: <http://purl.org/vocab/relationship/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX schema: <https://schema.org/>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
+
+
+
+CONSTRUCT {
+?gebouwRM rdfs:label ?rijksmonumentnummer .
+  ?gebouwWD rdfs:label ?rijksmonumentnummer .
+  
+} WHERE {
+  #-------------------------------Dataset 1 Rijksmonumenten-----------------------------------
+  #-------------------------------------------------------------------------------------------
+  {
+    SELECT DISTINCT ?gebouwRM
+      ?rijksmonumentnummer
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?gebouwRM ceo:heeftOmschrijving/ceo:omschrijving ?eventDescription.
+        ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
+FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*", "i")
+      }
+    }
+  }
+  #-------------------------------------------------------------------------------------------
+  #-------------------------------------------------------------------------------------------
+
+  UNION
+
+  #--------------------------------Dataset 2 Wikidata-----------------------------------------
+  #-------------------------------------------------------------------------------------------
+  {
+    SELECT DISTINCT ?gebouwWD ?rijksmonumentnummer
+
+    WHERE {
+      SERVICE <https://query.wikidata.org/sparql> {
+        {
+          SELECT DISTINCT ?gebouwWD WHERE {
+            ?gebouwWD p:P84 ?statement0.
+            ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld
+          }
+        }
+
+        # --------------------------------------Rijksmonumentnummer---------------------------------
+        OPTIONAL {
+          ?gebouwWD (wdt:P359) ?rijksmonumentnummer .
+
+        }
+      }
+    }
+  }
+}

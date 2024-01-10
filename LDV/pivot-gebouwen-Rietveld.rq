@@ -22,162 +22,226 @@ PREFIX schema: <https://schema.org/>
 PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 
-SELECT DISTINCT 
-?bron
-(COALESCE(?rijksmonumentnummer1, ?rijksmonumentnummer2) AS ?rijksmonumentnummer) 
-(COALESCE(?eventStart2, ?eventStart1, ?eventStart3) AS ?eventStart) 
-(COALESCE(?eventLabel2, ?eventLabel1, ?eventLabel2, "") AS ?eventLabel)
-(COALESCE(?afbeelding2, ?afbeelding3, ?afbeelding1)  AS ?eventMedia) 
+SELECT DISTINCT
 
-  
-   
-  
-{
+
+  ?gebouwWD
+  ?gebouwRM
+  ?gebouwHNI
  
+(MAX(?rijksmonumentnummer) AS ?rmnr)
+#(COALESCE(IF(?rijksmonumentnummer = ?rijksmonumentnummer, ?gebouwRM, ?gebouwWD)) AS ?gebouw)
+#(COALESCE(IF(!isBlank(?gebouwWD) && isBlank(?rijksmonumentnummer), ?gebouwWD, "nvt")) AS ?gebouw2)
+#(COALESCE(?rijksmonumentnummer1, ?rijksmonumentnummer2, "nvt") AS ?rijksmonumentnummer3)
+#(MIN(?eventStart) AS ?eventStartJaar)
+#(COALESCE(?eventLabel2, ?eventLabel1, ?eventLabel2, "") AS ?eventLabel)
+#(COALESCE(?afbeelding2, ?afbeelding3, ?afbeelding1)  AS ?eventMedia)
 
 
-#-------------------------------Dataset 1 Rijksmonumenten-----------------------------------
-#-------------------------------------------------------------------------------------------
-  { 
-    SELECT DISTINCT ?bron ?gebouw ?rijksmonumentnummer1  ?eventStart1 ?eventLabel1 ?afbeelding1 ?eventMediaCaption 
+
+
+{
+#BIND(IF(?rijksmonumentnummer = ?rijksmonumentnummer, ?gebouwRM, ?gebouwWD) AS ?gebouw)
+ #BIND(IF(?rijksmonumentnummer1 = ?rijksmonumentnummer2, ?rijksmonumentnummer1, "nvt") AS ?rijksmonument)
+
+  #-------------------------------Dataset 1 Rijksmonumenten-----------------------------------
+  #-------------------------------------------------------------------------------------------
+  {
+    SELECT DISTINCT ?gebouwRM 
+      ?rijksmonumentnummer
+      #(xsd:string(?rijksmonumentnummer1) AS ?rijksmonumentnummer1)  
+      #?eventLabel1 ?afbeelding1 ?eventMediaCaption
     WHERE {
       GRAPH graph:instanties-rce {
 
-  ?gebouw ceo:heeftOmschrijving/ceo:omschrijving ?eventDescription.  
-    
-  ?gebouw ceo:heeftOmschrijving/ceo:formeelStandpunt "1"^^xsd:boolean .
+        ?gebouwRM ceo:heeftOmschrijving/ceo:omschrijving ?eventDescription.
 
-OPTIONAL{?gebouw ceo:datumInschrijvingInMonumentenregister ?datum .
-      BIND(YEAR(?datum) AS ?jaar)}
+        ?gebouwRM ceo:heeftOmschrijving/ceo:formeelStandpunt "1"^^xsd:boolean .
 
-        
+        OPTIONAL{
+          ?gebouwRM ceo:datumInschrijvingInMonumentenregister ?datum .
+          BIND(YEAR(?datum) AS ?jaar)
+        }
+
+
         #?gebouw ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie.
-       OPTIONAL{ ?gebouw ceo:rijksmonumentnummer ?rijksmonumentnummer1.}
+        OPTIONAL{
+          ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
+        }
         #OPTIONAL { ?gebouw ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?gebouwType. }
-        OPTIONAL { ?gebouw ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor ?actor. }
-      FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*", "i")    
-      
-      VALUES ( ?bron) {('Rijksdienst voor Cultureelerfgoed')}
-#----------------------------------------eventLabel----------------------------------------------
+        OPTIONAL {
+          ?gebouwRM ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor ?actor.
+        }
+        FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*", "i")
 
- BIND(strdt(concat('''''', COALESCE(?rijksmonumentnummer1, ""),''''''), rdf:HTML) AS ?eventLabel)
-      
-#------------------------------------eventMediaCaption----------------------------------------------
- BIND(strdt(concat('''
+        VALUES ( ?bron) {
+                ('Rijksdienst voor Cultureelerfgoed')
+                }
+        #----------------------------------------eventLabel----------------------------------------------
+
+        BIND(strdt(concat('''''', COALESCE(?rijksmonumentnummer, ""),''''''), rdf:HTML) AS ?eventLabel)
+
+        #------------------------------------eventMediaCaption----------------------------------------------
+        BIND(strdt(concat('''
         <ul>
-        <li>Wikinummer: <a href="''', ?gebouw, '" target="_blank">', ?gebouw, '''</a></li>
-        <li>Beschrijving: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''', 
-                   uri(?rijksmonumentnummer1), '" target="_blank">', 
-                   str(?rijksmonumentnummer1), '</a>','</li></ul>'), rdf:HTML) as ?eventMediaCaption)
-          
+        <li>Wikinummer: <a href="''', ?gebouwRM, '" target="_blank">', ?gebouwRM, '''</a></li>
+        <li>Beschrijving: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''',
+                          uri(?rijksmonumentnummer), '" target="_blank">',
+                          str(?rijksmonumentnummer), '</a>','</li></ul>'), rdf:HTML) as ?eventMediaCaption)
 
+
+      }
     }
   }
-    }
-#-------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------
-  
- UNION
-  
-#--------------------------------Dataset 2 Wikidata-----------------------------------------
-#-------------------------------------------------------------------------------------------
-  { 
-    SELECT DISTINCT ?bron (SAMPLE(?eventLabel) AS ?eventLabel2) (SAMPLE(?afbeelding) AS ?afbeelding2)
+  #-------------------------------------------------------------------------------------------
+  #-------------------------------------------------------------------------------------------
+
+  UNION
+
+  #--------------------------------Dataset 2 Wikidata-----------------------------------------
+  #-------------------------------------------------------------------------------------------
+  {
+    SELECT DISTINCT ?gebouwWD 
+      ?rijksmonumentnummer
+      (SAMPLE(?eventLabel) AS ?eventLabel2) (SAMPLE(?afbeelding) AS ?afbeelding2)
       ?eventMediaCaption
-      (SAMPLE(?eventStartYear) AS ?eventStart2) (MAX(?rijksmonumentnummer) AS ?rijksmonumentnummer2)
+      (SAMPLE(xsd:string(?eventStartYear)) AS ?eventStart) 
+      #(MAX(xsd:string(?rijksmonumentnummer)) AS ?rijksmonumentnummer2)
     WHERE {
       SERVICE <https://query.wikidata.org/sparql> {
         {
-          SELECT DISTINCT ?gebouw WHERE {
-          ?gebouw p:P84 ?statement0.
-          ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld 
+          SELECT DISTINCT ?gebouwWD WHERE {
+            ?gebouwWD p:P84 ?statement0.
+            ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld
           }
         }
 
-        VALUES ( ?bron) {('Wikidata')}
-# ------------------------------------------gebouwLabel---------------------------------------
-        OPTIONAL { ?gebouw (wdt:P1705|rdfs:label) ?gebouwLabel . FILTER(LANG(?gebouwLabel) = "nl")}  
-        
-# --------------------------------------Rijksmonumentnummer---------------------------------  
-        OPTIONAL { ?gebouw (wdt:P7135|wdt:P359) ?rijksmonumentnummer .}    
-        
-#----------------------------------------------afbeelding-----------------------------------------   
-        # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
-        OPTIONAL { ?gebouw wdt:P18 ?afbeelding . FILTER(REGEX(str(?afbeelding), "(?i)\\.(jpg|gif|jpeg|png)", "i"))}
-#-----------------------------------------eventStartDate------------------------------------
-        OPTIONAL{?gebouw (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?eventStartDate . 
-        FILTER(YEAR(?eventStartDate) > 1900)} 
-        BIND(YEAR(?eventStartDate) AS ?eventStartYear)   
- }
-#-------------------------------------------eventLabel----------------------------------------
+        VALUES ( ?bron) {
+                ('Wikidata')
+                }
+        # ------------------------------------------gebouwLabel---------------------------------------
+        OPTIONAL {
+          ?gebouwWD (wdt:P1705|rdfs:label) ?gebouwLabel .
+          FILTER(LANG(?gebouwLabel) = "nl")
+        }
 
-    BIND(strdt(concat('''''',COALESCE(?rijksmonumentnummer, ""), ''' ''',
-            COALESCE(?gebouwLabel, ""),''''''), rdf:HTML) AS ?eventLabel)
-      
-#-------------------------------------------eventMediaCaption-----------------------------------      
+        # --------------------------------------Rijksmonumentnummer---------------------------------
+        OPTIONAL {
+          #?gebouw (wdt:P7135|wdt:P359) ?rijksmonumentnummer .
+          ?gebouwWD (wdt:P359) ?rijksmonumentnummer .
+          #FILTER(!BOUND(?rijksmonumentnummer))
+        }
+
+        #----------------------------------------------afbeelding-----------------------------------------
+        # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
+        OPTIONAL {
+          ?gebouwWD wdt:P18 ?afbeelding .
+          FILTER(REGEX(str(?afbeelding), "(?i)\\.(jpg|gif|jpeg|png)", "i"))
+        }
+        #-----------------------------------------eventStartDate------------------------------------
+        OPTIONAL{
+          ?gebouwWD (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?eventStartDate .
+          FILTER(YEAR(?eventStartDate) > 1900)
+        }
+        BIND(YEAR(?eventStartDate) AS ?eventStartYear)
+      }
+      #-------------------------------------------eventLabel----------------------------------------
+
+      BIND(strdt(concat('''''',COALESCE(?rijksmonumentnummer, ""), ''' ''',
+                        COALESCE(?gebouwLabel, ""),''''''), rdf:HTML) AS ?eventLabel)
+
+      #-------------------------------------------eventMediaCaption-----------------------------------
       BIND(strdt(concat('''
         <ul>
         <li>Verbouwingsjaar: ''',COALESCE(?eventStartYear, "onbekend"),'''</li>
-<li>Wikinummer: <a href="''', ?gebouw, '" target="_blank">', ?gebouw, '''</a></li>
+<li>Wikinummer: <a href="''', ?gebouwWD, '" target="_blank">', ?gebouwWD, '''</a></li>
   </ul>'''), rdf:HTML) as ?eventMediaCaption)
-  
+
     }
-  GROUP BY ?rijksmonumentnummer ?bron ?gebouw ?eventMediaCaption
-  } 
-  
-
-#-------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------
-  
- UNION
-  
-#------------------------Dataset 3 Het Nieuwe Instituut-------------------------------------
-#-------------------------------------------------------------------------------------------
-  {
-  SELECT DISTINCT
-  ?bron
-?gebouw
-(MAX(?titel) AS ?eventLabel3)
-(MAX(?collectie) AS ?colectieNaam)
-(MAX(?objectType) AS ?eventMediaAlt)
-(MAX(?id) AS ?collectieID) 
-(MAX(?startjaar) AS ?eventStart3)
-(MAX(?beschrijving) AS ?eventMediaCaption)
-?afbeelding3
-(MAX(?type) AS ?eventType)
-
-WHERE{
-
-    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
-
-     VALUES ?property { dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre}
-
-?gebouw ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
-
-OPTIONAL{?gebouw schema:identifier ?id .}
-OPTIONAL{?gebouw schema:description|schema:abstract ?beschrijving .}
-OPTIONAL{?gebouw skos:prefLabel|rico:title|schema:name|schema:artform/rdfs:label ?gebouwLabel .}
-OPTIONAL{?gebouw dct:contributor/schema:name|thesau:5234/schema:name ?contributor .}
-OPTIONAL{?gebouw schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?objectType .}
-OPTIONAL{?gebouw schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .}
-OPTIONAL{?gebouw schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .}
-      OPTIONAL{?gebouw (schema:associatedMedia/schema:image) ?afbeelding1 .}
-    OPTIONAL {?gebouw (schema:url|schema:associatedMedia/schema:image) ?afbeelding2 .}
-      OPTIONAL{?gebouw skos:prefLabel|skos:altLabel ?titel}
-
-      BIND(COALESCE(?afbeelding1, ?afbeelding2) AS ?afbeelding)
-      
-      BIND(IF(REGEX(?gebouwLabel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw", 
-          IF(REGEX(?gebouwLabel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel", 
-            IF(REGEX(?gebouwLabel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
-          
-          )) AS ?type)
-      FILTER(?type = "gebouw")
-      VALUES (?bron) {('Het Nieuwe Instituut')}
-    }}}
-
-GROUP BY ?bron ?gebouw ?eventType ?eventLabel ?afbeelding3
-}
-
+    GROUP BY ?rijksmonumentnummer ?bron ?gebouwWD ?eventMediaCaption 
   }
+
+
+  #-------------------------------------------------------------------------------------------
+  #-------------------------------------------------------------------------------------------
+
+  UNION
+
+  #------------------------Dataset 3 Het Nieuwe Instituut-------------------------------------
+  #-------------------------------------------------------------------------------------------
+  {
+    SELECT DISTINCT
+      
+      ?gebouwHNI
+      (MAX(?titel) AS ?eventLabel3)
+      (MAX(?collectie) AS ?colectieNaam)
+      (MAX(?objectType) AS ?eventMediaAlt)
+      (MAX(?id) AS ?collectieID)
+      (MAX(?startjaar) AS ?eventStart)
+      (MAX(?beschrijving) AS ?eventMediaCaption)
+      ?afbeelding3
+      (MAX(?type) AS ?eventType)
+
+    WHERE{
+
+      {
+        SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+
+          VALUES ?property {
+          dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
+        }
+
+          ?gebouwHNI ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+
+          OPTIONAL{
+            ?gebouwHNI schema:identifier ?id .
+          }
+          OPTIONAL{
+            ?gebouwHNI schema:description|schema:abstract ?beschrijving .
+          }
+          OPTIONAL{
+            ?gebouwHNI skos:prefLabel|rico:title|schema:name|schema:artform/rdfs:label ?gebouwLabel .
+          }
+          OPTIONAL{
+            ?gebouwHNI dct:contributor/schema:name|thesau:5234/schema:name ?contributor .
+          }
+          OPTIONAL{
+            ?gebouwHNI schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?objectType .
+          }
+          OPTIONAL{
+            ?gebouwHNI schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .
+          }
+          OPTIONAL{
+            ?gebouwHNI schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .
+          }
+          OPTIONAL{
+            ?gebouwHNI (schema:associatedMedia/schema:image) ?afbeelding1 .
+          }
+          OPTIONAL {
+            ?gebouwHNI (schema:url|schema:associatedMedia/schema:image) ?afbeelding2 .
+          }
+          OPTIONAL{
+            ?gebouwHNI skos:prefLabel|skos:altLabel ?titel
+          }
+
+          BIND(COALESCE(?afbeelding1, ?afbeelding2) AS ?afbeelding)
+
+          BIND(IF(REGEX(?gebouwLabel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw",
+               IF(REGEX(?gebouwLabel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel",
+               IF(REGEX(?gebouwLabel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
+
+               )) AS ?type)
+          FILTER(?type = "gebouw")
+          VALUES (?bron) {
+                  ('Het Nieuwe Instituut')
+                  }
+        }
+      }
+    }
+
+    GROUP BY ?bron ?gebouwHNI ?eventType ?eventLabel ?afbeelding3
+  }
+#BIND(COALESCE(?rijksmonumentnummer1, ?rijksmonumentnummer2) AS ?rijksmonumentnummer)
+# BIND(IF(?rijksmonumentnummer1 = ?rijksmonumentnummer2, ?rijksmonumentnummer1, "nvt") AS ?rijksmonument)
+}
 
