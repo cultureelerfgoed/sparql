@@ -183,5 +183,5 @@ GROUP BY ?bron ?gebouw ?eventType ?eventLabel ?afbeelding
 
   }
 
-order by ?eventMedia
-LIMIT 10
+order by ?eventStart desc(?eventMedia) 
+LIMIT 5
