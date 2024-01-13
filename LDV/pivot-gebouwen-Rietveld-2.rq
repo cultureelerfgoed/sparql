@@ -34,11 +34,8 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
 {
   SELECT *
   {
-
     {
       SELECT DISTINCT ?rijksmonumentnummer
-
-
         (MAX(COALESCE(IF(Bound(?gebouwRM), ?gebouwRM,
                       IF(Bound(?gebouwHNI), ?titel,
                       IF(Bound(?gebouwWD), ?eventLabelWD, ""))))) AS ?widgetLabel)
@@ -58,14 +55,11 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
       (MAX(?bron1) AS ?maxbronRM)
       (MAX(?bron2) AS ?maxbronWD)
       (MAX(?bron3) AS ?maxbronHNI)
-
-
       {
         #-------------------------------Dataset 1 Rijksmonumenten-----------------------------------
         #-------------------------------------------------------------------------------------------
         {
           SELECT DISTINCT ?gebouwRM ?rijksmonumentnummer ?bron1 ?beschrijving1
-
           WHERE {
             GRAPH graph:instanties-rce {
               ?gebouwRM (ceo:heeftOmschrijving/ceo:omschrijving|ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor) ?eventDescription.
@@ -74,18 +68,14 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
               BIND(CONCAT(?beschrijving,"...") AS ?beschrijving1)
 
               ?gebouwRM ceo:heeftOmschrijving/ceo:formeelStandpunt "1"^^xsd:boolean .
-
               OPTIONAL{
                 ?gebouwRM ceo:datumInschrijvingInMonumentenregister ?datum .
                 BIND(YEAR(?datum) AS ?jaar)
               }
               #?gebouw ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie.
-
               OPTIONAL{
                 ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
               }
-
-
               VALUES ( ?bron1) {
                       ('Rijksdienst voor Cultureelerfgoed')
                       }
@@ -94,16 +84,13 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
         }
         #-------------------------------------------------------------------------------------------
         #-------------------------------------------------------------------------------------------
-
         UNION
-
         #--------------------------------Dataset 2 Wikidata-----------------------------------------
         #-------------------------------------------------------------------------------------------
         {
           SELECT DISTINCT ?gebouwWD ?bron2 ?rijksmonumentnummer ?eventMediaCaption ?eventLabelWD
             (SAMPLE(?eventLabel) AS ?eventLabel2) (SAMPLE(?afbeelding) AS ?afbeelding2)
             (SAMPLE(xsd:string(?eventStartYear)) AS ?eventStart)
-
           WHERE {
             SERVICE <https://query.wikidata.org/sparql> {
               {
@@ -123,12 +110,10 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
                 ?gebouwWD (wdt:P1705|rdfs:label) ?gebouwLabel .
                 FILTER(LANG(?gebouwLabel) = "nl")
               }
-
               # --------------------------------------Rijksmonumentnummer---------------------------------
               OPTIONAL {
                 ?gebouwWD (wdt:P359) ?rijksmonumentnummer . # rijksmonumentnummer toevoegen indien aanwezig.
               }
-
               #----------------------------------------------afbeelding-----------------------------------------
               # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
               OPTIONAL {
@@ -154,17 +139,12 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
         <li>Verbouwingsjaar: ''',COALESCE(?eventStartYear, "onbekend"),'''</li>
 <li>Wikinummer: <a href="''', ?gebouwWD, '" target="_blank">', ?gebouwWD, '''</a></li>
   </ul>'''), rdf:HTML) as ?eventMediaCaption)
-
           }
           GROUP BY ?rijksmonumentnummer ?bron2 ?gebouwWD ?eventMediaCaption ?eventLabelWD
         }
-
-
         #-------------------------------------------------------------------------------------------
         #-------------------------------------------------------------------------------------------
-
         UNION
-
         #------------------------Dataset 3 Het Nieuwe Instituut-------------------------------------
         #-------------------------------------------------------------------------------------------
         {
@@ -183,22 +163,17 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
             (MAX(?type) AS ?eventType)
 
           WHERE{
-
             {
               SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
-
                 VALUES ?property {
                 dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
               }
-
                 ?gebouwHNI ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
-
                 OPTIONAL{
                   ?gebouwHNI schema:identifier ?id .
                 }
                 OPTIONAL{
-                  ?gebouwHNI schema:description|schema:abstract ?beschrijvingHNI .
-
+                  ?gebouwHNI schema:description|schema:abstract ?beschrijvingHNI 
                 }
                 BIND(SUBSTR(?beschrijvingHNI, 1, 500) AS ?beschrijvingHNI1)
                 BIND(CONCAT(?beschrijvingHNI1,"...") AS ?beschrijvingHNI2)
@@ -227,13 +202,10 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
                 OPTIONAL{
                   ?gebouwHNI skos:prefLabel|skos:altLabel ?titel
                 }
-
                 BIND(COALESCE(?afbeelding1, ?afbeelding2) AS ?afbeelding3)
-
                 BIND(IF(REGEX(?gebouwLabel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw",
                      IF(REGEX(?gebouwLabel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel",
                      IF(REGEX(?gebouwLabel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
-
                      )) AS ?type)
                 FILTER(?type = "gebouw")
                 FILTER(!REGEX(?titel, "Zitmeubel", "i"))
@@ -243,30 +215,24 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
               }
             }
           }
-
           GROUP BY ?bron3 ?gebouwHNI ?eventType ?eventLabel ?afbeelding3 ?titel
         }
-
-
       }
       GROUP BY ?rijksmonumentnummer ?gebouwHNI ?widgetLabel
     }
     #------------------------------------eventMediaCaption----------------------------------------------
-
-
     BIND(strdt(concat('''
            Gebouw of schaalmodel gegevens.
-   
            <ul>
-           <li>Bron: <a href="''', ?maxgebouwRM, '" target="_blank">', STR(?bron1), '</a>', ' ', '<a href="', ?maxgebouwWD, '" target="_blank">', STR(?bron2), '''</a></li>
+           <li>Bron: <a href="''', ?maxgebouwRM, '''" target="_blank">''',?maxgebouwRM,''' </a> 
+          
            <li>Wikidata: <a href="''', ?maxgebouwWD, '" target="_blank">', ?maxgebouwWD, '''</a></li>
            <li>Het Nieuwe Instituut: <a href="''', ?maxgebouwHNI, '" target="_blank">', ?maxgebouwHNI, '''</a></li>
            <li>Monumentnummer: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''',
                              uri(?rijksmonumentnummer), '" target="_blank">',
                              str(?rijksmonumentnummer), '</a>','</li></ul>'), rdf:HTML) as ?widgetDescription)
-
-
   }
 }
 
-ORDER BY desc(?rijksmonumentnummer)
+ORDER BY ?rijksmonumentnummer
+LIMIT 4
