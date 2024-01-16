@@ -1,0 +1,13 @@
+#+ name: Query-22-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT * 
+
+WHERE { GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {
+  ?rm a ceo:Rijksmonument . FILTER NOT EXISTS { ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeenteOWMS } 
+}  
+} 
