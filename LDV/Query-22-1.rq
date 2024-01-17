@@ -8,6 +8,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT * 
 
 WHERE { GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {
-  ?rm a ceo:Rijksmonument . FILTER NOT EXISTS { ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeenteOWMS } 
+  ?rm a ceo:Rijksmonument ; ceo:rijksmonumentnummer ?rijksmonumentnummer . FILTER NOT EXISTS { ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeenteOWMS } 
 }  
-} 
+} ORDER BY ?rijksmonumentnummer
