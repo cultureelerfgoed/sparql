@@ -1,4 +1,4 @@
-#+ name: geoGRietveld
+#+ name: geoGRietveld-2
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -22,14 +22,24 @@ PREFIX schema: <https://schema.org/>
 PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 
+SELECT *
 
 
-Select distinct ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item) AS ?WD)
+{
+{FILTER(bound(?wdID))}
+{
+  {
+Select distinct (MAX(?rijksmonumentnummer) AS ?rn) (IF(COUNT(?itemL) > 1 && bound(?item), "", ?itemL) AS ?wdID)
+  (MAX(?maxgebouwRM) AS ?RM)
+ (MAX(?maxgebouwWD) AS ?WD)
+(MAX(?item) AS ?WDn)
+
+  
 
 {
   {
 
-  SELECT  distinct (bif:uuid() AS ?uuid) ?item ?rijksmonumentnummer
+  SELECT  distinct (bif:uuid() AS ?uuid) ?item (STR(?item) AS ?itemL) ?rijksmonumentnummer
 
   WHERE {
     SERVICE <https://query.wikidata.org/sparql> {
@@ -74,7 +84,7 @@ UNION
 
 {
 
-SELECT DISTINCT ?uuid ?rijksmonumentnummer ?maxgebouwRM ?maxgebouwHNI ?maxgebouwWD ?maxgebouwWD2
+SELECT DISTINCT ?uuid ?rijksmonumentnummer ?maxgebouwRM ?maxgebouwHNI ?maxgebouwWD (STR(?maxgebouwWD) AS ?itemL)
 ?eventDescription
 (COALESCE(?eventMedia, ?eventMedia2) AS ?eventMedia)
 (COALESCE(?eventDate, ?eventDate2) AS ?eventDate)
@@ -255,5 +265,7 @@ SELECT DISTINCT ?uuid ?rijksmonumentnummer ?maxgebouwRM ?maxgebouwHNI ?maxgebouw
 }
   }
 
-    }
-GROUP BY ?rijksmonumentnummer 
+  }
+GROUP BY ?itemL ?item
+  }}}
+  
