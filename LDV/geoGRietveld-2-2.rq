@@ -1,4 +1,4 @@
-#+ name: geoGRietveld-2
+#+ name: geoGRietveld-2-2
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -22,14 +22,10 @@ PREFIX schema: <https://schema.org/>
 PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 
-SELECT DISTINCT (IF(STR(?eventDate1) = "0", "", ?eventDate1) AS ?eventDate) ?rijksmonumentnummer ?maxgebouwHNI ?WD ?maxgebouwRM
-  {
-    {
 
-SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item) AS ?WD) ?maxgebouwHNI
-(COALESCE(?eventLabelLaag2, ?gebouwLabel) AS ?eventLabel)
-(COALESCE(STR(?eventDateLaag2n), STR(?eventStartYearWDn)) AS ?eventDate1)
-(COALESCE(?eventMediaLaag2, ?mediaWD) AS ?eventMedia)
+SELECT DISTINCT ?eventLabel ?eventDate ?rijksmonumentnummer 
+  ?maxgebouwRM ?WD ?maxgebouwHNI ?eventMedia ?eventDescription ?eventMediaCredit
+
 
 {
 
@@ -83,17 +79,17 @@ SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item)
                     IF(Bound(?gebouwHNI), ?eventLabelHNI,
                     IF(Bound(?gebouwWD), ?eventLabelWDrn, ""))))) AS ?eventLabelLaag2)
       (MAX(?gebouwWD) AS ?maxgebouwWD)
-
       (MAX(?gebouwRM) AS ?maxgebouwRM)
       (MAX(?gebouwHNI) AS ?maxgebouwHNI)
       (MAX(COALESCE(?mediaWDrn, ?mediaHNI)) AS ?eventMediaLaag2)
-      (MAX(COALESCE(?eventStartWDrn)) AS ?eventDateLaag2)
+      (MAX(COALESCE(?eventStartWDrn, ?eventStart)) AS ?eventDateLaag2)
+      (MAX(COALESCE(?beschrijving2, ?beschrijving3, ?beschrijving4)) AS ?eventMediaCredit)
 
     {
       #-------------------------------Dataset 2 Rijksmonumenten-----------------------------------
       #--------------------------------------------------------------------------------------------
       {
-        SELECT DISTINCT ?gebouwRM ?bron ?rijksmonumentnummer (MAX(?gebouwLabel) AS ?eventLabelRM)
+        SELECT DISTINCT ?gebouwRM ?bron ?rijksmonumentnummer (MAX(?gebouwLabel) AS ?eventLabelRM) ?beschrijving2
         WHERE {
           GRAPH graph:instanties-rce {
             # --------------------------------------beschrijving---------------------------------
@@ -101,7 +97,7 @@ SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item)
                        ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor) ?eventDescription .
             FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*|Rietveld, G.Th.*", "i")
             BIND(SUBSTR(?eventDescription, 1, 500) AS ?beschrijving)
-            BIND(CONCAT(?beschrijving,"...") AS ?beschrijving1)
+            BIND(CONCAT(?beschrijving,"...") AS ?beschrijving2)
 
             # --------------------------------------Rijksmonumentnummer---------------------------------
             ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
@@ -164,12 +160,12 @@ SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item)
       #------------------------Dataset 4 Het Nieuwe Instituut-------------------------------------
       {
         SELECT DISTINCT ?gebouwHNI ?bron (MAX(?afbeelding) AS ?mediaHNI)
-          (MAX(?titel) AS ?eventLabelHNI)
+          (MAX(?gebouwLabel) AS ?eventLabelHNI)
           (MAX(?collectie) AS ?colectieNaam)
           (MAX(?objectType) AS ?eventMediaAlt)
           (MAX(?id) AS ?collectieID)
           (MAX(?startjaar2) AS ?eventStart)
-          (MAX(?beschrijvingHNI2) AS ?beschrijving2)
+          (MAX(?beschrijvingHNI2) AS ?beschrijving4)
           (MAX(?type) AS ?eventType)
         WHERE{
           SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
@@ -222,16 +218,15 @@ SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item)
         #--------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------
       }
-     
-
     }
-    GROUP BY ?rijksmonumentnummer ?gebouwHNI ?eventLabelLaag2
+    GROUP BY ?rijksmonumentnummer ?gebouwHNI
   }
   #**************************************************************************************************
+BIND(COALESCE(?maxgebouwWD, ?item) AS ?WD)
+BIND(COALESCE(?eventLabelLaag2, ?gebouwLabel) AS ?eventLabel)
+BIND(COALESCE(STR(?eventDateLaag2), STR(?eventStartYearWD)) AS ?eventDate)
+BIND(COALESCE(?eventMediaLaag2, ?mediaWD) AS ?eventMedia)
 
-
-  #  BIND(IF(STR(?eventDateLaag2) = "0", "", ?eventDateLaag2) AS ?eventDateLaag2n)
-  #  BIND(IF(STR(?eventStartYearWD) = "0", "", ?eventStartYearWD) AS ?eventStartYearWDn)
   #------------------------------------eventDescription----------------------------------------------
   
   BIND(strdt(concat('''
@@ -241,12 +236,11 @@ SELECT DISTINCT ?rijksmonumentnummer ?maxgebouwRM (COALESCE(?maxgebouwWD, ?item)
 
         <ul>
         <li>Bron: <a href="''', ?maxgebouwRM, '" target="_blank">', ?maxgebouwRM, '''</a></li>
-        <li>Wikidata: <a href="''', ?maxgebouwWD, '" target="_blank">', ?maxgebouwWD, '''</a></li>
+        <li>Wikidata: <a href="''', ?WD, '" target="_blank">', ?WD, '''</a></li>
         <li>Het Nieuwe Instituut: <a href="''', ?maxgebouwHNI, '" target="_blank">', ?maxgebouwHNI, '''</a></li>
         <li>Monumentnummer: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/''',
                     uri(?rijksmonumentnummer), '" target="_blank">',
                     str(?rijksmonumentnummer), '</a>','</li></ul>'), rdf:HTML) as ?eventDescription)
 }
-  GROUP BY ?rijksmonumentnummer  
-    }
-    }
+GROUP BY ?rijksmonumentnummer 
+ 

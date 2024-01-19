@@ -1,0 +1,22 @@
+#+ name: ni-architecten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sdo: <https://schema.org/>
+
+SELECT distinct ?ni_person ?ni_name ?ni_naam_string WHERE {
+  
+ SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql> {
+
+?ni_person a sdo:Person .
+?ni_person sdo:hasOccupation <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/256> .
+?ni_person sdo:name ?ni_name .
+BIND(STR(?ni_name) as ?ni_naam_string)
+  }
+  
+}
+
+ 
