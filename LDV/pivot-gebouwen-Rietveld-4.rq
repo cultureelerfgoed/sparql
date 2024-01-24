@@ -1,0 +1,86 @@
+#+ name: pivot-gebouwen-Rietveld-4
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
+PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rel: <http://purl.org/vocab/relationship/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX schema: <https://schema.org/>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
+
+SELECT ?object ?objectLabel ?collectie ?afbeelding ?objectType ?startDatum ?omschrijving ?objectCategorie
+ 
+
+ 
+ 
+
+WHERE{
+  SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+    VALUES ?property {
+    dct:contributor thesau:256 thesau:26455 thesau:5234
+    thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator
+    rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
+  }
+    ?object ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+    #--------------------------------------Beschrijving--------------------------------------
+    OPTIONAL{
+      ?object schema:description|
+              schema:abstract ?omschrijving .
+    }
+ 
+    OPTIONAL{
+      ?object dct:contributor/schema:name|
+                 thesau:5234/schema:name ?contributor .
+    }
+    OPTIONAL{
+      ?object schema:artform/rdfs:label|
+                 schema:type/schema:Article|
+                 rdf:type ?objectType .
+    }
+        OPTIONAL{
+      ?object rdf:type ?objectCategorie .
+    }
+    OPTIONAL{
+      ?object schema:archivedAt|
+                 rico:scopeAndContent|
+                 schema:isPartOf/schema:name ?collectie .
+    }
+    #------------------------------------------jaar-----------------------------------------
+    OPTIONAL{
+      ?object schema:dateCreated/cidoc:P82a_begin_of_the_begin|
+                 schema:datePublished|
+                 rico:date/rico:hasBeginningDate ?startDatum .
+    }
+    #------------------------------------afbeelding---------------------------------------
+    OPTIONAL{
+      ?object (schema:associatedMedia/schema:image |
+                  schema:url|
+                  schema:associatedMedia/schema:image) ?afbeelding .
+    }
+
+    #------------------------------------objectLabel---------------------------------------
+    OPTIONAL{
+      ?object skos:prefLabel|
+                 rico:title|
+                 schema:name|
+                 schema:artform/rdfs:label ?objectLabel .
+    }
+
+  }
+}
+
+
