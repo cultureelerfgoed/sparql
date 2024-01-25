@@ -1,0 +1,177 @@
+#+ name: kunst-collectie-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX schema: <https://schema.org/>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rel: <http://purl.org/vocab/relationship/>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
+
+SELECT DISTINCT *
+
+{
+#------------------------------Dataset 1 Rijksmuseum----------------------------------------
+#-------------------------------------------------------------------------------------------
+  {
+SELECT * WHERE {
+  SERVICE <https://api.data.netwerkdigitaalerfgoed.nl/datasets/Rijksmuseum/collection/services/collection/sparql>{
+    SELECT DISTINCT ?bron (?linkRijksmuseum AS ?voorwerpURI) ?id ?ontwerperNaam (?voorwerpLabel AS ?eventLabel) 
+      ?eventMedia (MAX(?typeVoorwerp) AS ?voorwerpType) (MIN(?jaar) AS ?eventDate) 
+    (?beschrijving AS ?eventDescription)(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad)
+   
+      WHERE {
+        
+        ?linkRijksmuseum dc:creator|dc:contributor ?ontwerper .
+        FILTER(?ontwerper = <http://hdl.handle.net/10934/RM0001.PEOPLE.107600>) #Gerrit Rietveld
+        ?ontwerper skos:prefLabel ?ontwerperNaam .
+        OPTIONAL{?linkRijksmuseum dc:description ?beschrijving.}
+        OPTIONAL{?linkRijksmuseum dc:title ?voorwerpLabel .}
+        OPTIONAL{?linkRijksmuseum dc:identifier ?id .}
+        OPTIONAL{?linkRijksmuseum dct:spatial ?spat.}
+        OPTIONAL{?linkRijksmuseum dc:publisher ?bron .}
+        OPTIONAL{?linkRijksmuseum dc:type/skos:prefLabel ?voorwerp . 
+         }
+        BIND(IF(REGEX(?voorwerp, "(stoelen|kinderstoel|leunstoel|stoel)", "i"), "stoelen", 
+          IF(REGEX(?voorwerp, "(label|etiket)", "i"), "kunst", ?voorwerp)) AS ?typeVoorwerp)
+
+        # Alle voorwerpen van Rijksmuseum
+        ?spat skos:prefLabel ?locatie ;
+               wgs84:lat ?lat ;
+               wgs84:long ?long.
+        OPTIONAL {
+          ?linkRijksmuseum dct:created ?periode .
+          BIND(REPLACE(?periode, "[^0-9-]", "") AS ?cleanedYear)
+          BIND(IF(STRLEN(?cleanedYear) > 4, STRBEFORE(?cleanedYear, "-"), ?cleanedYear) AS ?jaar)
+        }
+
+         
+        FILTER(lang(?voorwerp)='nl' && lang(?beschrijving)='nl' && lang(?periode)='nl')
+       
+      }
+      GROUP BY ?voorwerpLabel ?beschrijving ?linkRijksmuseum ?ontwerperNaam ?id ?bron ?voorwerpType ?eventMedia
+    }
+  }
+}
+#-------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
+  
+ UNION
+
+#------------------------------Dataset 2 Wikidata-------------------------------------------
+#------------------------------------------------------------------------------------------- 
+{
+SELECT DISTINCT ?bron (?item AS ?voorwerpURI) ?id ?ontwerperNaam 
+  ?eventLabel (MIN(?image) AS ?eventMedia) ?voorwerpType (MIN(?jaar) AS ?eventDate) 
+  (?beschrijving AS ?eventDescription)
+
+(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad) 
+ WHERE {
+   SERVICE <https://query.wikidata.org/sparql> {
+   ?item p:P170|p:P287 ?statement0.
+   ?statement0 (ps:P170|ps:P287/(wdt:170*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld 
+
+   
+# ------------------------------------------eventDescription---------------------------------------
+
+     OPTIONAL {
+    ?item (p:31|schema:description|rdfs:comment|schema:comment) ?beschrijving.
+    FILTER(LANGMATCHES(LANG(?beschrijving), "nl"))
+  }
+
+# ------------------------------------------eventLabel---------------------------------------
+   OPTIONAL { ?item (p:31|rdfs:label) ?eventLabel . FILTER(LANG(?eventLabel) = "nl")} 
+#----------------------------------------------image-----------------------------------------   
+# filter alleen image format dat werkt met de tijdlijn visualisatie.
+   OPTIONAL { ?item wdt:P18 ?image . FILTER(REGEX(str(?image), "(?i)\\.(jpg|gif|jpeg|png)", "i"))}
+   OPTIONAL{?item (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?periode .
+   BIND(STR(YEAR(?periode)) AS ?jaar)}
+   VALUES (?bron) {("Wikidata")}
+  OPTIONAL { ?item (wdt:P31/rdfs:label|wdt:P279/rdfs:label) ?voorwerp .
+  FILTER(LANG(?voorwerp) = "nl")
+      BIND(IF(REGEX(?voorwerp, "(stoelen|kinderstoel|leunstoel|stoel)", "i"), "stoelen", 
+          IF(REGEX(?voorwerp, "(kamer|interieur)", "i"), "interieur", 
+          IF(REGEX(?voorwerp, "(schilderij)", "i"), "kunst", ?voorwerp))) AS ?voorwerpType)}
+  }
+}
+   GROUP BY ?item ?eventLabel ?eventMedia ?eventDate ?bron ?id ?ontwerperNaam ?voorwerpType ?beschrijving
+
+}
+#-------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
+  
+ UNION
+
+#-------------------------Dataset 3 Het Nieuwe Instituut------------------------------------
+#------------------------------------------------------------------------------------------- 
+{
+
+
+SELECT DISTINCT
+?bron
+(?object AS ?voorwerpURI)
+(MAX(?collectieID) AS ?id)
+?ontwerperNaam
+(MAX(?titel) AS ?eventLabel)
+(MAX(?media) AS ?eventMedia) 
+(MAX(?typeVoorwerp) AS ?voorwerpType)
+(MAX(?startjaar) AS ?eventDate)
+(MAX(?beschrijving) AS ?eventDescription)
+(MAX(?lat) AS ?breedtegraad) (MAX(?long) AS ?lengtegraad)
+
+
+
+WHERE{
+
+    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+
+     VALUES ?property { dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre}
+
+?object ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+VALUES(?bron) {('Het Nieuwe Instituut')}
+OPTIONAL{?object schema:identifier ?collectieID .}
+OPTIONAL{?object schema:description|schema:abstract ?beschrijving .}
+OPTIONAL{?object skos:prefLabel|rico:title|schema:name|schema:artform/rdfs:label ?titel .}
+OPTIONAL{?object dct:contributor/schema:name|thesau:5234/schema:name ?contributor .}
+OPTIONAL{?object schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?voorwerp .
+  BIND(IF(REGEX(?voorwerp, "(schaalmodellen*)", "i"), "schaalmodellen", 
+          IF(REGEX(?voorwerp, "(stoelen|stoel)", "i"), "stoelen", 
+            IF(REGEX(?voorwerp, "(https://schema.org/Article|schets|https://schema.org/VisualArtwork|https://www.ica.org/standards/RiC/ontology#RecordSet)", "i"), "kunst", ?voorwerp))) AS ?typeVoorwerp) 
+}
+OPTIONAL{?object schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .}
+OPTIONAL{?object schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .}
+      OPTIONAL{?object (schema:associatedMedia/schema:image | schema:url|schema:associatedMedia/schema:image) ?media .}
+      
+  BIND(IF(REGEX(?titel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw", 
+          IF(REGEX(?titel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel", 
+            IF(REGEX(?titel, "(interieur|zaal|inrichting)", "i"), "interieur","overig")
+          
+          )) AS ?type)
+      FILTER(?type = "meubel")
+
+     
+    }}}
+
+GROUP BY ?object ?eventType ?eventLabel ?bron ?id ?ontwerperNaam ?voorwerpType
+  
+  }
+  
+}
