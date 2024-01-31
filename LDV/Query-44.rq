@@ -1,0 +1,17 @@
+#+ name: Query-44
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+SELECT  ?s ?rm
+       (REPLACE(?description, "\n", " ") AS ?descriptionschoon)
+
+WHERE {
+  ?s ceo:heeftOmschrijving/ceo:omschrijving ?description.
+  ?s ceo:rijksmonumentnummer ?rm.
+  FILTER (
+    CONTAINS(LCASE(?description), "uurwerken") && !CONTAINS(LCASE(?description), "wijzerplaten")
+  )
+}
+
+ORDER BY ?rm
