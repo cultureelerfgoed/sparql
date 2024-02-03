@@ -28,7 +28,7 @@ SELECT DISTINCT
 
 WHERE{
 
-    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+    {SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/default/sparql>{
 
      VALUES ?property { dct:contributor thesau:256 thesau:26455 thesau:5234
     thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator

@@ -164,7 +164,7 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
 
           WHERE{
             {
-              SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
+              SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/default/sparql>{
                 VALUES ?property {
                 dct:contributor thesau:256 thesau:26455 thesau:5234 thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
               }
@@ -191,7 +191,7 @@ SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?max
                 }
                 OPTIONAL{
                   ?gebouwHNI schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|rico:date/rico:hasBeginningDate ?startjaar .
-                  BIND(SUBSTR(?startjaar, 1, 4) AS ?startjaar2)
+                  BIND(SUBSTR(STR(?startjaar), 1, 4) AS ?startjaar2)
                 }
                 OPTIONAL{
                   ?gebouwHNI (schema:associatedMedia/schema:image) ?afbeelding1 .

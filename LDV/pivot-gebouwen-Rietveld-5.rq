@@ -1,0 +1,53 @@
+#+ name: pivot-gebouwen-Rietveld-5
+#+ description: Gebouwen vervaardigd door Gerrit. Th. Rietveld. Een combinatie van data uit Het Nieuwe Instituut, Rijksmonumenten en Wikidata.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/>
+PREFIX cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rel: <http://purl.org/vocab/relationship/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX schema: <https://schema.org/>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
+
+
+      #--------------------------------------------------------------------------------------------
+      #------------------------Dataset 4 Het Nieuwe Instituut-------------------------------------
+      
+        SELECT DISTINCT *
+        WHERE{
+          SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/default/sparql>{
+            VALUES ?property {
+            dct:contributor thesau:256 thesau:26455 thesau:5234
+            thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator
+            rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
+          }
+            ?gebouwHNI ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+           OPTIONAL{ ?gebouwHNI schema:description|schema:abstract ?beschrijvingHNI }
+            BIND(substr(?beschrijvingHNI, 1, 500) AS ?beschrijvingHNI1)
+            BIND(concat(?beschrijvingHNI1, "...") AS ?beschrijvingHNI2)
+
+             OPTIONAL{ ?gebouwHNI ((schema:dateCreated/cidoc:P82a_begin_of_the_begin)|schema:datePublished)|(rico:date/rico:hasBeginningDate) ?startjaar
+                           BIND(substr(?startjaar, 1, 4) AS ?startjaar2)
+                      }
+                     OPTIONAL{ ?gebouwHNI schema:associatedMedia/schema:image ?afbeelding1 }
+                        OPTIONAL{ ?gebouwHNI schema:url|(schema:associatedMedia/schema:image) ?afbeelding2 }
+                       BIND(coalesce(?afbeelding1, ?afbeelding2) AS ?afbeelding)
+          }
+        }
+     
+
+  

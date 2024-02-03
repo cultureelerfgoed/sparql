@@ -24,20 +24,20 @@ PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
 
-SELECT DISTINCT ?geoLocatieLabel ?itemTooltip  ?rijksmonumentnummer 
+SELECT DISTINCT ?geoLocatieLabel ?itemTooltip  ?rijksmonumentnummer
   ?geoLocatie ?item ?eventMedia
-?maxgebouwRM ?WD ?maxgebouwHNI ?eventDate
- ?eventMediaCredit
+  ?maxgebouwRM ?WD ?maxgebouwHNI ?eventDate
+  ?eventMediaCredit
 
 {
 
-  
+
   #*****************************************************************************************************
   #--------------------------------------Dataset 1 Wikidata-----------------------------------------
   #-------------------------------------------------------------------------------------------------
   {
     SELECT DISTINCT ?gebouw ?gebouwLabel (xsd:string(?eventStartYear) AS ?eventStartYearWD)
-    (MAX(?afbeelding) AS ?mediaWD) (MAX(?geoLocatieWD) AS ?geoLocatieWD1)
+      (MAX(?afbeelding) AS ?mediaWD) (MAX(?geoLocatieWD) AS ?geoLocatieWD1)
 
     WHERE {
       SERVICE <https://query.wikidata.org/sparql> {
@@ -58,7 +58,9 @@ SELECT DISTINCT ?geoLocatieLabel ?itemTooltip  ?rijksmonumentnummer
           FILTER(LANG(?gebouwLabel) = "nl")
         }
 
-          OPTIONAL { ?gebouw wdt:P625 ?geoLocatieWD . }
+        OPTIONAL {
+          ?gebouw wdt:P625 ?geoLocatieWD .
+        }
         #----------------------------------------------afbeelding-----------------------------------------
         # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
         OPTIONAL {
@@ -76,177 +78,186 @@ SELECT DISTINCT ?geoLocatieLabel ?itemTooltip  ?rijksmonumentnummer
   }
   #***************************************************************************************************
   UNION
-  #***************************************************************************************************
   {
-    SELECT  ?rijksmonumentnummer
-      (MAX(COALESCE(IF(Bound(?gebouwRM), ?eventLabelRM,
-                    IF(Bound(?gebouwHNI), ?eventLabelHNI,
-                    IF(Bound(?gebouwWD), ?eventLabelWDrn, ""))))) AS ?eventLabelLaag2)
-      (MAX(?gebouwWD) AS ?maxgebouwWD)
-      (MAX(?gebouwRM) AS ?maxgebouwRM)
-      (MAX(?gebouwHNI) AS ?maxgebouwHNI)
-      (MAX(COALESCE(?mediaWDrn, ?mediaHNI)) AS ?eventMediaLaag2)
-      (MAX(COALESCE(?eventStartWDrn, ?eventStart)) AS ?eventDateLaag2)
-      (MAX(COALESCE(?beschrijving2, ?beschrijving3, ?beschrijving4)) AS ?omschrijvingL2)
-    (MAX(COALESCE(?geoLocatieWDrn3,?geoLocatieRM1)) AS ?geoLocatieLaag2)
-
+    #***************************************************************************************************
     {
-      #-------------------------------Dataset 2 Rijksmonumenten-----------------------------------
-      #--------------------------------------------------------------------------------------------
-      {
-        SELECT DISTINCT ?gebouwRM ?bron ?rijksmonumentnummer (MAX(?gebouwLabel) AS ?eventLabelRM) ?beschrijving2
-        (MAX(?geoLocatieRM) AS ?geoLocatieRM1)
-        WHERE {
-          GRAPH graph:instanties-rce {
-            # --------------------------------------beschrijving---------------------------------
-            ?gebouwRM (ceo:heeftOmschrijving/ceo:omschrijving|
-                       ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor) ?eventDescription .
-            FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*|Rietveld, G.Th.*", "i")
-            BIND(SUBSTR(?eventDescription, 1, 500) AS ?beschrijving)
-            BIND(CONCAT(?beschrijving,"...") AS ?beschrijving2)
-            OPTIONAL{?gebouwRM ceo:heeftGeometrie/geo:asWKT ?geoLocatieRM .}
-            FILTER(!REGEX(?geoLocatieRM, "MULTI"))
+      SELECT  ?rijksmonumentnummer
+        (MAX(COALESCE(IF(Bound(?gebouwRM), ?eventLabelRM,
+                      IF(Bound(?gebouwHNI), ?eventLabelHNI,
+                      IF(Bound(?gebouwWD), ?eventLabelWDrn, ""))))) AS ?eventLabelLaag2)
+        (MAX(?gebouwWD) AS ?maxgebouwWD)
+        (MAX(?gebouwRM) AS ?maxgebouwRM)
+        (MAX(?gebouwHNI) AS ?maxgebouwHNI)
+        (MAX(COALESCE(?mediaWDrn, ?mediaHNI)) AS ?eventMediaLaag2)
+        (MAX(COALESCE(?eventStartWDrn, ?eventStart)) AS ?eventDateLaag2)
+        (MAX(COALESCE(?beschrijving2, ?beschrijving3, ?beschrijving4)) AS ?omschrijvingL2)
+        (MAX(COALESCE(?geoLocatieWDrn3,?geoLocatieRM1)) AS ?geoLocatieLaag2)
 
-            # --------------------------------------Rijksmonumentnummer---------------------------------
-            ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
-            VALUES ( ?bron) {
-                    ('Rijksdienst voor Cultureelerfgoed')
-                    }
-            OPTIONAL{ ?gebouwRM ceo:heeftNaam/ceo:naam| ceo:heeftOorspronkelijkeFunctie/ceo:kennisregistratieToelichting | ceo:isOnderdeelVanComplex/ceo:heeftNaam/ceo:naam|ceo:cultuurhistorischObjectnummer ?gebouwLabel .}
-          }
-        }
-      }
-      #--------------------------------------------------------------------------------------------
-      #--------------------------------------------------------------------------------------------
-      UNION
-      #--------------------------------Dataset 3 Wikidata-----------------------------------------
-      #--------------------------------------------------------------------------------------------
       {
-        SELECT DISTINCT ?gebouwWD ?bron ?rijksmonumentnummer (MAX(?geoLocatieWDrn) AS ?geoLocatieWDrn3)
-          (MAX(?gebouwLabel) AS ?eventLabelWDrn)
-          (SAMPLE(?afbeelding) AS ?mediaWDrn)
-          (SAMPLE(xsd:string(?eventStartYearWDrn)) AS ?eventStartWDrn)
-        
-        WHERE {
-          SERVICE <https://query.wikidata.org/sparql> {
-            {
-              SELECT DISTINCT ?gebouwWD WHERE {
-                ?gebouwWD p:P84 ?statement0.
-                ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld
+        #-------------------------------Dataset 2 Rijksmonumenten-----------------------------------
+        #--------------------------------------------------------------------------------------------
+        {
+          SELECT DISTINCT ?gebouwRM ?bron ?rijksmonumentnummer (MAX(?gebouwLabel) AS ?eventLabelRM) ?beschrijving2
+            (MAX(?geoLocatieRM) AS ?geoLocatieRM1)
+          WHERE {
+            GRAPH graph:instanties-rce {
+              # --------------------------------------beschrijving---------------------------------
+              ?gebouwRM (ceo:heeftOmschrijving/ceo:omschrijving|
+                         ceo:heeftKennisregistratie/ceo:heeftActorEnRol/ceo:heeftActor) ?eventDescription .
+              FILTER REGEX(?eventDescription, "gerrit*rietveld | Th.*Rietveld | G.*Rietveld | Th.*Rietveld | Gerrit Thomas Rietveld | *G.Th. Rietveld*|Rietveld, G.Th.*", "i")
+              BIND(SUBSTR(?eventDescription, 1, 500) AS ?beschrijving)
+              BIND(CONCAT(?beschrijving,"...") AS ?beschrijving2)
+              OPTIONAL{
+                ?gebouwRM ceo:heeftGeometrie/geo:asWKT ?geoLocatieRM .
+              }
+              FILTER(!REGEX(?geoLocatieRM, "MULTI"))
+
+              # --------------------------------------Rijksmonumentnummer---------------------------------
+              ?gebouwRM ceo:rijksmonumentnummer ?rijksmonumentnummer.
+              VALUES ( ?bron) {
+                      ('Rijksdienst voor Cultureelerfgoed')
+                      }
+              OPTIONAL{
+                ?gebouwRM ceo:heeftNaam/ceo:naam| ceo:heeftOorspronkelijkeFunctie/ceo:kennisregistratieToelichting | ceo:isOnderdeelVanComplex/ceo:heeftNaam/ceo:naam|ceo:cultuurhistorischObjectnummer ?gebouwLabel .
               }
             }
-            # ------------------------------------------bronLabel---------------------------------------
-            #Label toevoegen zodat er duidelijk is waar data vandaan komt.
-            VALUES (?bron) {('Wikidata')}
-            # ------------------------------------------gebouwLabel---------------------------------------
-            # Naam van het gebouw.
-            OPTIONAL {
-              ?gebouwWD (wdt:P1705|rdfs:label) ?gebouwLabel .
-              FILTER(LANG(?gebouwLabel) = "nl")
-            }
-            # --------------------------------------Rijksmonumentnummer---------------------------------
-            ?gebouwWD (wdt:P359) ?rijksmonumentnummer . # rijksmonumentnummer toevoegen indien aanwezig.
-            #----------------------------------------------afbeelding-----------------------------------------
-            # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
-            OPTIONAL {
-              ?gebouwWD wdt:P18 ?afbeelding .
-              FILTER(REGEX(str(?afbeelding), "(?i)\\.(jpg|gif|jpeg|png)", "i")) # Let op; geen .tif
-            }
-
-              OPTIONAL { ?gebouwWD wdt:P625 ?geoLocatieWDrn . }
-            #-----------------------------------------eventStartDate------------------------------------
-            OPTIONAL{
-              ?gebouwWD (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?eventStartDate .
-              FILTER(YEAR(?eventStartDate) > 1900) # een extra check op foute invoering in wikidata.
-            }
-            BIND(YEAR(?eventStartDate) AS ?eventStartYearWDrn)
           }
         }
-      }
-      #--------------------------------------------------------------------------------------------
-      #--------------------------------------------------------------------------------------------
-      UNION
-      #--------------------------------------------------------------------------------------------
-      #------------------------Dataset 4 Het Nieuwe Instituut-------------------------------------
-      {
-        SELECT DISTINCT ?gebouwHNI ?bron (MAX(?afbeelding) AS ?mediaHNI)
-          (MAX(?gebouwLabel) AS ?eventLabelHNI)
-          (MAX(?collectie) AS ?colectieNaam)
-          (MAX(?objectType) AS ?eventMediaAlt)
-          (MAX(?id) AS ?collectieID)
-          (MAX(?startjaar2) AS ?eventStart)
-          (MAX(?beschrijvingHNI2) AS ?beschrijving4)
-          (MAX(?type) AS ?eventType)
-        WHERE{
-          SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/knowledge-graph/sparql>{
-            VALUES ?property {
-            dct:contributor thesau:256 thesau:26455 thesau:5234
-            thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator
-            rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
-          }
-            ?gebouwHNI ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
-            #--------------------------------------Beschrijving--------------------------------------
-            OPTIONAL{
-              ?gebouwHNI schema:description|schema:abstract ?beschrijvingHNI .
+        #--------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------
+        UNION
+        #--------------------------------Dataset 3 Wikidata-----------------------------------------
+        #--------------------------------------------------------------------------------------------
+        {
+          SELECT DISTINCT ?gebouwWD ?bron ?rijksmonumentnummer (MAX(?geoLocatieWDrn) AS ?geoLocatieWDrn3)
+            (MAX(?gebouwLabel) AS ?eventLabelWDrn)
+            (SAMPLE(?afbeelding) AS ?mediaWDrn)
+            (SAMPLE(xsd:string(?eventStartYearWDrn)) AS ?eventStartWDrn)
+
+          WHERE {
+            SERVICE <https://query.wikidata.org/sparql> {
+              {
+                SELECT DISTINCT ?gebouwWD WHERE {
+                  ?gebouwWD p:P84 ?statement0.
+                  ?statement0 (ps:P84/(wdt:P279*)) wd:Q160435. # wd:Q160435 = Gerrit Rietveld
+                }
+              }
+              # ------------------------------------------bronLabel---------------------------------------
+              #Label toevoegen zodat er duidelijk is waar data vandaan komt.
+              VALUES (?bron) {
+                      ('Wikidata')
+                      }
+              # ------------------------------------------gebouwLabel---------------------------------------
+              # Naam van het gebouw.
+              OPTIONAL {
+                ?gebouwWD (wdt:P1705|rdfs:label) ?gebouwLabel .
+                FILTER(LANG(?gebouwLabel) = "nl")
+              }
+              # --------------------------------------Rijksmonumentnummer---------------------------------
+              ?gebouwWD (wdt:P359) ?rijksmonumentnummer . # rijksmonumentnummer toevoegen indien aanwezig.
+              #----------------------------------------------afbeelding-----------------------------------------
+              # filter alleen afbeelding format dat werkt met de tijdlijn visualisatie.
+              OPTIONAL {
+                ?gebouwWD wdt:P18 ?afbeelding .
+                FILTER(REGEX(str(?afbeelding), "(?i)\\.(jpg|gif|jpeg|png)", "i")) # Let op; geen .tif
+              }
+
+              OPTIONAL {
+                ?gebouwWD wdt:P625 ?geoLocatieWDrn .
+              }
+              #-----------------------------------------eventStartDate------------------------------------
+              OPTIONAL{
+                ?gebouwWD (wdt:P571|wdt:P276/(pqv:P580*)|wdt:P1619|wdt:P1319|ps:P580) ?eventStartDate .
+                FILTER(YEAR(?eventStartDate) > 1900) # een extra check op foute invoering in wikidata.
+              }
+              BIND(YEAR(?eventStartDate) AS ?eventStartYearWDrn)
             }
-            BIND(SUBSTR(?beschrijvingHNI, 1, 500) AS ?beschrijvingHNI1)
-            BIND(CONCAT(?beschrijvingHNI1,"...") AS ?beschrijvingHNI2)
-            # OPTIONAL{?gebouwHNI dct:contributor/schema:name|thesau:5234/schema:name ?contributor .}
-            # OPTIONAL{?gebouwHNI schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?objectType .}
-            # OPTIONAL{?gebouwHNI schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .}
-            #------------------------------------------jaar-----------------------------------------
-            OPTIONAL{
-              ?gebouwHNI schema:dateCreated/cidoc:P82a_begin_of_the_begin|
-                         schema:datePublished|
-                         rico:date/rico:hasBeginningDate ?startjaar .
-              BIND(SUBSTR(?startjaar, 1, 4) AS ?startjaar2)
-            }
-            #------------------------------------afbeelding---------------------------------------
-            OPTIONAL{
-              ?gebouwHNI (schema:associatedMedia/schema:image) ?afbeelding1 .
-            }
-            OPTIONAL {
-              ?gebouwHNI (schema:url|schema:associatedMedia/schema:image) ?afbeelding2 .
-            }
-            BIND(COALESCE(?afbeelding1, ?afbeelding2) AS ?afbeelding)
-            #------------------------------------gebouwLabel---------------------------------------
-            OPTIONAL{
-              ?gebouwHNI skos:prefLabel|rico:title|schema:name|schema:artform/rdfs:label ?gebouwLabel .
-            }
-            BIND(IF(REGEX(?gebouwLabel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw",
-                 IF(REGEX(?gebouwLabel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel",
-                 IF(REGEX(?gebouwLabel, "(interieur|zaal|inrichting)", "i"), "interieur","overig"))) AS ?type)
-            FILTER(?type = "gebouw")
-            FILTER(!REGEX(?gebouwLabel, "Zitmeubel", "i"))
-            VALUES (?bron) {
-                    ('Het Nieuwe Instituut')
-                    }
           }
         }
-        GROUP BY ?bron ?gebouwHNI ?eventType ?afbeelding3
+        #--------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------
+        UNION
 
         #--------------------------------------------------------------------------------------------
+        #------------------------Dataset 4 Het Nieuwe Instituut-------------------------------------
+        {
+          SELECT DISTINCT ?gebouwHNI ?bron (MAX(?afbeelding) AS ?mediaHNI)
+            (MAX(?gebouwLabel) AS ?eventLabelHNI)
+            (MAX(?collectie) AS ?colectieNaam)
+            (MAX(?objectType) AS ?eventMediaAlt)
+            (MAX(?id) AS ?collectieID)
+            (MAX(?startjaar2) AS ?eventStart)
+            (MAX(?beschrijvingHNI2) AS ?beschrijving4)
+            (MAX(?type) AS ?eventType)
+          WHERE{
+            SERVICE <https://api.collectiedata.hetnieuweinstituut.nl/datasets/the-other-interface/knowledge-graph/services/default/sparql>{
+              VALUES ?property {
+              dct:contributor thesau:256 thesau:26455 thesau:5234
+              thesau:2136 thesau:2109 thesau:1803 thesau:176 schema:creator
+              rico:isCreatorOf rico:isAgentAssociatedWithAgent rel:cre
+            }
+              ?gebouwHNI ?property <https://collectiedata.hetnieuweinstituut.nl/id/people/12546> .
+              #--------------------------------------Beschrijving--------------------------------------
+              OPTIONAL{
+                ?gebouwHNI schema:description|schema:abstract ?beschrijvingHNI .
+              }
+              BIND(SUBSTR(?beschrijvingHNI, 1, 500) AS ?beschrijvingHNI1)
+              BIND(CONCAT(?beschrijvingHNI1,"...") AS ?beschrijvingHNI2)
+
+              #------------------------------------------jaar-----------------------------------------
+
+              OPTIONAL{
+                ?gebouwHNI schema:dateCreated/cidoc:P82a_begin_of_the_begin|schema:datePublished|
+                           rico:date/rico:hasBeginningDate ?startjaar2 .
+                #  BIND(SUBSTR(STR(?startjaar), 1, 4) AS ?startjaar2)
+              }
+
+
+              #------------------------------------afbeelding---------------------------------------
+              OPTIONAL{?gebouwHNI (schema:associatedMedia/schema:image) ?afbeelding .}
+
+              #------------------------------------gebouwLabel---------------------------------------
+
+              OPTIONAL{
+                ?gebouwHNI skos:prefLabel|rico:title|schema:name|schema:artform/rdfs:label ?gebouwLabel .
+              }
+              BIND(IF(REGEX(?gebouwLabel, "(huis|woning|woningen|flat|gebouw|huizen|wijk|winkel|toren|Bungalows|villa|Stedenbouwkundig|museum)", "i"), "gebouw",
+                   IF(REGEX(?gebouwLabel, "(stoel|zit|lessenaar|fauteuil|bank|tafel|bed)", "i"), "meubel",
+                   IF(REGEX(?gebouwLabel, "(interieur|zaal|inrichting)", "i"), "interieur","overig"))) AS ?type)
+              FILTER(?type = "gebouw")
+              FILTER(!REGEX(?gebouwLabel, "Zitmeubel", "i"))
+              VALUES (?bron) {
+                      ('Het Nieuwe Instituut')
+                      }
+            }
+          }
+          GROUP BY ?bron ?gebouwHNI ?eventType ?mediaHNI
+        }
         #--------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------
+
       }
+
+      GROUP BY ?rijksmonumentnummer ?gebouwHNI
     }
-    GROUP BY ?rijksmonumentnummer ?gebouwHNI
   }
-  #**************************************************************************************************
-BIND(COALESCE(?omschrijvingL2) AS ?eventMediaCredit)
 
-BIND(COALESCE(?maxgebouwWD, ?gebouw) AS ?WD)
-BIND(COALESCE(?eventLabelLaag2, ?gebouwLabel) AS ?itemTooltip)
-BIND(COALESCE(STR(?eventDateLaag2), STR(?eventStartYearWD)) AS ?eventDate)
-BIND(COALESCE(?eventMediaLaag2, ?mediaWD) AS ?eventMedia)
-BIND(COALESCE(?geoLocatieLaag2, ?geoLocatieWD1) AS ?geoLocatie1)
-BIND(?geoLocatie1 AS ?geoLocatie)
-BIND(COALESCE(IF(BOUND(?maxgebouwRM), ?maxgebouwRM, 
-              IF(BOUND(?maxgebouwWD), ?maxgebouwWD, 
-              IF(BOUND(?gebouw), ?gebouw, 
-              IF(BOUND(?maxgebouwHNI), ?maxgebouwHNI, ""))))) AS ?item)
+  #**************************************************************************************************
+  BIND(COALESCE(?omschrijvingL2) AS ?eventMediaCredit)
+
+  BIND(COALESCE(?maxgebouwWD, ?gebouw) AS ?WD)
+  BIND(COALESCE(?eventLabelLaag2, ?gebouwLabel) AS ?itemTooltip)
+  BIND(COALESCE(STR(?eventDateLaag2), STR(?eventStartYearWD)) AS ?eventDate)
+  BIND(COALESCE(?eventMediaLaag2, ?mediaWD) AS ?eventMedia)
+  BIND(COALESCE(?geoLocatieLaag2, ?geoLocatieWD1) AS ?geoLocatie1)
+  BIND(?geoLocatie1 AS ?geoLocatie)
+  BIND(COALESCE(IF(BOUND(?maxgebouwRM), ?maxgebouwRM,
+                IF(BOUND(?maxgebouwWD), ?maxgebouwWD,
+                IF(BOUND(?gebouw), ?gebouw,
+                IF(BOUND(?maxgebouwHNI), ?maxgebouwHNI, ""))))) AS ?item)
 
   #------------------------------------eventDescription----------------------------------------------
-  
+
   BIND(strdt(concat('''
 
        </h4><img src="''',?eventMedia,'''"; style="max-width:250px">
@@ -262,5 +273,4 @@ BIND(COALESCE(IF(BOUND(?maxgebouwRM), ?maxgebouwRM,
 
 
 }
-GROUP BY ?rijksmonumentnummer 
- 
+GROUP BY ?rijksmonumentnummer
