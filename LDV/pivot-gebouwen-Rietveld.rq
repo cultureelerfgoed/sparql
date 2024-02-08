@@ -182,9 +182,7 @@ SELECT DISTINCT ?eventLabel ?eventDate ?rijksmonumentnummer
             }
             BIND(SUBSTR(?beschrijvingHNI, 1, 500) AS ?beschrijvingHNI1)
             BIND(CONCAT(?beschrijvingHNI1,"...") AS ?beschrijvingHNI2)
-            # OPTIONAL{?gebouwHNI dct:contributor/schema:name|thesau:5234/schema:name ?contributor .}
-            # OPTIONAL{?gebouwHNI schema:artform/rdfs:label|schema:type/schema:Article|rdf:type ?objectType .}
-            # OPTIONAL{?gebouwHNI schema:archivedAt|rico:scopeAndContent|schema:isPartOf/schema:name ?collectie .}
+        
             #------------------------------------------jaar-----------------------------------------
             OPTIONAL{
               ?gebouwHNI schema:dateCreated/cidoc:P82a_begin_of_the_begin|

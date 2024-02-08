@@ -1,4 +1,5 @@
 #+ name: pivot-gebouwen-Rietveld-2
+#+ description: Gallerij met aantal voorbeelden van gebouwen vervaardigd door Gerrit Th. Rietveld.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -23,7 +24,7 @@ PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX thesau: <https://collectiedata.hetnieuweinstituut.nl/model/con/thesau/>
 
 SELECT DISTINCT ?rijksmonumentnummer ?widgetLabel ?maxgebouwRM ?maxgebouwWD ?maxgebouwHNI
-  ?widgetDescription ?eventDate  ?widgetImageLink ?widgetImageCaption ?widget 
+  ?widgetDescription ?eventDate  ?widgetImageLink ?widgetImageCaption 
   (MAX(?eventMedia1) AS ?widgetImage)
 
       (MAX(COALESCE(IF(Bound(?maxgebouwRM), ?maxbronRM,
