@@ -1,0 +1,15 @@
+#+ name: get-rijksmonumenten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonument/services/Rijksmonument/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceosp: <https://linkeddata.cultureelerfgoed.nl/def/ceosp/>
+
+select * where {
+
+  ?monument ceo:rijksmonumentnummer ?nummer .
+  ?monument ceosp:heeftGemeente ?gemeente .
+  BIND(STRAFTER(STR(?gemeente), "terms/") AS ?gemeentestring)
+
+
+} 
