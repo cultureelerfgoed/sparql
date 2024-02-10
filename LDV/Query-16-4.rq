@@ -22,7 +22,7 @@ WHERE {
  OPTIONAL { ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functienaam_.}
  OPTIONAL {  ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl_.}
   OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type_.}
-  FILTER(STRLEN(?omschrijving) >= 176 && STRLEN(?omschrijving) <=420)
+  FILTER(STRLEN(?omschrijving) >= 1551 && STRLEN(?omschrijving) <=4400)
 }
   }
 }GROUP BY ?rijksmonument ?standpunt_omschrijving ?omschrijving
