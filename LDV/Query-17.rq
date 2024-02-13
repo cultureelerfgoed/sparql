@@ -1,7 +1,6 @@
 #+ name: Query-17
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Aardbevingen/services/aardbevingen/sparql
 
-PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
 #DECLAREER PREFIXES
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

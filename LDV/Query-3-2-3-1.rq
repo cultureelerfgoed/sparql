@@ -50,7 +50,7 @@ FILTER((geof:distance(?geo,?shape, uom:meter)) < ?afstand )
  # FILTER(geof:distance(?geo, ?shape, uom:meter) <= 50)
   
 
-  BIND(?tijd as ?shapeLabel)
+  BIND(concat(?tijd, " ", ?link) as ?shapeLabel)
   
 }
 GROUP BY ?rmn ?aantal ?geo ?eventLabel ?eventStart ?date ?tijd ?diepte ?magnitude ?link ?geoLabel ?shape ?geoColor ?shapeColor ?shapeLabel ?plaatsnaam
