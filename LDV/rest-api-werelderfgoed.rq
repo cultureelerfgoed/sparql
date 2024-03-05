@@ -15,6 +15,7 @@
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
 construct {
   $this ?p1 ?o1.
   $this ceo:werelderfgoednummer ?url.
@@ -27,6 +28,7 @@ construct {
 } where {
   graph graph:instanties-rce {
     {
+      # Selecting distinct instances with their associated information
       select distinct $this ?werelderfgoednummer ?url {
         $this
           a ceo:Werelderfgoed ;
@@ -35,18 +37,25 @@ construct {
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
           ceo:registratiedatum ?registratiedatum ;
           ceo:heeftNaam/ceo:naam ?heeftNaam .
-      bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
+        # Creating URL based on the UNESCO list
+        bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
       }
       limit 5
-      # paginate
+      # Pagination (comment)
     }
-    # Extract additional information about the selected instances
-    $this ?p1 ?o1.
-    filter(?p1 != ceo:werelderfgoednummer)
-    $this ceo:werelderfgoednummer ?werelderfgoednummer .
-    bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
-    optional {
-# Filter out specific properties from the data    
+  }
+  # Including the 'werelderfgoed_hvdl' graph in the query
+  GRAPH graph:werelderfgoed_hvdl {
+    # Adding patterns for this graph here (not specified in the original query)
+    $this ceo:heeftGeometrie/ceo:oppervlakteInHectare ?oppervlakteinhectare.
+  }
+  # Extracting additional information about the selected instances
+  $this ?p1 ?o1.
+  filter(?p1 != ceo:werelderfgoednummer) # Filtering out werelderfgoednummer property
+  $this ceo:werelderfgoednummer ?werelderfgoednummer .
+  bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url) # Creating URL based on the UNESCO list
+  optional {
+    # Filtering out specific properties from the data
     $this ?p1 ?o1.
     optional {
       filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
@@ -68,5 +77,4 @@ construct {
       }
     }
   }
-}
 }
