@@ -8,15 +8,15 @@
 #- - registratiedatum, ex: 2021-11-22
 #- - werelderfgoedstatus, ex: werelderfgoed
 #- </p>
-#- Date: dd. 2023-11-20</br>
-#- Version: 0.5
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
-construct {
+CONSTRUCT {
   $this ?p1 ?o1.
   $this ceo:werelderfgoednummer ?url.
   ?o1 ?p2 ?o2.
@@ -25,11 +25,11 @@ construct {
   ?o4 ?p5 ?o5.
   ?o5 ?p6 ?o6.
   ?o6 ?p7 ?o7.
-} where {
-  graph graph:instanties-rce {
+} WHERE {
+  GRAPH graph:instanties-rce {
     {
       # Selecting distinct instances with their associated information
-      select distinct $this ?werelderfgoednummer ?url {
+      SELECT DISTINCT $this ?werelderfgoednummer ?url {
         $this
           a ceo:Werelderfgoed ;
           ceo:heeftWerelderfgoedstatus/skos:prefLabel ?werelderfgoedstatus ;
@@ -38,9 +38,9 @@ construct {
           ceo:registratiedatum ?registratiedatum ;
           ceo:heeftNaam/ceo:naam ?heeftNaam .
         # Creating URL based on the UNESCO list
-        bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
+        BIND(CONCAT('https://whc.unesco.org/en/list/',STR(?werelderfgoednummer)) AS ?url)
       }
-      limit 5
+      LIMIT 5
       # Pagination (comment)
     }
   }
@@ -51,24 +51,24 @@ construct {
   }
   # Extracting additional information about the selected instances
   $this ?p1 ?o1.
-  filter(?p1 != ceo:werelderfgoednummer) # Filtering out werelderfgoednummer property
+  FILTER(?p1 != ceo:werelderfgoednummer) # Filtering out werelderfgoednummer property
   $this ceo:werelderfgoednummer ?werelderfgoednummer .
-  bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url) # Creating URL based on the UNESCO list
-  optional {
+  BIND(CONCAT('https://whc.unesco.org/en/list/',STR(?werelderfgoednummer)) AS ?url) # Creating URL based on the UNESCO list
+  OPTIONAL {
     # Filtering out specific properties from the data
     $this ?p1 ?o1.
-    optional {
-      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+    OPTIONAL {
+      FILTER(?p1 NOT IN (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
       ?o1 ?p2 ?o2.
-      optional {
+      OPTIONAL {
         ?o2 ?p3 ?o3.
-        optional {
+        OPTIONAL {
           ?o3 ?p4 ?o4.
-          optional {
+          OPTIONAL {
             ?o4 ?p5 ?o5.
-            optional {
+            OPTIONAL {
               ?o5 ?p6 ?o6.
-              optional {
+              OPTIONAL {
                 ?o6 ?p7 ?o7.
               }
             }

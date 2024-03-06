@@ -1,12 +1,28 @@
 #+ name: rest-api-grondsporen
-#+ description: REST API query for the path grondsporen.
+#+ description: #####REST API query for the path grondsporen.</p>
+#- 
+#- This SPARQL query is designed to retrieve information related to "grondsporen," specifically grondsporen from the Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
 #- 
 #- Due to the time-out issue, levels 6 and 7 of nesting from line 44 to 49 were commented out.
+#- 
+#- - cultuurhistorischObjectnummer, ex: 10000026
+#- - vondstlocatie, ex: https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/vondstlocatie/6175943</br>
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-construct {
+# This query constructs a graph pattern by traversing linked data from a cultural heritage dataset.
+# It starts from a specific type of object (Grondsporen) and explores its relationships with other objects.
+# It also includes optional patterns for additional levels of depth in the traversal.
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+# The CONSTRUCT clause specifies the structure of the resulting graph pattern to be constructed.
+# It includes variables representing subject, predicate, and object for each triple pattern.
+
+CONSTRUCT {
   $this ?p1 ?o1.
   ?o1 ?p2 ?o2.
   ?o2 ?p3 ?o3.
@@ -14,42 +30,50 @@ construct {
   ?o4 ?p5 ?o5.
   ?o5 ?p6 ?o6.
   ?o6 ?p7 ?o7.
-} where {
-  graph graph:instanties-rce {
+} WHERE {
+  # The GRAPH clause specifies the named graph where the data is retrieved from.
+  GRAPH graph:instanties-rce {
     {
-      select distinct $this {
+      # The SELECT clause retrieves instances of a specific type of object (Grondsporen)
+      # along with certain properties and binds variables for filtering purposes.
+      SELECT DISTINCT $this {
         $this
           a ceo:Grondsporen;
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer.
-        bind(?archis2Vondstnummer as ?archis2Vondstnummer1)
-        optional {
+        BIND(?archis2Vondstnummer AS ?archis2Vondstnummer1)
+        OPTIONAL {
           $this ceo:archis2Vondstnummer ?archis2Vondstnummer2.
         }
-        filter(!bound(?archis2Vondstnummer1) || ?archis2Vondstnummer1 = ?archis2Vondstnummer2)
+        FILTER(!BOUND(?archis2Vondstnummer1) || ?archis2Vondstnummer1 = ?archis2Vondstnummer2)
         
-        bind(?vondstlocaties as ?vondstlocaties1)
-        optional {
+        BIND(?vondstlocaties AS ?vondstlocaties1)
+        OPTIONAL {
           $this ceo:ligtInObject ?vondstlocaties2.
           ?vondstlocaties2 a ceo:Vondstlocatie.
         }
-        filter(!bound(?vondstlocaties1) || ?vondstlocaties1 = ?vondstlocaties2)
+        FILTER(!BOUND(?vondstlocaties1) || ?vondstlocaties1 = ?vondstlocaties2)
       }
-      limit 5
-      # paginate
+      LIMIT 5
+      # Paginate
     }
+    # The subsequent triple patterns represent the traversal of linked data
+    # starting from the instances of Grondsporen and exploring their relationships.
+
     $this ?p1 ?o1.
-    optional {
-      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+    OPTIONAL {
+      # The OPTIONAL clause allows for optional traversal patterns,
+      # ensuring that if they are not present, the query still returns results.
+      FILTER(?p1 NOT IN (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
       ?o1 ?p2 ?o2.
-      optional {
+      OPTIONAL {
         ?o2 ?p3 ?o3.
-        optional {
+        OPTIONAL {
           ?o3 ?p4 ?o4.
-          optional {
+          OPTIONAL {
             ?o4 ?p5 ?o5.
-#            optional {
+#            OPTIONAL {
 #              ?o5 ?p6 ?o6.
-#              optional {
+#              OPTIONAL {
 #                ?o6 ?p7 ?o7.
 #              }
 #            }

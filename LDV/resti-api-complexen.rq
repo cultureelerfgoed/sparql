@@ -2,49 +2,71 @@
 #+ description: REST API query for the path complexen.
 #- 
 #- Due to the time-out issue, level 7 of nesting from line 37 to 39 was commented out.
+#- This SPARQL query is designed to retrieve information related to "complexen," specifically complexen consisting of build monuments from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- 
+#- - cultuurhistorischObjectnummer, ex.: 62476
+#- - complexnummer, ex: 531014
+#- - rijksmonumentnummer2, ex. 65314
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-construct {
+# PREFIX Declarations: Define namespace prefixes for the query.
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+# CONSTRUCT Clause: Specifies the pattern to be constructed in the query results.
+CONSTRUCT {
   $this ?p1 ?o1.
+  $this ceo:heeftRijksmonument ?rijksmonumentnummer.
   ?o1 ?p2 ?o2.
   ?o2 ?p3 ?o3.
   ?o3 ?p4 ?o4.
   ?o4 ?p5 ?o5.
   ?o5 ?p6 ?o6.
-  ?o6 ?p7 ?o78. 
-} where {
-  graph graph:instanties-rce {
+  ?o6 ?p7 ?o8. 
+} WHERE {
+  # WHERE Clause: Defines conditions that the data must meet to be included in the query results.
+  GRAPH graph:instanties-rce {
     {
-      select distinct $this {
+      # SELECT DISTINCT: Subquery selects distinct values for variable $this representing a complex object.
+      SELECT DISTINCT $this ?rijksmonumentnummer {
         $this
           a ceo:Complex;
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
-          ceo:complexnummer ?complexnummer.
+          ceo:complexnummer ?complexnummer;
+          ceo:heeftRijksmonument ?rijksmonumentnummer.
         
-        bind(?rijksmonumenten as ?rijksmonumenten1)
-        optional {
+        # BIND: Binds the value of ?rijksmonumenten to ?rijksmonumenten1.
+        BIND(?rijksmonumentnummer AS ?rijksmonumenten)
+        
+        # OPTIONAL: Specifies optional pattern to check if the complex object has a main object associated with it.
+        OPTIONAL {
           $this ceo:heeftHoofdobject ?rijksmonumenten2.
         }
-        filter(!bound(?rijksmonumenten1) || ?rijksmonumenten1 = ?rijksmonumenten2)
+        
+        # FILTER: Filters results based on conditions, ensuring either ?rijksmonumenten1 is not bound or it matches ?rijksmonumenten2.
+        FILTER(!BOUND(?rijksmonumenten) || ?rijksmonumentnummer = ?rijksmonumenten)
       }
-      limit 5
+      LIMIT 5
+      # Pagination Logic: Limits the number of results returned by the query.
       # paginate
     }
     $this ?p1 ?o1.
-    optional {
-      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+    OPTIONAL {
+      # FILTER: Filters results to exclude specific properties.
+      FILTER(?p1 NOT IN (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
       ?o1 ?p2 ?o2.
-      optional {
+      OPTIONAL {
         ?o2 ?p3 ?o3.
-        optional {
+        OPTIONAL {
           ?o3 ?p4 ?o4.
-          optional {
+          OPTIONAL {
             ?o4 ?p5 ?o5.
-            optional {
+            OPTIONAL {
               ?o5 ?p6 ?o6.
-#              optional {
+#              OPTIONAL {
 #                ?o6 ?p7 ?o7.
 #              }
             }
