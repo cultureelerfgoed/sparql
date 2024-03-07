@@ -1,0 +1,64 @@
+#+ name: rijksmonument-3d
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix bag:  <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt:  <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix wde: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+select
+  ?bagWkt (10 as ?bagWktHeight) (5 as ?bagWktZ) ('green' as ?bagWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?gebouw)),'">BAG geometrie van een gebouw</a>'),rdf:HTML) as ?bagWktLabel)
+  ?bgtWkt (15 as ?bgtWktHeight) (10 as ?bgtWktZ) ('dodgerblue' as ?bgtWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?gebouw)),'">BGT geometrie van een gebouw</a>'),rdf:HTML) as ?bgtWktLabel)
+  #?perceelWkt (1 as ?perceelWktHeight) ('yellow' as ?perceelWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?perceel)),'">BRK geometrie van een perceel </a>'),rdf:HTML) as ?perceelWktLabel)
+  ?rceWkt ('purple' as ?rceWktColor) ?rceWktLabel
+{
+  bind(<https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/rijksmonument/15494> as ?rijksmonument)
+  bind('https://data.labs.kadaster.nl/dst/kkg/browser?resource=' as ?prefix)
+  ?rijksmonument
+    a ceo:Rijksmonument;
+    ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
+    ceo:heeftGeometrie/geo:asWKT ?rceWkt;
+    ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam;
+    ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
+  optional { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl. }
+  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+    ?gebouw
+      a sor:Gebouw;
+      geo:hasGeometry
+        [ geo:asWKT ?bagWkt; rdfs:isDefinedBy bag: ],
+        [ geo:asWKT ?bgtWkt; rdfs:isDefinedBy bgt: ];
+      sor:geregistreerdMet
+        [ nen3610:identificatie ?bagId; rdfs:isDefinedBy bag: ];
+      sor:oorspronkelijkBouwjaar ?bouwjaarKadaster.
+    ?perceel
+      a sor:Perceel;
+      geo:hasGeometry/geo:asWKT ?perceelWkt;
+      sor:hoortBij ?nummeraanduiding.
+    ?vbo
+      a sor:Verblijfsobject;
+      sor:hoofdadres ?nummeraanduiding;
+      sor:maaktDeelUitVan ?gebouw.
+  }
+  service <https://query.wikidata.org/sparql> {
+    ?wikidata
+      wdt:P5208 ?bagId;
+      wdt:P580 ?bouwjaarWikidata;
+      wdt:P18 ?img;
+      rdfs:label ?label.
+    filter(lang(?label) = 'nl')
+  }
+  bind(strdt(concat(
+    '<img src=',str(?img),'>',
+    '<p>',str(?omschrijving),' [<a href="',str(?rijksmonument),'">RCE</a>]</p>',
+    '<dl>',
+      '<dt>Bouwjaar (<a href="',str(?wikidata),'">Wikidata</a>)</dt><dd>',str(year(?bouwjaarWikidata)),'</dd>',
+      '<dt>Bouwjaar (Kadaster)</dt><dd>',str(?bouwjaarKadaster),'</dd>',
+    '</dl>'),rdf:HTML) as ?rceWktLabel)
+}
