@@ -23,34 +23,23 @@ SELECT DISTINCT ?choi ?rmn ?geo ?beeldbank (SAMPLE(?image) AS ?sampleImage) ?afb
     '   <br><br>',
     '</div>'
   ), rdf:HTML) AS ?widget)
-  (strdt(concat(
-    '<div style="background-color:rgba(0,0,0,.2);">',
-    '   <center><img src="{{sampleImage}}" style="max-width: 200px;"></center>',
-    '   <ul>',
-    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rmn), '" target="_blank">', STR(?rmn), '</a></li>',
-    '      <li>{{naam}}</li>',
-    '      <li>In: <a href="', STR(?beeldbank), '" target="_blank">Beeldbank</a></li>',
-    '   </ul>',
-    '   <br><br>',
-    '</div>'
-  ), rdf:HTML) AS ?geoLabel)
 
 FROM <https://linkeddata.cultureelerfgoed.nl/graph/image>
 FROM <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce>
 
 WHERE {
   SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql> {
-    ?choi a ceo:Rijksmonument .  # Select Rijksmonument objects
-    ?choi ceo:rijksmonumentnummer ?rmn.  # Retrieve the Rijksmonumentnummer
-    ?choi ceo:heeftGeometrie/geo:asWKT ?geo  # Retrieve the geometry information
+    ?choi a ceo:Rijksmonument .  
+    ?choi ceo:rijksmonumentnummer ?rmn.  
+    ?choi ceo:heeftGeometrie/geo:asWKT ?geo  
   }
 
-  ?afb a edm:ProvidedCHO .  # Select ProvidedCHO objects
-  ?afb edm:aggregatedCHO ?choi.  # Link to the corresponding Rijksmonument (?choi)
-  ?afb foaf:depiction ?image.  # Retrieve the image
-  ?afb dc:description ?naam.  # Retrieve the description
-  ?afb edm:isShownAt ?beeldbank.  # Retrieve the Beeldbank link
-  FILTER (regex(str(?beeldbank), "beeldbank" , "i"))  # Filter by Beeldbank link containing "beeldbank"
+  ?afb a edm:ProvidedCHO .  
+  ?afb edm:aggregatedCHO ?choi.  
+  ?afb foaf:depiction ?image.  
+  ?afb dc:description ?naam.  
+  ?afb edm:isShownAt ?beeldbank.  
+#  FILTER (regex(str(?beeldbank), "beeldbank" , "i"))  
 }
-
+GROUP BY ?choi ?rmn ?geo ?beeldbank ?naam ?afb
 LIMIT 100

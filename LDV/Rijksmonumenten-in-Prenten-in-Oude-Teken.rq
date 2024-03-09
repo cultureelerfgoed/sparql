@@ -12,21 +12,24 @@ prefix cidoc: <http://www.cidoc-crm.org/cidoc-crm/>
 
 select DISTINCT *
 WHERE {
-  ?pot a cidoc:E22_Human-Made_Object.
-  ?pot cidoc:P2_has_type <https://data.cultureelerfgoed.nl/term/id/ceo/Stelselcatalogus/cfd00113-d749-421d-98aa-b9c0f916ad6c>.
- ?pot cidoc:P190_has_symbolic_content ?pot_mon.
-  OPTIONAL {?pot cidoc:P62_depicts ?depicts.}
-  OPTIONAL {?pot rdfs:label ?label.}
-  OPTIONAL {?pot cidoc:P138i_has_representation ?afb.}
-  OPTIONAL {?afb la:digitally_shown_by ?a.}
-  OPTIONAL {?a la:access_point ?b.}
- # FILTER (regex(str(?b), "images", "i"))
+  ?pot1 a cidoc:E22_Human-Made_Object.
+  ?pot1 cidoc:P2_has_type <https://data.cultureelerfgoed.nl/term/id/rn/2b73b05a-b83a-423d-a95a-3633664d00b8>.
+  ?pot1 cidoc:P129i_is_subject_of/rdfs:label ?onderwerp .
+  OPTIONAL {?pot1 cidoc:P62_depicts ?depiction.}
+  OPTIONAL {?depiction rdfs:label ?label.
+  ?pot1 cidoc:P129i_is_subject_of ?ff.
+  ?ff cidoc:P65_shows_visual_item ?ff2.
+  ?ff2 la:digitally_shown_by ?a.
+    ?a la:access_point ?b.}
+  ?depiction cidoc:P190_has_symbolic_content ?pot_mon.
+  FILTER (regex(str(?b), "images", "i"))
 
-#SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/default/sparql>
- #    {
- # ?choi a ceo:Rijksmonument. 
- # ?choi ceo:heeftGeometrie/geo:asWKT?geo.    
- # ?choi ceo:rijksmonumentnummer ?pot_mon.
-  #  }}
+SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql>
+     {
+  ?choi a ceo:Rijksmonument. 
+  ?choi ceo:heeftGeometrie/geo:asWKT ?geo.   
+    OPTIONAL {?choi ceo:heeftNaam/ceo:naam ?rmnaam.}
+  ?choi ceo:rijksmonumentnummer ?pot_mon.
+    }
   }
-#limit 150
+limit 150
