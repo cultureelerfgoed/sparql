@@ -11,7 +11,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT DISTINCT ?rijksmonumentnummer  
     (REPLACE(STR(?CBSCodeGemeente), "^0+", "") AS ?CBSCodeGemeente)  
-    ?subcat ?bovencat1 ?bovencat2 ?bovencat3 
+    ?subcat ?bovencat1 ?bovencat2 ?bovencat3 ?successor
+    (REPLACE(STR(?CBSCodeGemeente_s), "^0+", "") AS ?CBSCodeGemeente_s)
 WHERE {
   ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer 
 ; ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente 
@@ -31,7 +32,10 @@ WHERE {
  #  Minus status geen rijksmonument
   MINUS {?rijksmonument ceo:heeftJuridischeStatus 
         <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>} . 
-  GRAPH <https://triplydb.com/koop/owms/graphs/default> {?gemeente owms:CBSCode ?CBSCodeGemeente
+  GRAPH <https://triplydb.com/koop/owms/graphs/default> {
+    ?gemeente rdf:type <http://standaarden.overheid.nl/owms/terms/Gemeente> ; <http://standaarden.overheid.nl/owms/terms/CBSCode> ?CBSCodeGemeente
+             optional { ?gemeente <http://standaarden.overheid.nl/owms/terms/successor> ?successor . ?successor <http://standaarden.overheid.nl/owms/terms/CBSCode> ?CBSCodeGemeente_s
+  }
 }
-} 
+  }
 OFFSET 20001 LIMIT 10000
