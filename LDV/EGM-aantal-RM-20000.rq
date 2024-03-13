@@ -11,18 +11,25 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT DISTINCT ?rijksmonumentnummer  
     (REPLACE(STR(?CBSCodeGemeente), "^0+", "") AS ?CBSCodeGemeente)  
-    ?subcat ?bovencat1 ?bovencat2 ?bovencat3 ?successor 
+    ?nv4_label ?nv3_label ?nv2_label ?nv1_label ?successor
     (REPLACE(STR(?CBSCodeGemeente_s), "^0+", "") AS ?CBSCodeGemeente_s)
 WHERE {
   ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer 
 ; ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente 
-; ceo:heeftOorspronkelijkeFunctie ?f_uri . ?f_uri ceo:heeftFunctieNaam ?f_urinaam 
-; ceo:hoofdfunctie "1"^^xsd:boolean .
+; ceo:heeftOorspronkelijkeFunctie ?functie . ?functie ceo:heeftFunctieNaam ?nv4 ; ceo:hoofdfunctie "1"^^xsd:boolean .
  GRAPH graph:bebouwdeomgeving { 
-    ?f_urinaam skos:broader ?broader1 . ?f_urinaam skos:prefLabel ?subcat .?broader1 skos:prefLabel ?bovencat1 .
-    OPTIONAL {?broader1 skos:broader ?broader2 . ?broader2 skos:prefLabel ?bovencat2 . }
-    OPTIONAL {?broader2 skos:broader ?broader3 . ?broader3 skos:prefLabel ?bovencat3 .}
-  } 
+    ?nv4 skos:broader ?nv3 .
+    ?nv4 skos:prefLabel ?nv4_label .
+    ?nv3 skos:prefLabel ?nv3_label .
+    OPTIONAL {
+      ?nv3 skos:broader ?nv2 .
+      ?nv2 skos:prefLabel ?nv2_label .
+    }
+    OPTIONAL {
+      ?nv2 skos:broader ?nv1 .
+      ?nv1 skos:prefLabel ?nv1_label .
+    } 
+  }
   # Minus monumentaard archeologisch
   MINUS {?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/b673c8c1-5d93-496d-8f9e-89133d579d77> .
   }
@@ -34,7 +41,7 @@ WHERE {
         <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>} . 
   GRAPH <https://triplydb.com/koop/owms/graphs/default> {
     ?gemeente rdf:type <http://standaarden.overheid.nl/owms/terms/Gemeente> ; <http://standaarden.overheid.nl/owms/terms/CBSCode> ?CBSCodeGemeente
-             optional { ?gemeente <http://standaarden.overheid.nl/owms/terms/successor> ?successor . ?successor <http://standaarden.overheid.nl/owms/terms/CBSCode> ?CBSCodeGemeente_s
+    optional { ?gemeente <http://standaarden.overheid.nl/owms/terms/successor> ?successor . ?successor <http://standaarden.overheid.nl/owms/terms/CBSCode> ?CBSCodeGemeente_s   
   }
 }
 }

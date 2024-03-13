@@ -1,6 +1,10 @@
 #+ name: Query-6-10
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
 # We definiëren de gebruikte prefixes voor namespaces aan het begin van de query.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -9,7 +13,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
 # We selecteren de variabelen die we willen ophalen in de resultaten.
-SELECT ?rijksmonument ?nummer ?omschrijving 
+SELECT ?rijksmonument ?nummer  ?label ?kerk (REPLACE(?omschrijvingen, "\n", " ") AS ?omschrijvingen)
 
 # Hier begint de query voor het ophalen van de gegevens.
 WHERE 
@@ -21,7 +25,7 @@ WHERE
     ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
     ?rijksmonument ceo:rijksmonumentnummer ?nummer.
     ?rijksmonument ceo:heeftOmschrijving ?standpunt_omschrijving.
-    ?standpunt_omschrijving ceo:omschrijving ?omschrijving .
+    ?standpunt_omschrijving ceo:omschrijving ?omschrijvingen.
     ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
 
     # We halen de juridische status en oorspronkelijke functie op.
@@ -29,9 +33,12 @@ WHERE
     ?status skos:prefLabel ?statusLabel.
     ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
     ?functie ceo:heeftFunctieNaam ?uri.
+    ?uri skos:prefLabel ?kerk .
+     # We voegen een filter toe op de skos:prefLabel van de uri waarin "kerk" voorkomt.
+    FILTER(regex(STR(?kerk), "kerk", "i" ))
 
     # We voegen een filter toe op basis van de lengte van de omschrijving.
-    FILTER(STRLEN(?omschrijving) >= ?min && STRLEN(?omschrijving) <= ?max)
+    FILTER(STRLEN(?omschrijvingen) >= ?min && STRLEN(?omschrijvingen) <= ?max)
   }
   {
     GRAPH graph:bebouwdeomgeving {
@@ -59,11 +66,12 @@ WHERE
       ?narrow skos:narrower+ ?uri .
     }
   }
+
   # We berekenen het jaar van inschrijving en filteren op een bepaalde periode.
   BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
   FILTER (?jaarInschrijving >= "1964"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <= "2023"^^<http://www.w3.org/2001/XMLSchema#integer>)
   BIND(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
-}
+} 
 
 # We voegen een ORDER BY-clausule toe om de resultaten te sorteren op basis van de lengte van de omschrijving.
-ORDER BY ASC(STRLEN(?omschrijving))
+ORDER BY ASC(STRLEN(?omschrijvingen))

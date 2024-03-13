@@ -9,7 +9,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 
-SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image) AS ?sampleImage)
+SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image) AS ?sampleImage) ?geo
 (GROUP_CONCAT(DISTINCT CONCAT('<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', uri(?rmn), '" target="_blank">', ?temple_name, '</a>'); SEPARATOR=" of ") AS ?temple_name_us)
 (GROUP_CONCAT(DISTINCT ?occupation; SEPARATOR=", ") as ?occupations)
 (GROUP_CONCAT(DISTINCT ?status; SEPARATOR=", ") as ?statuss)
@@ -41,6 +41,7 @@ WHERE {
     ?wikirm wdt:P1435 wd:Q916333.
     ?wikirm wdt:P18 ?image.
     ?wikirm wdt:P359 ?rmn.
+    ?wikirm wdt:P625 ?geo .
   }   
   
   ?temple ceox:hoortBij ?grave .
@@ -57,4 +58,4 @@ WHERE {
 }
 
 ORDER BY DESC (?birthYear)
-#LIMIT 10
+LIMIT 10
