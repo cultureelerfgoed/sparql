@@ -1,0 +1,21 @@
+#+ name: Query-3-8
+#+ description: Geeft aan op type schilderij waarop technisch rapport betrekking heeft.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Van-Gogh-World-Wide-RCE/services/Van-Gogh-World-Wide-RCE/sparql
+
+# Geeft aan op type schilderij waarop technisch rapport betrekking heeft.
+prefix crm: <http://www.cidoc-crm.org/cidoc-crm/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select distinct ?technisch_rapport 
+where {
+  ?tr_uri a crm:E33_Linguistic_Object ; 
+           crm:P67_refers_to ?schilderij ; 
+           crm:P2_has_type/rdfs:label ?schilderij_ondergrond ;
+            crm:P2_has_type/rdfs:label ?schilderij_genre ;
+          crm:P2_has_type/rdfs:label ?materiaal_technisch_onderzoek_naar ;
+           crm:P1_is_identified_by ?titel_uri . 
+  ?titel_uri a crm:E33_E41_Linguistic_Appellation ; 
+             crm:P190_has_symbolic_content ?technisch_rapport .
+
+}
+    

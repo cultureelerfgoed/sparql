@@ -1,0 +1,18 @@
+#+ name: Query-2-11
+#+ description: Geeft aan op welk De La Faille Nummer het technisch rappport betrekking heeft
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Van-Gogh-World-Wide-RCE/services/Van-Gogh-World-Wide-RCE/sparql
+
+# Technisch rapport heeft betrekking schilderij met het de la faille nummer
+prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> 
+
+select 
+  #distinct ?p
+  
+  ?technischrapport ?deLaFailleNummer
+
+where {
+  ?tr_uri a crm:E33_Linguistic_Object ; crm:P67_refers_to ?schilderij ;
+    crm:P1_is_identified_by ?titel_uri . ?titel_uri a crm:E33_E41_Linguistic_Appellation ; crm:P190_has_symbolic_content ?technischrapport . 
+  ?schilderij <http://www.cidoc-crm.org/cidoc-crm/P1_is_identified_by> ?id . 
+   ?id crm:P190_has_symbolic_content ?deLaFailleNummer . ?id  crm:P2_has_type <https://vangoghworldwide.org/data/concept/f_number> .
+} 
