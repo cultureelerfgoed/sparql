@@ -8,7 +8,7 @@ prefix crm: <http://www.cidoc-crm.org/cidoc-crm/>
 select 
   #distinct ?p
   
-  ?technischrapport ?deLaFailleNummer
+  ?technischrapport
 
 where {
   ?tr_uri a crm:E33_Linguistic_Object ; crm:P67_refers_to ?schilderij ;
