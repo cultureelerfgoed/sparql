@@ -2,14 +2,25 @@
 #+ description: Koppeling met wikidata
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Van-Gogh-World-Wide-RCE/services/Van-Gogh-World-Wide-RCE/sparql
 
-# Van Gogh World Wid - wikidata
 PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?technischrapport ?deLaFailleNummer ?schilderij (SAMPLE(?locatie_wiki) AS ?locatie_wiki) ?locatie_schilderij (SAMPLE(?afbeelding) AS ?afbeelding)
+SELECT DISTINCT ?technischrapport ?deLaFailleNummer ?schilderij (SAMPLE(?locatie_wiki) AS ?locatie_wiki) ?locatie_schilderij (SAMPLE(?afbeelding) AS ?afbeelding) (GROUP_CONCAT(?beeldtUit; separator=", ") AS ?beeldtUit) 
+
+
+('''<div style="background-color:rgba(0,0,0,.2);">
+<center><img src="{{afbeelding}}" style="max-width: 150px;"></center>
+<p> <b>Titel:</b> {{schilderij}}</p>
+<p> <b>Beeldt uit:</b> {{beeldtUit}}</p>
+<p> <b>Locatie:</b> {{locatie_schilderij}}</p>
+<p><b>Technische rapportage:</b> {{technischrapport}}</p>
+  '''^^rdf:HTML as ?widget)
+
 
 WHERE {
 
@@ -33,14 +44,19 @@ SERVICE <https://query.wikidata.org/sparql>
 # Q3305213. = painting
 wdt:P31 wd:Q3305213 ;
 # P1476 = title
-wdt:P1476 ?schilderij ;
+wdt:P1476 ?schilderij  ;
 # P528 = catalog code
 wdt:P528 ?deLaFailleNummer . FILTER (STRSTARTS(STR(?deLaFailleNummer), "F")) . 
 # P170 = creator, Q5582 = Vincent van Gogh
 OPTIONAL { ?schilderij_wiki wdt:P170 wd:Q5582 } .
+# P180 = beeldt uit
+OPTIONAL { ?schilderij_wiki wdt:P180 ?beeldtUit_uri . ?beeldtUit_uri rdfs:label ?beeldtUit } .
+FILTER (LANG(?beeldtUit) = "en") . 
 # P276 = location
 OPTIONAL { ?schilderij_wiki wdt:P276 ?locatie_wiki . ?locatie_wiki rdfs:label ?locatie_schilderij . FILTER (LANG(?locatie_schilderij) = "en") } .              
 # P18 = image
-OPTIONAL { ?schilderij_wiki wdt:P18 ?afbeelding .  FILTER(REGEX(STR(?afbeelding), "gogh", "i"))  } .             
+OPTIONAL { ?schilderij_wiki wdt:P18|foaf:depiction ?afbeelding .  FILTER(REGEX(STR(?afbeelding), "gogh", "i"))  } .   
+FILTER (LANG(?schilderij) = "en") . 
 } 
-}
+
+} order by ?deLaFailleNummer
