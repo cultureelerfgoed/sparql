@@ -29,7 +29,7 @@ CONSTRUCT {
   GRAPH graph:instanties-rce {
     {
       # Selecting distinct instances with their associated information
-      SELECT DISTINCT $this ?werelderfgoednummer ?url {
+      SELECT DISTINCT $this ?werelderfgoednummer  {
         $this
           a ceo:Werelderfgoed ;
           ceo:heeftWerelderfgoedstatus/skos:prefLabel ?werelderfgoedstatus ;
