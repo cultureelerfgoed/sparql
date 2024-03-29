@@ -1,0 +1,57 @@
+#+ name: gezichten-hvdl-geo
+#+ description: ##### Query for the path gezicht(en).</p>
+#- This SPARQL query is designed to retrieve information related to "gezichten," specifically stads- en dorpsgezichten (urban and village views) from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- - gezichtsnummer, ex.: 1439
+#- - cultuurhistorischObjectnummer, ex.: 10134173
+#- - gezichtsstatus, ex.: rijksbeschermd stads- of dorpsgezicht
+#- - naam, ex.: Kamerik
+#- - registratiedatum, ex: 1966-08-04
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select *
+where {
+  graph graph:instanties-rce {
+    ?gezicht a ceo:Gezicht ;
+             ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus ;
+             ceo:gezichtsnummer ?gezichtsnummer ;
+             ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+             ceo:registratiedatum ?registratiedatum ;
+             ceo:heeftNaam/ceo:naam ?heeftNaam ;
+             ceo:bijzonderGebied ?bijzondergebied ;
+             ceo:heeftKennisregistratie ?kennisregistratie ;
+             ceo:heeftGeometrie ?geometrie .
+    ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
+    ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
+    ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam.
+
+    ?geometrie ceo:asWKT-RD ?geometrie_rd.
+    ?geometrie geo:asWKT ?geometrie_WGS84.
+    ?geometrie ceo:heeftGeometrieKwaliteit/skos:prefLabel ?geometriekwaliteit.
+
+    # Creating URL
+    bind(concat('https://archisarchief.cultureelerfgoed.nl/Beschermde_Gezichten/BG', str(?gezichtsnummer)) as ?url)
+
+
+    # Including the 'werelderfgoed_hvdl' graph in the query
+    graph graph:gezicht_hvdl {
+        ?geometrie ceo:asWKT-RD ?geometrie_rd_ .
+        ?gezicht ceo:inProceduredatumGezicht ?inProceduredatumGezicht.
+        ?geometrie ceo:heeftOndergrondGezicht/skos:prefLabel ?ondergrondgezicht.
+        ?geometrie ceo:oppervlakteInHectare ?oppervlakteinhectare.
+        ?geometrie ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers.
+      }
+    }
+    # Defining ?geometrie_WGS84Label and setting ?geometrie_WGS84Color to 'Red'
+    BIND(CONCAT('Naam: ', ?heeftNaam, ', Gezichtsnummer: ', ?gezichtsnummer, ', Registratiedatum: ', ?registratiedatum) as ?geometrie_WGS84Label)
+    # bind(?geometrie_WGS84 as ?geometrie_WGS84Label)
+    bind("red" as ?geometrie_WGS84Color)
+    bind(30 as ?geometrie_WGS84Height)
+  }

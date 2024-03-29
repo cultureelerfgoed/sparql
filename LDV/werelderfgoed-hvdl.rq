@@ -1,0 +1,52 @@
+#+ name: werelderfgoed-hvdl
+#+ description: #### Guery for the path werelderfgoed.</p>
+#- This SPARQL query is designed to retrieve information about Dutch UNESCO World Heritage Sites (Unesco Werelderfgoederen in Dutch) from the Cultural Heritage Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- 
+#- - werelderfgoednummer, ex: 1349
+#- - cultuurfistorischObjectnummer, ex: 10134675
+#- - heeftNaam, ex: Hollandse Waterlinies
+#- - registratiedatum, ex: 2021-11-22
+#- - werelderfgoedstatus, ex: werelderfgoed
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select ?werelderfgoed ?cultuurhistorischObjectnummer ?werelderfgoedstatus ?werelderfgoedtype ?werelderfgoednummer ?registratiedatum ?jaarvaninschrijving ?heeftNaam ?huidigeNaam ?registratiedatum_naam ?formeelStandpunt
+  ?geometrietype ?geometriekwaliteit ?geometrie_rd ?geometrie_WGS84 ?oppervlakteinvierkantekilometers ?oppervlakteinvierkantemeters ?oppervlakteinhectare
+where {
+  graph graph:instanties-rce {
+    ?werelderfgoed a ceo:Werelderfgoed ;
+                   ceo:heeftWerelderfgoedstatus/skos:prefLabel ?werelderfgoedstatus ;
+                   ceo:werelderfgoednummer ?werelderfgoednummer ;
+                   ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+                   ceo:registratiedatum ?registratiedatum ;
+                   ceo:heeftNaam/ceo:naam ?heeftNaam ;
+                   ceo:heeftKennisregistratie ?kennisregistratie ;
+                   ceo:heeftGeometrie ?geometrie .
+    ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
+    ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
+    ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam.
+    ?geometrie ceo:asWKT-RD ?geometrie_rd.
+    ?geometrie geo:asWKT ?geometrie_WGS84.
+    ?geometrie ceo:heeftGeometrieKwaliteit/skos:prefLabel ?geometriekwaliteit.
+    ?geometrie ceo:heeftGeometrieType/skos:prefLabel ?geometrietype.
+
+    # Creating URL based on the UNESCO list
+    bind(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) as ?url)
+
+    # Including the 'werelderfgoed_hvdl' graph in the query
+    graph graph:werelderfgoed_hvdl {
+        ?werelderfgoed ceo:jaarVanInschrijving ?jaarvaninschrijving.
+        ?werelderfgoed ceo:heeftWerelderfgoedType/skos:prefLabel ?werelderfgoedtype.
+        ?geometrie ceo:oppervlakteInHectare ?oppervlakteinhectare.
+        ?geometrie ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers.
+        ?geometrie ceo:oppervlakteInVierkanteMeters ?oppervlakteinvierkantemeters.
+       }
+    }
+  }
