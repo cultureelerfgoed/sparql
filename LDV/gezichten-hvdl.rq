@@ -20,7 +20,6 @@ select *
 where {
   graph graph:instanties-rce {
     ?gezicht a ceo:Gezicht ;
-             ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus ;
              ceo:gezichtsnummer ?gezichtsnummer ;
              ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
              ceo:registratiedatum ?registratiedatum ;
@@ -28,12 +27,16 @@ where {
              ceo:bijzonderGebied ?bijzondergebied ;
              ceo:heeftKennisregistratie ?kennisregistratie ;
              ceo:heeftGeometrie ?geometrie .
+    optional {
+      ?gezicht ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus.
+    }
+
     ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
     ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
     ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam.
 
-        ?geometrie ceo:asWKT-RD ?geometrie_rd.
-       ?geometrie geo:asWKT ?geometrie_WGS84.
+    ?geometrie ceo:asWKT-RD ?geometrie_rd.
+    ?geometrie geo:asWKT ?geometrie_WGS84.
     ?geometrie ceo:heeftGeometrieKwaliteit/skos:prefLabel ?geometriekwaliteit.
 
     # Creating URL
@@ -41,13 +44,15 @@ where {
 
 
     # Including the 'werelderfgoed_hvdl' graph in the query
-    graph graph:gezicht_hvdl {
-      select * where {
-        ?geometrie ceo:asWKT-RD ?geometrie_rd_ .
-        ?gezicht ceo:inProceduredatumGezicht ?inProceduredatumGezicht.
-        ?geometrie ceo:heeftOndergrondGezicht/skos:prefLabel ?ondergrondgezicht.
-        ?geometrie ceo:oppervlakteInHectare ?oppervlakteinhectare.
-        ?geometrie ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers.
+    optional {
+      graph graph:gezicht_hvdl {
+        select * where {
+          ?geometrie ceo:asWKT-RD ?geometrie_rd_ .
+          ?gezicht ceo:inProceduredatumGezicht ?inProceduredatumGezicht.
+          ?geometrie ceo:heeftOndergrondGezicht/skos:prefLabel ?ondergrondgezicht.
+          ?geometrie ceo:oppervlakteInHectare ?oppervlakteinhectare.
+          ?geometrie ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers.
+        }
       }
     }
   }

@@ -20,7 +20,6 @@ select *
 where {
   graph graph:instanties-rce {
     ?gezicht a ceo:Gezicht ;
-             ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus ;
              ceo:gezichtsnummer ?gezichtsnummer ;
              ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
              ceo:registratiedatum ?registratiedatum ;
@@ -28,6 +27,10 @@ where {
              ceo:bijzonderGebied ?bijzondergebied ;
              ceo:heeftKennisregistratie ?kennisregistratie ;
              ceo:heeftGeometrie ?geometrie .
+    optional {
+      ?gezicht ceo:heeftGezichtsstatus/skos:prefLabel ?gezichtsstatus .
+    }
+
     ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
     ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
     ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam.
@@ -41,7 +44,8 @@ where {
 
 
     # Including the 'werelderfgoed_hvdl' graph in the query
-    graph graph:gezicht_hvdl {
+    optional {
+      graph graph:gezicht_hvdl {
         ?geometrie ceo:asWKT-RD ?geometrie_rd_ .
         ?gezicht ceo:inProceduredatumGezicht ?inProceduredatumGezicht.
         ?geometrie ceo:heeftOndergrondGezicht/skos:prefLabel ?ondergrondgezicht.
@@ -50,8 +54,9 @@ where {
       }
     }
     # Defining ?geometrie_WGS84Label and setting ?geometrie_WGS84Color to 'Red'
-    BIND(CONCAT('Naam: ', ?heeftNaam, ', Gezichtsnummer: ', ?gezichtsnummer, ', Registratiedatum: ', ?registratiedatum) as ?geometrie_WGS84Label)
+    bind(concat('Naam: ', ?heeftNaam, ', Gezichtsnummer: ', ?gezichtsnummer, ', Registratiedatum: ', ?registratiedatum) as ?geometrie_WGS84Label)
     # bind(?geometrie_WGS84 as ?geometrie_WGS84Label)
     bind("red" as ?geometrie_WGS84Color)
     bind(30 as ?geometrie_WGS84Height)
   }
+}
