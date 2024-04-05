@@ -1,0 +1,68 @@
+#+ name: rijksmonument-hvdl-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select *
+where {
+  {
+    select ?cho ?monumentenregister ?rijksmonumentnummer (group_concat(distinct ?kadasterdeel; separator="/") as ?kadasterdeel_) (group_concat(distinct ?kadasterdeelnummer; separator="/") as ?kadasterdeelnummer_) ?kadasterDeelNr ?provincieCode ?gemeenteCode ?gemeentenaam ?perceelNummer ?sectie ?appartementsAanduiding ?kadastraleAanduiding ?datumInschrijvingInMonumententenregister ?bebouwdekomType ?juridischeStatus ?monumentAard ?registratiedatum (group_concat(distinct ?formeelstandpuntBouwkundigeKwaliteit; separator="/") as ?formeelstandpuntBouwkundigeKwaliteit_) (group_concat(distinct ?bouwkundigeStaatLabel; separator="/") as ?bouwkundigeStaatLabel_) (group_concat(distinct ?bouwkundigekwaliteit; separator="/") as ?bouwkundigekwaliteit_) (group_concat(distinct ?geometrie; separator="/") as ?geometrie_) (group_concat(distinct ?geometrie_RD; separator="/") as ?geometrie_RD_) (group_concat(distinct ?omschrijving; separator="/") as ?omschrijving_) (group_concat(distinct ?functie; separator="/") as ?functie_)
+    where {
+      graph graph:instanties-rce {
+        ?cho a ceo:Rijksmonument ;
+             ceo:datumInschrijvingInMonumentenregister ?datumInschrijvingInMonumententenregister ;
+             ceo:heeftBebouwdeKomType/skos:prefLabel ?bebouwdekomType ;
+             ceo:heeftJuridischeStatus/skos:prefLabel ?juridischeStatus .
+        filter(regex(?juridischeStatus, "rijksmonument"))
+        ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentAard ;
+             ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+             ceo:registratiedatum ?registratiedatum .
+        bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+        optional {
+          ?cho ceo:heeftKennisregistratie/ceo:formeelStandpunt ?formeelstandpuntBouwkundigeKwaliteit ;
+               ceo:heeftBouwkundigeKwaliteit ?bouwkundigekwaliteit .
+          ?bouwkundigekwaliteit ceo:heeftBouwkundigeStaat ?bouwkundigeStaat .
+          ?bouwkundigeStaat skos:prefLabel ?bouwkundigeStaatLabel .
+        }
+        minus {
+          ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> .
+        }
+        optional {
+          ?cho ceo:kadasterdeel ?kadasterdeel .
+          ?cho ceo:kadasterdeelnummer ?kadasterdeelnummer .
+          bind(if(bound(?kadasterdeel), ?kadasterdeel, "") as ?kadasterDeelNr)
+        }
+        ?cho ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie .
+        ?basisregistratieRelatie ceo:heeftBRKRelatie ?brkRelatie .
+        
+        # Retrieve these properties regardless of their presence
+        ?brkRelatie ceo:provinciecode ?provincieCode .
+        ?brkRelatie ceo:gemeentecode ?gemeenteCode .
+        ?brkRelatie ceo:gemeentenaam ?gemeentenaam .
+        ?brkRelatie ceo:perceelnummer ?perceelNummer .
+        ?brkRelatie ceo:sectie ?sectie .
+        ?brkRelatie ceo:appartementAanduiding ?appartementAanduiding .
+        
+        bind(if(bound(?appartementAanduiding), concat("A", ?appartementAanduiding), "") as ?appartementsAanduiding)
+        bind(concat(?gemeentenaam, " ", ?perceelNummer, " ", ?sectie, " ", ?appartementsAanduiding) as ?kadastraleAanduiding)
+        
+        # Additional properties
+        optional {
+          ?cho ceo:heeftGeometrie/geo:asWKT ?geometrie .
+          ?cho ceo:heeftGeometrie/ceo:asWKT-RD ?geometrie_RD .
+          ?cho ceo:heeftOmschrijving ?omschrijving1 .
+          ?omschrijving1 ceo:omschrijving ?omschrijving .
+          ?omschrijving1 ceo:formeelStandpunt "1"^^xsd:boolean .
+          ?cho ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam .
+          ?functienaam skos:prefLabel ?functie .
+        }
+      }
+    }
+    group by ?cho ?monumentenregister ?rijksmonumentnummer ?kadasterDeelNr ?provincieCode ?gemeenteCode ?gemeentenaam ?perceelNummer ?sectie ?appartementsAanduiding ?kadastraleAanduiding ?datumInschrijvingInMonumententenregister ?bebouwdekomType ?juridischeStatus ?monumentAard ?registratiedatum
+  }
+}
+limit 100

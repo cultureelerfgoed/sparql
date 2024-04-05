@@ -1,0 +1,80 @@
+#+ name: werelderfgoed-hvdl-2
+#+ description: #### Guery for the path werelderfgoed.</p>
+#- This SPARQL query is designed to retrieve information about Dutch UNESCO World Heritage Sites (Unesco Werelderfgoederen in Dutch) from the Cultural Heritage Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- 
+#- - werelderfgoednummer, ex: 1349
+#- - cultuurfistorischObjectnummer, ex: 10134675
+#- - heeftNaam, ex: Hollandse Waterlinies
+#- - registratiedatum, ex: 2021-11-22
+#- - werelderfgoedstatus, ex: werelderfgoed
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+construct {
+  ?werelderfgoed a ceo:Werelderfgoed .
+  ?werelderfgoed ceo:heeftWerelderfgoedstatus ?werelderfgoedstatus .
+  ?werelderfgoedstatus skos:prefLabel ?werelderfgoedstatusL.
+  ?werelderfgoed ceo:werelderfgoednummer ?werelderfgoednummer .
+  ?werelderfgoed ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
+  ?werelderfgoed ceo:registratiedatum ?registratiedatum .
+  ?werelderfgoed ceo:heeftNaam ?heeftNaam .
+  ?heeftNaam ceo:naam ?heeftNaamL.
+  ?werelderfgoed ceo:heeftKennisregistratie ?kennisregistratie .
+  ?werelderfgoed ceo:heeftGeometrie ?geometrie .
+  ?werelderfgoed ceo:jaarVanInschrijving ?jaarvaninschrijving .
+  ?werelderfgoed ceo:heeftWerelderfgoedType ?werelderfgoedtype .
+  ?werelderfgoedtype skos:prefLabel ?werelderfgoedtypeL.
+  ?werelderfgoed ceo:oppervlakteInHectare ?oppervlakteinhectare .
+  ?werelderfgoed  ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers .
+  ?werelderfgoed  ceo:oppervlakteInVierkanteMeters ?oppervlakteinvierkantemeters .
+  ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
+  ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
+  ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam .
+  ?geometrie geo:asWKT ?geometrie_WGS84 .
+  ?geometrie ceo:asWKT-RD ?geometrie_rd.
+  ?geometrie ceo:heeftGeometrieKwaliteit ?geometriekwaliteit.
+  ?geometriekwaliteit skos:prefLabel ?geometriekwaliteitL .
+  ?geometrie ceo:heeftGeometrieType ?geometrietype .
+  ?geometrietype skos:prefLabel ?geometrietypeL .
+  ?werelderfgoed ceo:url ?url_value .
+}
+where {
+  GRAPH graph:instanties-rce {
+    ?werelderfgoed a ceo:Werelderfgoed .
+    ?werelderfgoed ceo:heeftWerelderfgoedstatus ?werelderfgoedstatus .
+    ?werelderfgoedstatus skos:prefLabel ?werelderfgoedstatusL.
+    ?werelderfgoed ceo:werelderfgoednummer ?werelderfgoednummer .
+    ?werelderfgoed ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
+    ?werelderfgoed ceo:registratiedatum ?registratiedatum .
+    ?werelderfgoed ceo:heeftNaam ?heeftNaam .
+    ?heeftNaam ceo:naam ?heeftNaamL.
+    ?werelderfgoed ceo:heeftKennisregistratie ?kennisregistratie .
+    ?werelderfgoed ceo:heeftGeometrie ?geometrie .
+    ?kennisregistratie ceo:formeelStandpunt ?formeelStandpunt .
+    ?kennisregistratie ceo:huidigeNaam ?huidigeNaam .
+    ?kennisregistratie ceo:registratiedatum ?registratiedatum_naam.
+    ?geometrie ceo:asWKT-RD ?geometrie_rd.
+    ?geometrie geo:asWKT ?geometrie_WGS84.
+    ?geometrie ceo:heeftGeometrieKwaliteit/skos:prefLabel ?geometriekwaliteit.
+    ?geometrie ceo:heeftGeometrieType/skos:prefLabel ?geometrietype.
+
+    # Creating URL based on the UNESCO list
+    BIND(concat('https://whc.unesco.org/en/list/',str(?werelderfgoednummer)) AS ?url_value)
+
+    # Including the 'werelderfgoed_hvdl' graph in the query
+    GRAPH graph:werelderfgoed_hvdl {
+      ?werelderfgoed ceo:jaarVanInschrijving ?jaarvaninschrijving.
+      ?werelderfgoed ceo:heeftWerelderfgoedType/skos:prefLabel ?werelderfgoedtype.
+      ?geometrie ceo:oppervlakteInHectare ?oppervlakteinhectare.
+      ?geometrie ceo:oppervlakteInVierkanteKilometers ?oppervlakteinvierkantekilometers.
+      ?geometrie ceo:oppervlakteInVierkanteMeters ?oppervlakteinvierkantemeters.
+    }
+  }
+}

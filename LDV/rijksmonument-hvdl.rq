@@ -1,0 +1,22 @@
+#+ name: rijksmonument-hvdl
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix cht: <https://data.cultureelerfgoed.nl/term/id/cht/>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+select * where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument;
+         ?p ?o .
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+    optional {
+      ?o ?p2 ?o2 .
+    }
+  }
+}
+LIMIT 1000
