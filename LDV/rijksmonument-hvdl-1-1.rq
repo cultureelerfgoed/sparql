@@ -1,0 +1,200 @@
+#+ name: rijksmonument-hvdl-1-1
+#+ description: This SPARQL query is designed to retrieve information related to "Rijkmonumenten" from a Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
+#- https://api.linkeddata.cultureelerfgoed.nl/queries/rce/rest-api-rijksmonumenten/run?
+#- 
+#- Gezocht kan worden op:
+#- - rijksmonumentnummer, ex.: 12340
+#- </p>
+#- Date: dd. 2024-03-05</br>
+#- Version: 1.0
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select ?geometrieAsWKTLabel ?rijksmonumentnummer ?geometrieAsWKT ?geometrieAsWKTColor ?geometrieAsWKTHeight
+where {
+  graph graph:instanties-rce {
+    {
+      select * {
+        ?cho
+          a ceo:Rijksmonument .
+        ?cho ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
+        ?cho ceo:heeftJuridischeStatus/skos:prefLabel ?status .
+        ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
+        ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
+        ?cho ceo:datumInschrijvingInMonumentenregister ?datumInschrijving .
+        optional {
+          ?cho ceo:internationaalKenteken ?internationaalKenteken.
+        }
+        ?cho ceo:kadasterdeel ?kadasterdeel.
+        ?cho ceo:kadasterdeelnummer ?kadasterdeelnummer.
+        ?cho ceo:registratiedatum ?registratiedatum .
+        # functie
+        optional {
+          ?cho ceo:heeftBebouwdeKomType/skos:prefLabel ?bebouwdeKomType.
+        }
+        optional {
+          ?cho ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?oorspronkelijkeFunctie .
+        }
+        optional {
+          ?cho ceo:heeftOorspronkelijkeFunctie/ceo:hoofdfunctie ?hoofdfunctie.
+        }
+        optional {
+          ?cho ceo:heeftOorspronkelijkeFunctie/ceo:formeelStandpunt ?formeelStandpuntFunctie.
+        }
+        optional {
+          ?cho ceo:heeftOorspronkelijkeFunctie/ceo:registratiedatum ?registratiedatumFunctie
+        }
+        # basisregistratie
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincieOwms.
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeenteOwms.
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?volledigAdres .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:openbareRuimte ?straatnaam .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:huisnummer ?huisnummer .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:heeftPand ?pandBag .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:heeftVerblijfsobject ?verblijfsObjectBag .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:provinciecode ?provinciecodeBRK .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?gemeentecodeBRK .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaamBRK .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceelnummerBRK .
+        }
+        optional {
+          ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectieBRK .
+        }
+        # geometrie
+        optional {
+          ?cho ceo:heeftGeometrie/ceo:heeftHerkomst/skos:prefLabel ?herkomstGeometrie.
+        }
+        optional {
+          ?cho ceo:heeftGeometrie/ceo:heeftGeometrieStatus/skos:prefLabel ?statusGeometrie.
+          optional {
+            ?cho ceo:heeftGeometrie/ceo:heeftGeometrieKwaliteit/skos:prefLabel ?kwaliteitGeometrie.
+          }
+          optional {
+            ?cho ceo:heeftGeometrie/geo:asWKT ?geometrieAsWKT.
+          }
+          optional {
+            ?cho ceo:heeftGeometrie/ceo:asWKT-RD ?geometrieAsWKTRD.
+          }
+          # omschrijving
+          optional {
+            ?cho ceo:heeftOmschrijving/ceo:formeelStandpunt ?formeelstandpuntOmschrijving.
+          }
+          optional {
+            ?cho ceo:heeftOmschrijving/ceo:registratiedatum ?registratiedatumOmschrijving.
+          }
+          optional {
+            ?cho ceo:heeftOmschrijving/ceo:heeftOmschrijvingstype/skos:prefLabel ?typeOmschrijving.
+          }
+          optional {
+            ?cho ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
+          }
+          # gebeurtenis
+
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:formeelStandpunt ?formeelstandpuntGebeurtenis.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:registratiedatum ?registratiedatumGebeurtenis.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisnaam.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftActorEnRol/ceo:heeftActor ?actorGebeurtenis.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftActorEnRol/ceo:heeftRol ?actorrolGebeurtenis.
+          }
+          # Datering
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?nauwkeurigheidDatering.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftDateringsmethode/skos:prefLabel ?dateringsmethode.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftBetrouwbaarheid/skos:prefLabel ?betrouwbaarheiddatering.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftBeginDatering/ceo:datum ?begindatering.
+          }
+          optional {
+            ?cho ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftEindDatering/ceo:datum ?einddatering.
+          }
+          # stijl en cultuur
+          optional {
+            ?cho ceo:heeftStijlEnCultuur/ceo:formeelStandpunt ?formeelstandpuntStijlenCultuur.
+          }
+          optional {
+            ?cho ceo:heeftStijlEnCultuur/ceo:registratiedatum ?registratiedatumStijlenCultuur.
+          }
+          optional {
+            ?cho ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?naamStijlenCultuur.
+          }
+          optional {
+            ?cho ceo:heeftStijlEnCultuur/ceo:heeftZuiverheid/skos:prefLabel ?zuiverheidStijlenCultuur.
+          }
+          # type
+          optional {
+            ?cho ceo:heeftType/ceo:formeelStandpunt ?formeelstandpuntType.
+          }
+          optional {
+            ?cho ceo:heeftType/ceo:registratiedatum ?registratiedatumType.
+          }
+          optional {
+            ?cho ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?naamType.
+          }
+          optional {
+            ?cho ceo:heeftType/ceo:heeftTypekenmerk/skos:prefLabel ?kenmerkType.
+          }
+          # locatie aanduiding
+          optional {
+          ?cho ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam.
+        }
+        optional {
+          ?cho ceo:heeftLocatieAanduidingStatus/skos:prefLabel ?locatienaamStatus.
+        }
+      }
+    }
+  }
+}
+      bind(concat('Adres: ', ?straatnaam, ' ', ?huisnummer, " ", ?postcode, " in: ", ?woonplaatsnaam, ".", " Rijksmonumentnummer: ", ?rijksmonumentnummer) as ?geometrieAsWKTLabel)
+    bind("red" as ?geometrieAsWKTColor)
+    bind(15 as ?geometrieAsWKTHeight)
+}
+
+#limit 100
+

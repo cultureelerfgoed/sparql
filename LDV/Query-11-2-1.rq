@@ -16,13 +16,15 @@ where {
   graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument.
     ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    minus {
+      ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>
+    }
+
     ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
     ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
     ?bagrelatie ceo:heeftPand ?pand.
     ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
     ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
-    ?cho ceo:heeftGeometrie ?geometrie .
-    ?geometrie geo:asWKT ?shape .
     bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pand)) as ?pandURI)
     bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)) as ?verblijfsobjectURI)
 
@@ -42,8 +44,5 @@ where {
     ?hoofdadres bag:postcode ?bagpostcode .
     ?hoofdadres bag:ligtAan/bag:ligtIn/skos:prefLabel ?bagwoonplaatsnaam.
   }
-    bind(concat('Adres RCE: ', ?straatnaam, ' ', ?huisnummer, " ", ?postcode, " in: ", ?woonplaatsnaam, "en BAGadres: ", ?bagstraat , " " , ?baghuisnummer, " ", ?postcode, " in: ", ?bagwoonplaatsnaam) as ?shapeLabel)
-    bind("red" as ?shapeColor)
-    bind(15 as ?shapeHeight)
 }
 

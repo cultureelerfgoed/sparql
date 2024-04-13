@@ -14,6 +14,7 @@ SELECT ?jaarInschrijvings (COUNT(?rijksmonument) AS ?aantal)
 # The query selects the variable ?jaarInschrijvings to represent the year of registration and COUNT(?rijksmonument) as ?aantal to count the number of registered monuments.
 
 WHERE {
+  GRAPH graph:instanties-rce {
   ?rijksmonument a ceo:Rijksmonument . 
   # Matches ?rijksmonument that is of type ceo:Rijksmonument.
   
@@ -32,7 +33,7 @@ WHERE {
   MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
   # Excludes ?rijksmonument that has the property ceo:heeftJuridischeStatus with the specified value.
 }
-
+}
 GROUP BY ?jaarInschrijvings
 # Groups the results by ?jaarInschrijvings.
 
