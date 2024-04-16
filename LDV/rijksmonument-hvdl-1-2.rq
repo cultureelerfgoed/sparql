@@ -1,0 +1,64 @@
+#+ name: rijksmonument-hvdl-1-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select  *
+where {
+  graph graph:instanties-rce {
+    {
+      ?cho
+        a ceo:Rijksmonument .
+      ?cho ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
+      ?cho ceo:heeftJuridischeStatus/skos:prefLabel ?status .
+      ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
+      ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
+      ?cho ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate .
+
+
+      optional {
+        ?cho ceo:heeftNaam/ceo:naam ?text.
+      }
+      # functie
+      optional {
+        ?cho ceo:heeftOorspronkelijkeFunctie ?functieBlok .
+        ?functieBlok ceo:heeftFunctieNaam/skos:prefLabel ?oorspronkelijkeFunctie .
+        ?functieBlok ceo:hoofdfunctie "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+      }
+      # geometrie
+      optional {
+        ?cho ceo:heeftGeometrie/ceo:heeftHerkomst/skos:prefLabel ?herkomstGeometrie.
+      }
+      optional {
+        ?cho ceo:heeftGeometrie/ceo:heeftGeometrieStatus/skos:prefLabel ?statusGeometrie.
+        optional {
+          ?cho ceo:heeftGeometrie/ceo:heeftGeometrieKwaliteit/skos:prefLabel ?kwaliteitGeometrie.
+        }
+        optional {
+          ?cho ceo:heeftGeometrie/geo:asWKT ?geometrieAsWKT.
+        }
+        optional {
+          ?cho ceo:heeftGeometrie/ceo:asWKT-RD ?WKT.
+        }
+
+      }
+      # Conditionally bind the namespace
+      bind(if(bound(?status), "nlps-rijksmonumenten", "") as ?namespace)
+            # Conditionally bind the ci_citation
+      bind(if(bound(?rijksmonumentnummer), 
+              concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer), 
+              "") as ?ci_citation)
+      BIND(?cultuurhistorischObjectnummer AS ?localId)
+      BIND("100" as ?percentageunderdesignation)
+      BIND("nld" as ?language)
+      BIND("Latn" as ?script)
+      BIND(IF(?monumentaard = "archeologisch", "cultural;archaeological", "cultural") AS ?siteprotectionclassification)
+
+    }
+  }
+}
