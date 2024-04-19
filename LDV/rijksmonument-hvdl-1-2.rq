@@ -8,7 +8,7 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select  *
+select  * 
 where {
   graph graph:instanties-rce {
     {
@@ -45,19 +45,21 @@ where {
         optional {
           ?cho ceo:heeftGeometrie/ceo:asWKT-RD ?WKT.
         }
-
       }
       # Conditionally bind the namespace
-      bind(if(bound(?status), "nlps-rijksmonumenten", "") as ?namespace)
-            # Conditionally bind the ci_citation
-      bind(if(bound(?rijksmonumentnummer), 
-              concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer), 
-              "") as ?ci_citation)
-      BIND(?cultuurhistorischObjectnummer AS ?localId)
-      BIND("100" as ?percentageunderdesignation)
-      BIND("nld" as ?language)
-      BIND("Latn" as ?script)
-      BIND(IF(?monumentaard = "archeologisch", "cultural;archaeological", "cultural") AS ?siteprotectionclassification)
+      #bind(if(bound(?rijksmonumentnummer), "nlps-rijksmonumenten", "") as ?namespace)
+      #bind(if(bound(?status), "nlps-rijksmonumenten", "") as ?namespace)
+      bind(if(?status = "rijksmonument", "voorbeschermd", "geen rijksmonument") as ?namespace)
+
+      # Conditionally bind the ci_citation
+      bind(if(bound(?rijksmonumentnummer),
+           concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer),
+           "") as ?ci_citation)
+      bind(?cultuurhistorischObjectnummer as ?localId)
+      bind("100" as ?percentageunderdesignation)
+      bind("nld" as ?language)
+      bind("Latn" as ?script)
+      bind(if(?monumentaard = "archeologisch", "cultural;archaeological", "cultural") as ?siteprotectionclassification)
 
     }
   }

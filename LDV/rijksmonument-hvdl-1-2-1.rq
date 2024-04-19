@@ -1,0 +1,63 @@
+#+ name: rijksmonument-hvdl-1-2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+construct {
+  ?cho a ceo:Rijksmonument .
+  ?cho ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
+  ?cho ceo:heeftJuridischeStatus ?heeftJuridischeStatus .
+  ?heeftJuridischeStatus skos:prefLabel ?status .
+  ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
+  ?cho ceo:heeftMonumentAard ?heeftMonumentAard .
+  ?heeftMonumentAard skos:prefLabel ?monumentaard .
+  ?cho ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate .
+  ?cho ceo:heeftNaam ?text .
+  ?functieBlok ceo:heeftFunctieNaam ?oorspronkelijkeFunctie .
+  ?oorspronkelijkeFunctie skos:prefLabel ?oorspronkelijkeFunctieLabel .
+  ?cho ceo:heeftGeometrie ?geometrie .
+  ?geometrie ceo:heeftHerkomst ?herkomstGeometrie .
+  ?herkomstGeometrie skos:prefLabel ?herkomstGeometrieLabel .
+  ?geometrie ceo:heeftGeometrieStatus ?statusGeometrie .
+  ?statusGeometrie skos:prefLabel ?statusGeometrieLabel .
+  ?geometrie ceo:heeftGeometrieKwaliteit ?kwaliteitGeometrie .
+  ?kwaliteitGeometrie skos:prefLabel ?kwaliteitGeometrieLabel .
+  ?geometrie geo:asWKT ?geometrieAsWKT .
+  ?geometrie ceo:asWKT-RD ?WKT .
+} where {
+  graph graph:instanties-rce {
+    {
+      ?cho a ceo:Rijksmonument ;
+           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+           ceo:heeftJuridischeStatus ?heeftJuridischeStatus .
+      ?heeftJuridischeStatus skos:prefLabel ?status .
+      ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+           ceo:heeftMonumentAard ?heeftMonumentAard .
+      ?heeftMonumentAard skos:prefLabel ?monumentaard .
+      ?cho ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate .
+      ?cho ceo:heeftNaam/ceo:naam ?text .
+      ?cho ceo:heeftOorspronkelijkeFunctie ?functieBlok .
+      ?functieBlok ceo:heeftFunctieNaam ?oorspronkelijkeFunctie .
+      ?cho ceo:heeftGeometrie ?geometrie .
+      ?geometrie ceo:heeftHerkomst ?herkomstGeometrie .
+      ?geometrie ceo:heeftGeometrieStatus ?statusGeometrie .
+      ?geometrie ceo:heeftGeometrieKwaliteit ?kwaliteitGeometrie .
+      ?geometrie geo:asWKT ?geometrieAsWKT .
+      ?geometrie ceo:asWKT-RD ?WKT .
+      bind(if(bound(?heeftJuridischeStatus) && ?heeftJuridischeStatus = ceo:heeftJuridischeStatus, "voorbeschermd", "geen rijksmonument") as ?namespaceProp)
+      bind(if(bound(?rijksmonumentnummer),
+           concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer),
+           "") as ?ci_citationProp)
+      bind(?cultuurhistorischObjectnummer as ?localIdProp)
+      bind("100" as ?percentageunderdesignationProp)
+      bind("nld" as ?languageProp)
+      bind("Latn" as ?scriptProp)
+      bind(if(bound(?heeftMonumentAard) && ?heeftMonumentAard = "archeologisch", "cultural;archaeological", "cultural") as ?siteprotectionclassificationProp)
+    }
+  }
+}

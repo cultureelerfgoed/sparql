@@ -4,6 +4,10 @@
 #- 
 #- Gezocht kan worden op:
 #- - rijksmonumentnummer, ex.: 12340
+#- - cultuurhistorisch oobjectnummer
+#- - status
+#- - monumentaard
+#- - datum inschrijving in monumentenregister
 #- </p>
 #- Date: dd. 2024-03-05</br>
 #- Version: 1.0
@@ -16,7 +20,7 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select ?geometrieAsWKTLabel ?rijksmonumentnummer ?geometrieAsWKT ?geometrieAsWKTColor ?geometrieAsWKTHeight
+select ?rijksmonumentnummer ?geometrieAsWKT ?geometrieAsWKTColor ?geometrieAsWKTHeight ?geometrieAsWKTLabel
 where {
   graph graph:instanties-rce {
     {
@@ -25,7 +29,7 @@ where {
           a ceo:Rijksmonument .
         ?cho ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer .
         ?cho ceo:heeftJuridischeStatus/skos:prefLabel ?status .
-        ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
+        ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer  .
         ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
         ?cho ceo:datumInschrijvingInMonumentenregister ?datumInschrijving .
         optional {
@@ -182,19 +186,21 @@ where {
           }
           # locatie aanduiding
           optional {
-          ?cho ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam.
-        }
-        optional {
-          ?cho ceo:heeftLocatieAanduidingStatus/skos:prefLabel ?locatienaamStatus.
+            ?cho ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam.
+          }
+          optional {
+            ?cho ceo:heeftLocatieAanduidingStatus/skos:prefLabel ?locatienaamStatus.
+          }
         }
       }
     }
-  }
-}
-      bind(concat('Adres: ', ?straatnaam, ' ', ?huisnummer, " ", ?postcode, " in: ", ?woonplaatsnaam, ".", " Rijksmonumentnummer: ", ?rijksmonumentnummer) as ?geometrieAsWKTLabel)
-    bind("red" as ?geometrieAsWKTColor)
+    bind(concat('Adres: ', ?straatnaam, ' ', ?huisnummer, " ", ?postcode, " in: ", ?woonplaatsnaam, ".", " Rijksmonumentnummer: ", ?rijksmonumentnummer) as ?geometrieAsWKTLabel)
+    # bind("{#f03b20},{opacity:0.6}"; as ?geometrieAsWKTColor)
+   # bind(concat('rgba(255, 0, 0, 1.0)') as ?geometrieAsWKTColor)
+    bind(concat('red') as ?geometrieAsWKTColor)
     bind(15 as ?geometrieAsWKTHeight)
-}
+  }
 
+}
 #limit 100
 

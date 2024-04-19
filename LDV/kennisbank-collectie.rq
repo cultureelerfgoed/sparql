@@ -1,43 +1,64 @@
 #+ name: kennisbank-collectie
-#+ description: Query om alle concepten uit de CHT op te halen die onderdeel zijn van de `skos:collection` kennisbank - en een scopeNote hebben
-#- 
-#- N.B.: momenteel geeft query **alle** CHT concepten met een scopeNote
+#+ description: Query om alle `skos:Concept` uit de CHT op te halen die een scopeNote hebben, samen met labels, broader en narrower.
 #- 
 #- **DO NOT DELETE**
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 CONSTRUCT {
-?subject skos:prefLabel ?prefLabel .
-?subject skos:altLabel ?altLabel .
-?subject skos:scopeNote ?scopeNote .   
+  ?subject rdf:type ?type .
+  ?subject skos:prefLabel ?prefLabel .
+  ?subject skos:altLabel ?altLabel .
+  ?subject skos:scopeNote ?scopeNote .
+  ?subject skos:broader ?broader .
+  ?subject skos:narrower ?narrower
   
-  }
-  #<https://data.cultureelerfgoed.nl/term/id/cht/90de02e3-4ae8-4cc8-992f-422fe80a7b32> skos:member ?concept .
-WHERE {
-  {
+  } 
+  where {
+  {  
+    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+    ?subject rdf:type ?type .
+    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
     ?subject skos:prefLabel ?prefLabel .
   ?subject skos:scopeNote ?scopeNote .
    FILTER(LANG(?prefLabel) = 'nl')
    FILTER(LANG(?scopeNote) = 'nl')
-      }
+      }}
   UNION
   {
+    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+    ?subject rdf:type ?type .
+    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
     ?subject skos:prefLabel ?prefLabel .
     ?subject skos:scopeNote ?scopeNote .
     FILTER(LANG(?prefLabel) = 'nl')
     FILTER(LANG(?scopeNote) = 'nl')
-    OPTIONAL {
-      ?subject skos:altLabel ?altLabel .
-      FILTER(LANG(?altLabel) = 'nl')
+    OPTIONAL {?subject skos:altLabel ?altLabel. 
+    FILTER(LANG(?altLabel) = 'nl') }.
+   }}
+UNION
+  {
+    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+    ?subject rdf:type ?type .
+    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
+    ?subject skos:prefLabel ?prefLabel .
+    ?subject skos:scopeNote ?scopeNote .
+    FILTER(LANG(?prefLabel) = 'nl')
+    FILTER(LANG(?scopeNote) = 'nl')
+    optional{?subject skos:narrower ?narrower }.
+      }}
+  UNION {
+    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+?subject rdf:type ?type .
+    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
+    ?subject skos:prefLabel ?prefLabel .
+    ?subject skos:scopeNote ?scopeNote .
+    FILTER(LANG(?prefLabel) = 'nl')
+    FILTER(LANG(?scopeNote) = 'nl')
+      optional{?subject skos:narrower ?narrower }.
+     optional{?subject skos:broader ?broader }
     }
   }
 }
-
-  #  FILTER(lang(?prefLabel) = "nl")
-  #  FILTER(lang(?altLabel) = "nl")
-   # FILTER(lang(?scopeNote) = "nl")
-# FILTER NOT EXISTS {?concept skos:scopeNote ?scopenote} niet nodig want we selecten de triple scopenote al
-  
-
