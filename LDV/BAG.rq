@@ -1,0 +1,40 @@
+#+ name: BAG
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?verblijfsobjectIdentificatie 
+       (if(bound(?pand), iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pand)), "") as ?pandURI)
+       (if(bound(?verblijfsobjectIdentificatie), iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)), "") as ?verblijfsobjectURI)
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+
+    ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
+    ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
+    ?bagrelatie ceo:heeftPand ?pand.
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+
+    ?bagrelatie ceo:openbareRuimte ?straatnaam.
+    ?bagrelatie ceo:huisnummer ?huisnummer.
+    ?bagrelatie ceo:postcode ?postcode.
+    ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
+
+    filter(bound(?straatnaam) && bound(?huisnummer) && bound(?postcode) && bound(?woonplaatsnaam))
+  }
+
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+    ?verblijfsobject bag:hoofdadres ?hoofdadres .
+    ?hoofdadres bag:ligtAan/skos:prefLabel ?bagstraat .
+    ?hoofdadres bag:huisnummer ?baghuisnummer .
+    ?hoofdadres bag:postcode ?bagpostcode .
+    ?hoofdadres bag:ligtAan/bag:ligtIn/skos:prefLabel ?bagwoonplaatsnaam.
+  }
+  filter(?straatnaam != ?bagstraat || ?huisnummer != ?baghuisnummer || ?postcode != ?bagpostcode || ?woonplaatsnaam != ?bagwoonplaatsnaam)
+}
+LIMIT 100

@@ -1,0 +1,38 @@
+#+ name: rijksmonument-3d-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix bag:  <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt:  <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+
+select *
+{
+  ?rijksmonument
+    a ceo:Rijksmonument;
+    ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
+ #   ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam;
+    ceo:heeftBasisregistratieRelatie ?basisregistratie.
+    ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
+#    ?bagrelatie ceo:heeftPand ?pand.
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+  #  ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+    ?bagrelatie ceo:openbareRuimte ?straatnaam.
+    ?bagrelatie ceo:huisnummer ?huisnummer.
+     ?bagrelatie ceo:postcode ?postcode.
+      ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
+  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+    ?vbo
+      a sor:Verblijfsobject;
+      sor:hoofdadres ?nummeraanduiding.
+      ?nummeraanduiding sor:huisnummer ?baghuisnummer .
+   ?nummeraanduiding sor:postcode ?bagpostcode .
+   ?nummeraanduiding sor:ligtAan ?bagstraat.
+  }
+}
+LIMIT 10
