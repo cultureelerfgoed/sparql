@@ -1,0 +1,87 @@
+#+ name: rijksmonument-hvdl-1-2-2
+#+ description: Werkt allen op één rijksmonument. dat een polygon als geo heeft. Aan de rest wordt nog gewerkt.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select (concat('{ "type": "FeatureCollection", "features": [', group_concat(?feature; separator=","), ']}') as ?geojson)
+where {
+  graph graph:instanties-rce {
+    {
+      ?cho a ceo:Rijksmonument ;
+           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+           ceo:heeftJuridischeStatus/skos:prefLabel ?status ;
+           ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+           ceo:heeftMonumentAard/skos:prefLabel ?monumentaard ;
+           ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate .
+
+      optional {
+        ?cho ceo:heeftNaam/ceo:naam ?text .
+      }
+      optional {
+        ?cho ceo:heeftOorspronkelijkeFunctie ?functieBlok .
+        ?functieBlok ceo:heeftFunctieNaam/skos:prefLabel ?oorspronkelijkeFunctie ;
+                     ceo:hoofdfunctie "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+      }
+      optional {
+        ?cho ceo:heeftGeometrie/ceo:heeftHerkomst/skos:prefLabel ?herkomstGeometrie .
+      }
+      optional {
+        ?cho ceo:heeftGeometrie/ceo:heeftGeometrieStatus/skos:prefLabel ?statusGeometrie .
+        optional {
+          ?cho ceo:heeftGeometrie/ceo:heeftGeometrieKwaliteit/skos:prefLabel ?kwaliteitGeometrie .
+        }
+        optional {
+          ?cho ceo:heeftGeometrie/geo:asWKT ?geometrieAsWKT .
+          bind(replace(?geometrieAsWKT, "^.*\\(\\(", "") as ?coordinates1)
+          bind(replace(?coordinates1, "\\)\\)$", "") as ?coordinates2)
+          bind(replace(?coordinates2, ",", "],[") as ?coordinates3)
+          bind(replace(?coordinates3, " ", ", ") as ?coordinates4)
+          bind(concat("[[[", ?coordinates4, "]]]") as ?coordinates)
+        }
+      }
+
+      bind(if(?status = "rijksmonument", "voorbeschermd", "geen rijksmonument") as ?namespace)
+      bind(if(bound(?rijksmonumentnummer), concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer), "") as ?ci_citation)
+      bind(?cultuurhistorischObjectnummer as ?localId)
+      bind("100" as ?percentageunderdesignation)
+      bind("nld" as ?language)
+      bind("Latn" as ?script)
+      bind(if(?monumentaard = "archeologisch", "cultural;archaeological", "cultural") as ?siteprotectionclassification)
+
+      bind(
+        concat(
+          '{ "type": "Feature", "properties": {',
+          '"status": "', ?status, '",',
+          '"rijksmonumentnummer": "', ?rijksmonumentnummer, '",',
+          '"monumentaard": "', ?monumentaard, '",',
+          '"legalfoundationdate": "', ?legalfoundationdate, '",',
+          if(bound(?text), concat('"text": "', ?text, '",'), ''),
+          if(bound(?oorspronkelijkeFunctie), concat('"oorspronkelijkeFunctie": "', ?oorspronkelijkeFunctie, '",'), ''),
+          if(bound(?herkomstGeometrie), concat('"herkomstGeometrie": "', ?herkomstGeometrie, '",'), ''),
+          if(bound(?statusGeometrie), concat('"statusGeometrie": "', ?statusGeometrie, '",'), ''),
+          if(bound(?kwaliteitGeometrie), concat('"kwaliteitGeometrie": "', ?kwaliteitGeometrie, '",'), ''),
+          if(bound(?ci_citation), concat('"ci_citation": "', ?ci_citation, '",'), ''),
+          '"localId": "', ?localId, '",',
+          '"percentageunderdesignation": "', ?percentageunderdesignation, '",',
+          '"language": "', ?language, '",',
+          '"script": "', ?script, '",',
+          '"siteprotectionclassification": "', ?siteprotectionclassification, '"',
+          '}',
+          if(bound(?coordinates),
+          concat(
+            ', "geometry": { "type": "Polygon", "coordinates": ', ?coordinates, ' }'
+          ),
+          ''
+          ),
+          '}'
+        ) as ?feature)
+    }
+  }
+}
+limit 1
