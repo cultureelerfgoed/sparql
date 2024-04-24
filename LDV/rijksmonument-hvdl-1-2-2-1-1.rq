@@ -38,8 +38,12 @@ where {
         }
         optional {
           ?cho ceo:heeftGeometrie/geo:asWKT ?geometrieAsWKT .
-          bind(replace(?geometrieAsWKT, ".*\\(|\\)", "") as ?coordinates)
-          bind(replace(?coordinates, " ", ", ") as ?coordinatesWithComma) 
+          bind(replace(?geometrieAsWKT, "^.*\\(\\(", "") as ?coordinates1)
+          bind(replace(?coordinates1, "\\)\\)$", "") as ?coordinates2)
+          bind(replace(?coordinates2, ",", "] [") as ?coordinates3)
+          bind(replace(?coordinates3, " ", ",") as ?coordinates4)
+                    bind(replace(?coordinates4, "\\)", "") as ?coordinates5)
+          bind(concat("", ?coordinates5, "") as ?coordinates)
         }
       }
 
@@ -70,9 +74,9 @@ where {
           '"script": "', ?script, '",',
           '"siteprotectionclassification": "', ?siteprotectionclassification, '"',
           '}',
-          if(bound(?coordinatesWithComma),
+          if(bound(?coordinates),
           concat(
-            ', "geometry": { "type": "Point", "coordinates": [', ?coordinatesWithComma, '] }'
+            ', "geometry": { "type": "MultiPolygon", "coordinates": [[[[', ?coordinates, ']]]] }'
           ),
           ''
           ),

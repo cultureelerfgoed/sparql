@@ -4,13 +4,9 @@
 #- 
 #- Gezocht kan worden op:
 #- - rijksmonumentnummer, ex.: 12340
-#- - cultuurhistorisch oobjectnummer
-#- - status
-#- - monumentaard
-#- - datum inschrijving in monumentenregister
 #- </p>
-#- Date: dd. 2024-03-05</br>
-#- Version: 1.0
+#- Date: dd. 2024-22-04</br>
+#- Version: 1.1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 prefix owms: <http://standaarden.overheid.nl/owms/terms/>
@@ -20,7 +16,7 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select ?rijksmonumentnummer ?geometrieAsWKT ?geometrieAsWKTColor ?geometrieAsWKTHeight ?geometrieAsWKTLabel
+select ?geometrieAsWKTLabel ?rijksmonumentnummer ?geometrieAsWKT ?geometrieAsWKTColor ?geometrieAsWKTHeight 
 where {
   graph graph:instanties-rce {
     {
