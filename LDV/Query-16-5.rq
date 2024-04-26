@@ -1,4 +1,7 @@
 #+ name: Query-16-5
+#+ description: Voorbeeld van een geof:sfWithin.
+#- Polygoon coordinaten zijn een stuk zuid-holland
+#- Zoek nog een manier om dit in te voeren. op vraag gebruiker
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 prefix geo: <http://www.opengis.net/ont/geosparql#>
@@ -6,8 +9,14 @@ prefix sf: <http://www.opengis.net/ont/sf#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geof: <http://www.opengis.net/def/function/geosparql/>
 
-select * where {
+select ?rm where {
+  
   ?a a ceo:Rijksmonument ;
-     ceo:heeftGeometrie/geo:asWKT ?lit .
-  filter (geof:sfWithin(?lit, "POLYGON((4.0841675 52.2614336, 4.0786743 51.7542401, 5.4135132 51.7253269, 5.4299927 52.2580713, 4.0786743 52.2631146, 4.0841675 52.2614336))"^^geo:wktLiteral))
+     ceo:heeftGeometrie/geo:asWKT ?rm .
+  
+  BIND(("POLYGON((4.0841675 52.2614336, 4.0786743 51.7542401, 5.4135132 51.7253269, 5.4299927 52.2580713, 4.0786743 52.2631146, 4.0841675 52.2614336))"^^geo:wktLiteral) as ?polygon)
+# Bind("lightgrey" as ?ffColor) 
+  filter (geof:sfWithin(?rm, ?polygon))
+
 }
+Limit 1000
