@@ -1,0 +1,82 @@
+#+ name: rijksmonument-3d-1-1
+#+ description: De query, mocht ie ooit werken, failliet van LOD, begint met het selecteren van unieke ?cho, hun geometrie en labels. Vervolgens wordt een subquery gebruikt om informatie te verzamelen over elk ?cho-object. Binnen deze subquery worden twee services gebruikt: één voor het Cultureel Erfgoed Object en één voor BAG-gerelateerde informatie. De informatie uit beide services wordt samengevoegd en geretourneerd als resultaat.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+
+# De query selecteert unieke ?cho (Cultuurhistorisch Object) met hun geometrie en labels.
+
+select distinct ?cho ?wkt ?wktLabel
+where {
+  {
+    # Deze subquery verzamelt informatie over elk ?cho-object.
+    select
+      ?cho
+      (sample(?geometrie) as ?wkt) # De geometrie van het object
+      (strdt(concat(  # De label van het object als HTML
+        '<table>',
+        '<tr>',
+        '<td>Monument ID: <a href="',str(?cho),'" target="_blank">Monument</a></td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Bouwjaar: </b>',group_concat(distinct ?bouwjaar; separator='; '),'</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Monument Status: </b>',group_concat(distinct ?status; separator='; '),'</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Oorspronkelijke Functie: </b>',group_concat(distinct ?functie; separator='; '),'</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Gebouwtype(n): </b>',group_concat(distinct ?type; separator='; '),'</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Monument Omschrijving: </b>',group_concat(distinct concat('<a href="',str(?omschrijving),'" target="_blank">Description</a>'); separator='; '),'</a></td>',
+        '</tr>',
+        '</table>'),rdf:HTML) as ?wktLabel)
+    where {
+      # Retrieve all monument information in gemeente
+        ?cho
+          ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
+        ?basisregistratieRelatie
+          ceo:heeftBAGRelatie ?bagRelatie ;
+          ceo:heeftGemeente/skos:prefLabel ?gemeente .
+        ?bagRelatie
+          ceo:verblijfsobjectIdentificatie ?verblijfsobjectBag .
+        ?cho
+            ceo:heeftGeometrie/geo:asWKT ?geometrie ;
+            ceo:heeftJuridischeStatus/skos:prefLabel ?status ;
+            ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie ;
+            ceo:heeftOmschrijving ?omschrijving .
+      ?omschrijving ceo:formeelStandpunt ?formeelstandpunt .
+  FILTER (?formeelstandpunt = true)
+
+
+      # Service voor BAG-gerelateerde informatie.
+      # Dit haalt informatie op van een andere RDF-bron.
+      service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+        ?vbo
+          a sor:Verblijfsobject ;
+          sor:maaktDeelUitVan ?gebouw ;
+          sor:geregistreerdMet/nen3610:identificatie ?verblijfsobjectBag .
+        optional {
+          ?gebouw sor:oorspronkelijkBouwjaar ?bouwjaar
+        }
+        optional {
+          ?gebouwzone sor:hoortBij ?vbo .
+          ?gebouwzone kad:gebouwtype/skos:prefLabel ?gebouwtype
+        }
+        bind(if(bound(?gebouwtype), str(?gebouwtype), '') as ?type)
+      }
+    }
+    group by ?cho
+  }
+}
