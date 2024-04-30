@@ -1,5 +1,5 @@
 #+ name: rijksmonument-3d-1-1
-#+ description: De query, mocht ie ooit werken, failliet van LOD, begint met het selecteren van unieke ?cho, hun geometrie en labels. Vervolgens wordt een subquery gebruikt om informatie te verzamelen over elk ?cho-object. Binnen deze subquery worden twee services gebruikt: één voor het Cultureel Erfgoed Object en één voor BAG-gerelateerde informatie. De informatie uit beide services wordt samengevoegd en geretourneerd als resultaat.
+#+ description: De query begint met het selecteren van unieke ?cho,  geometrie en labels. Vervolgens wordt een subquery gebruikt om informatie te verzamelen over elk ?cho-object. Binnen deze subquery worden twee services gebruikt: één voor het Cultureel Erfgoed Object en één voor BAG-gerelateerde informatie. De informatie uit beide services wordt samengevoegd en geretourneerd als resultaat.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
@@ -10,10 +10,9 @@ prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
 # De query selecteert unieke ?cho (Cultuurhistorisch Object) met hun geometrie en labels.
-
 select distinct ?cho ?wkt ?wktLabel
 where {
   {
@@ -21,43 +20,47 @@ where {
     select
       ?cho
       (sample(?geometrie) as ?wkt) # De geometrie van het object
-      (strdt(concat(  # De label van het object als HTML
+      (strdt(concat(
         '<table>',
         '<tr>',
-        '<td>Monument ID: <a href="',str(?cho),'" target="_blank">Monument</a></td>',
+        '<td>Monument ID: <a href="', ?cho, '" target="_blank">Monument</a></td>',
         '</tr>',
         '<tr>',
-        '<td><b>Bouwjaar: </b>',group_concat(distinct ?bouwjaar; separator='; '),'</td>',
+        '<td><b>Bouwjaar: </b>', group_concat(distinct ?bouwjaar; separator='; '), '</td>',
         '</tr>',
         '<tr>',
-        '<td><b>Monument Status: </b>',group_concat(distinct ?status; separator='; '),'</td>',
+        '<td><b>Monument Status: </b>', group_concat(distinct ?status; separator='; '), '</td>',
         '</tr>',
         '<tr>',
-        '<td><b>Oorspronkelijke Functie: </b>',group_concat(distinct ?functie; separator='; '),'</td>',
+        '<td><b>Oorspronkelijke Functie: </b>', group_concat(distinct ?functies; separator='; '), '</td>',
         '</tr>',
         '<tr>',
-        '<td><b>Gebouwtype(n): </b>',group_concat(distinct ?type; separator='; '),'</td>',
+        '<td><b>Gebouwtype(n): </b>', group_concat(distinct ?type; separator='; '), '</td>',
         '</tr>',
         '<tr>',
-        '<td><b>Monument Omschrijving: </b>',group_concat(distinct concat('<a href="',str(?omschrijving),'" target="_blank">Description</a>'); separator='; '),'</a></td>',
+        '<td><b>Monument Omschrijving: </b>', group_concat(distinct concat('<a href="', ?omschrijving, '" target="_blank">Description</a>'); separator='; '), '</a></td>',
         '</tr>',
-        '</table>'),rdf:HTML) as ?wktLabel)
+        '<td><b>Register RCE: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
+        '</table>'), rdf:HTML) as ?wktLabel)
     where {
       # Retrieve all monument information in gemeente
-        ?cho
-          ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
-        ?basisregistratieRelatie
-          ceo:heeftBAGRelatie ?bagRelatie ;
-          ceo:heeftGemeente/skos:prefLabel ?gemeente .
-        ?bagRelatie
-          ceo:verblijfsobjectIdentificatie ?verblijfsobjectBag .
-        ?cho
-            ceo:heeftGeometrie/geo:asWKT ?geometrie ;
-            ceo:heeftJuridischeStatus/skos:prefLabel ?status ;
-            ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie ;
-            ceo:heeftOmschrijving ?omschrijving .
+      ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
+
+      ?cho
+        ceo:rijksmonumentnummer ?rijksmonumentnummer;
+       ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
+      ?basisregistratieRelatie
+        ceo:heeftBAGRelatie ?bagRelatie ;
+        ceo:heeftGemeente/skos:prefLabel ?gemeente .
+      ?bagRelatie
+        ceo:verblijfsobjectIdentificatie ?verblijfsobjectBag .
+      ?cho
+        ceo:heeftGeometrie/geo:asWKT ?geometrie ;
+        ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie ;
+        ceo:heeftOmschrijving ?omschrijving .
       ?omschrijving ceo:formeelStandpunt ?formeelstandpunt .
-  FILTER (?formeelstandpunt = true)
+      filter (?formeelstandpunt = true)
+      bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
 
 
       # Service voor BAG-gerelateerde informatie.
@@ -73,10 +76,10 @@ where {
         optional {
           ?gebouwzone sor:hoortBij ?vbo .
           ?gebouwzone kad:gebouwtype/skos:prefLabel ?gebouwtype
+          bind(if(bound(?gebouwtype), ?gebouwtype, '') as ?type)
         }
-        bind(if(bound(?gebouwtype), str(?gebouwtype), '') as ?type)
       }
     }
-    group by ?cho
+    group by ?cho ?rijksmonumentnummer
   }
 }
