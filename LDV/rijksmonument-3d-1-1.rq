@@ -11,15 +11,17 @@ prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
 
 # De query selecteert unieke ?cho (Cultuurhistorisch Object) met hun geometrie en labels.
-select distinct ?cho ?wkt ?wktLabel
+select distinct ?cho ?wkt ?wktLabel ?kadwkt ('red' as ?wktColor) ('blue' as ?kadwktColor)
 where {
   {
     # Deze subquery verzamelt informatie over elk ?cho-object.
     select
       ?cho
       (sample(?geometrie) as ?wkt) # De geometrie van het object
+      (sample(?geometrieKadaster) as ?kadwkt)
       (strdt(concat(
         '<table>',
         '<tr>',
@@ -35,6 +37,9 @@ where {
         '<td><b>Oorspronkelijke Functie: </b>', group_concat(distinct ?functies; separator='; '), '</td>',
         '</tr>',
         '<tr>',
+        '<td><b>Gebouwtype RCE: </b>', group_concat(distinct ?naamType; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
         '<td><b>Gebouwtype(n): </b>', group_concat(distinct ?type; separator='; '), '</td>',
         '</tr>',
         '<tr>',
@@ -48,7 +53,7 @@ where {
 
       ?cho
         ceo:rijksmonumentnummer ?rijksmonumentnummer;
-       ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
+        ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
       ?basisregistratieRelatie
         ceo:heeftBAGRelatie ?bagRelatie ;
         ceo:heeftGemeente/skos:prefLabel ?gemeente .
@@ -59,8 +64,12 @@ where {
         ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie ;
         ceo:heeftOmschrijving ?omschrijving .
       ?omschrijving ceo:formeelStandpunt ?formeelstandpunt .
+
+      optional {
+        ?cho ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?naamType.
+      }
       filter (?formeelstandpunt = true)
-      bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+      bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
 
 
       # Service voor BAG-gerelateerde informatie.
@@ -70,8 +79,10 @@ where {
           a sor:Verblijfsobject ;
           sor:maaktDeelUitVan ?gebouw ;
           sor:geregistreerdMet/nen3610:identificatie ?verblijfsobjectBag .
+        ?vbo geo:hasGeometry/geo:asWKT ?geometrieKadaster.
+
         optional {
-          ?gebouw sor:oorspronkelijkBouwjaar ?bouwjaar
+          ?gebouw sor:oorspronkelijkBouwjaar ?bouwjaar .
         }
         optional {
           ?gebouwzone sor:hoortBij ?vbo .

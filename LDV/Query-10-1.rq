@@ -1,0 +1,22 @@
+#+ name: Query-10-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select distinct ?s (xsd:integer(?rijksmonumentnummer) as ?nummer) (max(?bagrelatie) as ?eenbagrelatie) where {
+  graph graph:instanties-rce{
+    ?s a ceo:Rijksmonument.
+    ?s ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
+    ?s ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?s ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie.
+    optional {
+      ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    }
+    filter (!bound(?verblijfsobject))
+  }
+}
+group by ?s ?rijksmonumentnummer
+order by ?nummer
