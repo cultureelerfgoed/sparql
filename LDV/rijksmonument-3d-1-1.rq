@@ -14,16 +14,19 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
 
 # De query selecteert unieke ?cho (Cultuurhistorisch Object) met hun geometrie en labels.
-select distinct ?cho ?wkt ?wktLabel ?kadwkt ('red' as ?wktColor) ('blue' as ?kadwktColor)
+select distinct ?cho ?wkt ?wktLabel ?kadwkt ?kadwktLabel ('red' as ?wktColor) ('blue' as ?kadwktColor)
 where {
   {
     # Deze subquery verzamelt informatie over elk ?cho-object.
     select
-      ?cho
+      ?cho ?vbo
       (sample(?geometrie) as ?wkt) # De geometrie van het object
       (sample(?geometrieKadaster) as ?kadwkt)
       (strdt(concat(
         '<table>',
+        '<tr>',
+        '<td>RCE Geometrie</td>',
+        '</tr>',
         '<tr>',
         '<td>Monument ID: <a href="', ?cho, '" target="_blank">Monument</a></td>',
         '</tr>',
@@ -47,12 +50,40 @@ where {
         '</tr>',
         '<td><b>Register RCE: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
         '</table>'), rdf:HTML) as ?wktLabel)
+      (strdt(concat(
+        '<table>',
+        '<tr>',
+        '<td>Kadaster Geometrie</td>',
+        '</tr>',
+        '<tr>',
+        '<td>Verblijfsobject ID: </b>',group_concat(distinct concat('<a href="', ?vbo, '" target="_blank">Verblijfsobject</a>'); separator='; '), '</a></td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Bouwjaar: </b>', group_concat(distinct ?bouwjaar; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Monument Status: </b>', group_concat(distinct ?status; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Oorspronkelijke Functie: </b>', group_concat(distinct ?functies; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Gebouwtype RCE: </b>', group_concat(distinct ?naamType; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Gebouwtype(n): </b>', group_concat(distinct ?type; separator='; '), '</td>',
+        '</tr>',
+        '<tr>',
+        '<td><b>Monument Omschrijving: </b>', group_concat(distinct concat('<a href="', ?omschrijving, '" target="_blank">Description</a>'); separator='; '), '</a></td>',
+        '</tr>',
+        '<td><b>Register RCE: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
+        '</table>'), rdf:HTML) as ?kadwktLabel)
+
     where {
       # Retrieve all monument information in gemeente
-      ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
-
       ?cho
         ceo:rijksmonumentnummer ?rijksmonumentnummer;
+      ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864;
         ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
       ?basisregistratieRelatie
         ceo:heeftBAGRelatie ?bagRelatie ;
@@ -70,7 +101,6 @@ where {
       }
       filter (?formeelstandpunt = true)
       bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
-
 
       # Service voor BAG-gerelateerde informatie.
       # Dit haalt informatie op van een andere RDF-bron.
@@ -91,6 +121,6 @@ where {
         }
       }
     }
-    group by ?cho ?rijksmonumentnummer
+    group by ?cho ?rijksmonumentnummer ?vbo
   }
 }
