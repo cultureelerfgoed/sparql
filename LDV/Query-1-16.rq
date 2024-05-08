@@ -1,0 +1,48 @@
+#+ name: Query-1-16
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix schema: <https://schema.org/>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+select ?titel ?geo (sample(?img) as ?image)
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="{{image}}" style="max-width: 200px;"></center>','   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rm), '" target="_blank">', STR(?rm), '</a></li>',
+    '      <li>Boek: {{titel}}</li>',
+    '      <li>Zoek op in: <a href="', STR(?catalogus), '" target="_blank">Catalogus bibliotheek</a></li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) AS ?geoLabel)
+where {
+  # Patroon voor de eerste dataset (alleen ?titel)
+  ?s ceo:rijksmonumentnummer ?rm;
+     schema:name ?titel;
+   schema:sameAs ?catalogus.
+
+  # Patroon voor de tweede dataset (alleen ?geo)
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    graph graph:instanties-rce {
+      ?cho ceo:rijksmonumentnummer ?rm;
+       ceo:heeftGeometrie/geo:asWKT ?geo.
+    }
+  }
+
+  # Patroon voor de derde dataset (optioneel, voor eventuele afbeeldingen)
+  optional {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
+      graph <https://linkeddata.cultureelerfgoed.nl/graph/image> {
+      ?afb a edm:ProvidedCHO ;
+        ceo:rijksmonumentnummer ?rm;
+           edm:aggregatedCHO ?choi ;
+           foaf:depiction ?img ;
+      }
+    }
+  }
+} GROUP BY ?rm ?titel ?geo ?geoLabel ?catalogus

@@ -1,0 +1,25 @@
+#+ name: Query-47
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix schema: <https://schema.org/>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+
+select * where {
+  ?s ceo:rijksmonumentnummer ?rm.
+  ?s schema:name ?titel.
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    graph graph:instanties-rce {
+      ?cho a ceo:Rijksmonument.
+      ?cho ceo:rijksmonumentnummer ?rm.
+      optional {
+        ?cho   ceo:heeftGeometrie/geo:asWKT  ?geo.
+
+      }
+    }
+  }
+  bind(concat("Rijksmonument: ", ?rm, " Boektitel: ", ?titel) as ?geoLabel)
+}
