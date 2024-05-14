@@ -1,0 +1,15 @@
+#+ name: Query-3-9
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix schema: <https://schema.org/>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+
+select ?name (group_concat(?auteur; separator=", ") as ?authors) where {
+  ?s schema:keywords ?keywords.
+ OPTIONAL {?s schema:author ?auteur.}
+  ?s schema:name ?name.
+} group by ?name
