@@ -7,9 +7,14 @@ prefix edm: <http://www.europeana.eu/schemas/edm/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-select ?name (group_concat(?auteur; separator=", ") as ?authors) where {
-  ?s schema:keywords ?keywords.
- OPTIONAL {?s schema:author ?auteur.}
-  ?s schema:name ?name.
-} group by ?name
+select ?publicatie ?name (group_concat(?auteur; separator=", ") as ?authors) where {
+  graph graph:bib {
+    ?publicatie schema:keywords ?keywords.
+    optional {
+      ?publicatie schema:author/schema:name ?auteur.
+    }
+    ?publicatie schema:name ?name.
+  }
+} group by ?name ?publicatie
