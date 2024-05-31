@@ -1,0 +1,14 @@
+#+ name: Query-2-12
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+prefix graph: <https://data.colonialcollections.nl/nmvw/collection-archives/graphs/>
+prefix graph2: <https://data.cultureelerfgoed.nl/term/id/cht/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?conceptNMVW ?altLabel where {
+  service <https://api.colonialcollections.nl/datasets/nmvw/collection-archives/sparql> {
+    graph graph:thesaurus {
+      ?conceptNMVW skos:altLabel ?altLabel.
+    }
+  }
+}

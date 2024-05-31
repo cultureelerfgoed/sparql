@@ -9,17 +9,15 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT (count(distinct(?obj)) as ?terms) (count(distinct(?uri_cht)) as ?cht_matches) WHERE {
- 
+SELECT (COUNT(DISTINCT ?obj) AS ?terms) (COUNT(DISTINCT ?uri_cht) AS ?cht_matches) WHERE {
+
   ?sub dct:medium|dct:subject|schema:artform ?obj .
+
+  BIND(STRLANG(?obj, "nl") AS ?obj_nl)
   
-  BIND(strlang(?obj, "nl") AS ?obj_nl)
-  
-SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql> {
-   
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql> {
     GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
-  
-      optional{   ?uri_cht skos:prefLabel|skos:altLabel|skos:hiddenLabel ?obj_nl . }
-    
-    }}
-} LIMIT 10
+      OPTIONAL { ?uri_cht skos:prefLabel|skos:altLabel|skos:hiddenLabel ?obj_nl . }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+#+ name: stinsrm-bb-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+
+select distinct ?stinscomplex ?wkt ?wktColor ?wktLabel ?depiction ?tekst ?rmnummer ?beeldbank ?mapEndpoint
+where {
+  {
+    # geef me alle stins in de CHO
+    ?stinscomplex rdf:type ?type .
+    ?stinscomplex ceo:rijksmonumentnummer ?rmnummer .
+    ?stinscomplex ceo:heeftKennisregistratie ?omschrijving .
+    ?omschrijving ceo:omschrijving ?tekst .
+    ?omschrijving ceox:heeftOmschrijvingOnderwerp ?stinsterm .
+    ?stinsterm skos:prefLabel ?type_label .
+    
+    values (?stinsterm) {
+      (<https://data.cultureelerfgoed.nl/term/id/cht/1130e375-3469-4e63-a8d4-5fcb339f7536>)
+    } .
+
+    ?stinscomplex ceo:heeftGeometrie/geo:asWKT ?wkt .
+    bind('blue' as ?wktColor)
+  }
+
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
+    ?afbeelding ceo:rijksmonumentnummer ?rmnummer .
+    ?afbeelding foaf:depiction ?depiction .
+    ?afbeelding edm:isShownAt ?beeldbank .
+  }
+
+  filter(regex(?beeldbank, "beeldbank"))
+
+  bind(strdt(
+    concat(
+      "<h4>Rijksmonumentnummer:", str(?rmnummer), "</h4>",
+      "<img src='", str(?depiction), "' style='max-width:100px'>",
+      "<ul>",
+      "<li>Omschrijving: ", str(?tekst), "</li>",
+      "<li>Rijksmonument: <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rmnummer), "' target='_blank'>", str(?rmnummer), "</a></li>",
+      "<li>Beeldbank: <a href='", str(?beeldbank), "' target='_blank'>", str(?beeldbank), "</a></li>",
+      "</ul>"
+    ), rdf:HTML
+  ) as ?wktLabel)
+
+  # add map layer
+ # bind(<https://services.rce.geovoorziening.nl/liniesenstellingen/wms?request=GetCapabilities> AS ?mapEndpoint)
+}
+limit 10000
