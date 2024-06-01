@@ -17,6 +17,7 @@ SELECT distinct ?shapeLabel ?mapEndpoint ?plaats ?shape ?ff ?beginPeriode ?ac
 WHERE 
 {
   ?ao a ceo:ArcheologischOnderzoeksgebied .
+  GRAPH graph:instanties-rce {
   ?ao ceo:heeftGeometrie/geo:asWKT ?shape.
   ?ao ceo:bevatObject ?ac.
     FILTER (regex(str(?ac), "archeologischcomplex" , "i "))
@@ -28,7 +29,7 @@ WHERE
      ?perE skos:prefLabel ?eindPeriode.
    ?ao ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?pl.
   ?pl ceo:woonplaatsnaam ?plaats.
-    
+    }
     BIND(CONCAT("Plaats: ", ?plaats, " - ", "Complextype: ", ?complextype, " - ", "Periode: ", ?beginPeriode,"-",?eindPeriode) AS ?shapeLabel)
 
   #kadaster

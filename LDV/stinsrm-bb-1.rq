@@ -9,46 +9,70 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix foaf: <http://xmlns.com/foaf/0.1/>
 prefix edm: <http://www.europeana.eu/schemas/edm/>
 
-select distinct ?stinscomplex ?wkt ?wktColor ?wktLabel ?depiction ?tekst ?rmnummer ?beeldbank ?mapEndpoint
+select distinct ?stinscomplex ?wkt ?wktColor ?depiction ?wktLabel ?tekst ?rmnummer ?beeldbank ?stroming ?mapEndpoint
 where {
   {
-    # geef me alle stins in de CHO
+    # Geef me alle stins in de CHO
     ?stinscomplex rdf:type ?type .
     ?stinscomplex ceo:rijksmonumentnummer ?rmnummer .
     ?stinscomplex ceo:heeftKennisregistratie ?omschrijving .
     ?omschrijving ceo:omschrijving ?tekst .
     ?omschrijving ceox:heeftOmschrijvingOnderwerp ?stinsterm .
+    ?stinscomplex ceox:heeftDenominatie ?denominatie .
+    ?denominatie ceox:heeftDenominatieNaam/skos:prefLabel ?stroming .
     ?stinsterm skos:prefLabel ?type_label .
-    
+
+    # Kerken ipv stinsen
     values (?stinsterm) {
-      (<https://data.cultureelerfgoed.nl/term/id/cht/1130e375-3469-4e63-a8d4-5fcb339f7536>)
-    } .
+            (<https://data.cultureelerfgoed.nl/term/id/cht/c15af234-87b0-433c-bbe1-880a6f717057>)
+            } .
 
     ?stinscomplex ceo:heeftGeometrie/geo:asWKT ?wkt .
-    bind('blue' as ?wktColor)
+    bind(if(?stroming="Nederlandse Hervormde Kerk", "red",
+         if(?stroming="Rooms-Katholieke Kerk in Nederland", "purple",
+         if(?stroming="Oud-Katholieke Kerk van Nederland", "yellow",
+         if(?stroming="Jodendom", "maroon","black")))) as ?wktColor)
   }
 
-  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
-    ?afbeelding ceo:rijksmonumentnummer ?rmnummer .
-    ?afbeelding foaf:depiction ?depiction .
-    ?afbeelding edm:isShownAt ?beeldbank .
+  {
+    select ?rmnummer (sample(?depiction) as ?sampledDepiction) (sample(?beeldbank) as ?sampledBeeldbank)
+    where {
+      service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
+        ?afbeelding ceo:rijksmonumentnummer ?rmnummer .
+        ?afbeelding foaf:depiction ?depiction .
+        ?afbeelding edm:isShownAt ?beeldbank .
+      }
+      filter(regex(?beeldbank, "beeldbank"))
+    }
+    group by ?rmnummer
   }
 
-  filter(regex(?beeldbank, "beeldbank"))
+  bind(?sampledDepiction as ?depiction)
+  bind(?sampledBeeldbank as ?beeldbank)
 
-  bind(strdt(
+  bind(
+    strdt(
     concat(
       "<h4>Rijksmonumentnummer:", str(?rmnummer), "</h4>",
-      "<img src='", str(?depiction), "' style='max-width:100px'>",
+      "<center><img src='", coalesce(str(?depiction), ''), "' style='max-width:200px'></center>",
       "<ul>",
-      "<li>Omschrijving: ", str(?tekst), "</li>",
+      "<li>Omschrijving: ",
+      str(
+      if(strlen(str(?tekst)) > 250,
+      concat(substr(str(?tekst), 1, 250), "... <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rmnummer), "' target='_blank'>lees hier verder</a>"),
+      str(?tekst)
+      )
+      ),
+      "</li>",
       "<li>Rijksmonument: <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rmnummer), "' target='_blank'>", str(?rmnummer), "</a></li>",
-      "<li>Beeldbank: <a href='", str(?beeldbank), "' target='_blank'>", str(?beeldbank), "</a></li>",
+      "<li>Beeldbank: <a href='", str(?beeldbank), "' target='_blank'>klik hier</a></li>",
       "</ul>"
     ), rdf:HTML
-  ) as ?wktLabel)
-
-  # add map layer
- # bind(<https://services.rce.geovoorziening.nl/liniesenstellingen/wms?request=GetCapabilities> AS ?mapEndpoint)
+    ) as ?wktLabel
+    )
+  #bouwhistorie
+ # bind(<https://geo.rijkswaterstaat.nl/services/ogc/gdr/cultuurhistorie/ows?service=WMS&request=getcapabilities&version=1.3.0> as ?mapEndpoint)
+  #luchtfoto
+  bind(<https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?request=GetCapabilities&service=wms> AS ?mapEndpoint)
 }
 limit 10000

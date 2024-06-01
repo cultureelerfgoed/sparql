@@ -1,0 +1,66 @@
+#+ name: death-total-per-municipality
+#+ description: Query based on CLARIAH research and queries by Thomas de Groot, Rob Zeeman. Total amount of deceased per municipality.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/sparql
+
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix schema: <http://schema.org/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix iisgv: <https://iisg.amsterdam/openarchdeaths1910_1920/vocab/>
+prefix iisgv2: <https://iisg.amsterdam/openarchdeath/vocab/>
+prefix gg: <http://www.gemeentegeschiedenis.nl/gg-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix bio: <http://purl.org/vocab/bio/0.1/>
+prefix bif: <http://www.openlinksw.com/schemas/bif#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?total_deaths ?wkt ?gemeente_naam ?wktTooltip ?dpm ?wktColor ?wktWeight
+where {
+  service <https://api.druid.datalegend.net/datasets/dataLegend/deaths-1910-1920/services/deaths-1910-1920/sparql> {
+    {
+      select ?wkt ?gemeente_naam (count(?death) as ?total_deaths)
+      where {
+        {
+          select (max(?wktyear) as ?max) ?gg_gemeente
+          where {
+            ?gg_gemeente geo:hasGeometry ?geo .
+            ?geo gg:year ?wktyear .
+            filter(?wktyear <= "1918"^^xsd:gYear)
+          } group by ?gg_gemeente
+        }
+        ?gg_gemeente geo:hasGeometry [gg:year ?max;
+                                      geo:asWKT ?wkt] .
+        ?gg_gemeente skos:prefLabel ?gemeente_naam .
+        ?death a bio:Death .
+        ?death iisgv:deceased ?deceased .
+        ?death bio:date ?date .
+        ?death iisgv:event_location ?gemeente .
+        ?gemeente gg:amsterdamCode ?amco .
+        ?amco ^gg:amsterdamCode ?gg_gemeente .
+        bind(year(?date) as ?year)
+        filter(not exists {
+          ?gg_gemeente gg:startDate ?startdate
+          filter(?startdate >= "1918-01-01"^^xsd:date)
+        })
+        filter(not exists {
+          ?gg_gemeente gg:endDate ?enddate
+          filter(?enddate <= "1918-01-01"^^xsd:date)
+        })
+      } group by ?wkt ?gemeente_naam
+    }
+  }
+  bind (
+    if(?total_deaths <= 100, "lightblue",
+    if(?total_deaths <= 1000, "green",
+    if(?total_deaths <= 5000, "yellow",
+    if(?total_deaths <= 10000, "orange",
+    if(?total_deaths <= 50000, "red", "black")
+    )
+    )
+    )) as ?wktColor)
+
+  bind(xsd:float(?total_deaths) as ?wktWeight)
+  bind(concat('gemeente: ',str(?gemeente_naam), ', aantal overledenen: ', str(?total_deaths)) as ?wktTooltip)
+
+}
+order by asc(?wkt)

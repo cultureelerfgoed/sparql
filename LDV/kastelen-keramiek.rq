@@ -1,0 +1,26 @@
+#+ name: kastelen-keramiek
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+SELECT DISTINCT ?shape (GROUP_CONCAT(?label; SEPARATOR=", ") AS ?shapeLabel) ?shapeColor WHERE {
+  # in welke ommuurde kastelen (archeologisch complex) is glas gevonden bij een archeologische opgraving?
+
+  ?ao a ceo:ArcheologischOnderzoeksgebied .
+  ?ao ceo:heeftGeometrie/geo:asWKT ?shape.
+  ?complex ceo:ligtInObject/ceo:ligtInObject ?ao .
+  
+  <https://data.cultureelerfgoed.nl/term/id/cht/1130e375-3469-4e63-a8d4-5fcb339f7536> skos:exactMatch ?match .
+  ?kennis ceo:heeftTypeNaam ?match .
+  ?complex ceo:heeftKennisregistratie ?kennis .
+  ?complex ceo:bevatObject ?vondsten .
+  ?vondsten ceo:heeftMateriaal ?materiaal .
+  ?materiaal ceo:heeftMateriaalNaam/skos:prefLabel ?label .
+
+  # Assigning a color to shape
+  BIND("red" AS ?shapeColor)
+}
+GROUP BY ?shape ?shapeColor
+LIMIT 10000
