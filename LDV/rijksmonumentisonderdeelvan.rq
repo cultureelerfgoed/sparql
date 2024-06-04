@@ -1,0 +1,57 @@
+#+ name: rijksmonumentisonderdeelvan
+#+ description: - werelderfgoed
+#- - gezicht of
+#- - complex
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix gsp: <http://www.opengis.net/ont/geosparql#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?rm ?rmn ?type ?nummer ?rmGeometry ?otherGeometry ('red' as ?rmGeometryColor) ('blue' as ?otherGeometryColor)
+where {
+  graph graph:instanties-rce {
+    ?rm a ceo:Rijksmonument ;
+        ceo:rijksmonumentnummer ?rmn ;
+        ceo:heeftGeometrie/gsp:asWKT ?rmGeometry .
+
+    optional {
+      ?ge a ceo:Gezicht ;
+          ceo:gezichtsnummer ?gezichtnummer ;
+          ceo:heeftGeometrie/gsp:asWKT ?geogez .
+      filter(geof:sfWithin(?rmGeometry, ?geogez))
+      bind("Gezicht" as ?type)
+      bind(?gezichtnummer as ?nummer)
+      bind(?geogez as ?otherGeometry)
+    }
+
+    optional {
+      ?wh a ceo:Werelderfgoed ;
+          ceo:werelderfgoednummer ?werelderfgoednummer ;
+          ceo:heeftGeometrie/gsp:asWKT ?geowh .
+      filter(geof:sfWithin(?rmGeometry, ?geowh))
+      bind("Werelderfgoed" as ?type)
+      bind(?werelderfgoednummer as ?nummer)
+      bind(?geowh as ?otherGeometry)
+    }
+
+    optional {
+      ?complex ceo:heeftHoofdobject ?rm ;
+               ceo:complexnummer ?complexnummer .
+      bind("Hoofdobject" as ?type)
+      bind(?complexnummer as ?nummer)
+    }
+
+    optional {
+      ?complex ceo:heeftRijksmonument ?rm ;
+               ceo:complexnummer ?complexnummer .
+      bind("Rijksmonument" as ?type)
+      bind(?complexnummer as ?nummer)
+    }
+  }
+  filter((bound(?type) && bound(?nummer)))
+  #&& (!BOUND(?complexnummer) || BOUND(?complexnummer)))
+}
+order by ?rmn ?type ?nummer

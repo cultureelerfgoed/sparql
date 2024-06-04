@@ -2,13 +2,12 @@
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-PREFIX gsp: <http://www.opengis.net/ont/geosparql#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX gsp: <http://www.opengis.net/ont/geosparql#>
 PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-SELECT ?ge ?rm ?gezichtnummer ?gezichtsnaam ?rmn ?functie ?oorspronkelijkeFunctie ?geogez ?geormn ('red' as ?geogezColor) ('blue' as ?geormColor)
+SELECT ?ge ?rm ?gezichtnummer ?gezichtsnaam ?rmn ?oorspronkelijkeFunctie ?geogez ?geormn ('red' as ?geogezColor) ('blue' as ?geormColor)
 WHERE {
   GRAPH graph:instanties-rce {
     ?ge a ceo:Gezicht ;
@@ -20,16 +19,13 @@ WHERE {
         ceo:rijksmonumentnummer ?rmn ;
         ceo:heeftGeometrie/gsp:asWKT ?geormn .
     
-    OPTIONAL {
-      ?rm ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functie .
-    }
+    OPTIONAL { ?rm ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functie }
     
     FILTER(geof:sfWithin(?geormn, ?geogez))
   }
 
   GRAPH graph:bebouwdeomgeving {
-    OPTIONAL {?functie skos:broader ?broader .
-    ?broader skos:prefLabel ?oorspronkelijkeFunctie .
+    OPTIONAL { ?functie skos:broader/skos:prefLabel ?oorspronkelijkeFunctie }
   }
-}}
+}
 ORDER BY ?gezichtnummer ?rmn
