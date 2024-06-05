@@ -1,7 +1,7 @@
 #+ name: rijksmonumentisonderdeelvan
-#+ description: - werelderfgoed
-#- - gezicht of
-#- - complex
+#+ description: - werelderfgoed 18329
+#- - gezicht 40035 of
+#- - complex 531019, 531015
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

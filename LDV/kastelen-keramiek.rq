@@ -4,15 +4,28 @@
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
 
-SELECT DISTINCT ?ff ?shape (GROUP_CONCAT(?label; SEPARATOR=", ") AS ?shapeLabel) ?shapeColor WHERE {
+SELECT DISTINCT ?ao ?ff ?shape (GROUP_CONCAT(?label; SEPARATOR=", ") AS ?shapeLabel) ?shapeColor ?provincie ?label2 WHERE {
   # in welke ommuurde kastelen (archeologisch complex) is wat gevonden bij een archeologische opgraving?
 
   ?ao a ceo:ArcheologischOnderzoeksgebied .
   ?ao ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?ff.
-  FILTER (regex(str(?ff), "Peize", "i"))
+ # FILTER (regex(str(?ff), "Wijk bij Duurstede", "i"))
   ?ao ceo:heeftGeometrie/geo:asWKT ?shape.
   ?complex ceo:ligtInObject/ceo:ligtInObject ?ao .
+
+  GRAPH <https://triplydb.com/koop/owms/graphs/default> {
+
+?plaats skos:prefLabel ?plaatslabel
+    BIND(STR(?plaatslabel) as ?label2)
+
+    ?plaats owms:overlapsWith ?provincie .
+    ?provincie a owms:Provincie .
+ ?provincie skos:prefLabel ?provlabel .
+
+    
+  }
   
   <https://data.cultureelerfgoed.nl/term/id/cht/1130e375-3469-4e63-a8d4-5fcb339f7536> skos:exactMatch ?match .
   ?kennis ceo:heeftTypeNaam ?match .
@@ -23,6 +36,8 @@ SELECT DISTINCT ?ff ?shape (GROUP_CONCAT(?label; SEPARATOR=", ") AS ?shapeLabel)
 
   # Assigning a color to shape
   BIND("red" AS ?shapeColor)
+  FILTER(?ff = ?label2)
+  FILTER(REGEX(?provlabel, "Utrecht"))
 }
-GROUP BY ?shape ?shapeColor ?ff
+GROUP BY ?shape ?shapeColor ?ff ?ao ?provincie ?label2
 LIMIT 10000

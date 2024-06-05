@@ -1,0 +1,28 @@
+#+ name: Query-1-14-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select distinct ?rijksmonument ?nummer (REPLACE(?omschrijving, "\n", " ") AS ?descriptionschoon) ?aantalGevondenWoorden
+where {
+  graph graph:instanties-rce {
+    ?rijksmonument a ceo:Rijksmonument.
+    ?rijksmonument ceo:rijksmonumentnummer ?nummer.
+    ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?rijksmonument ceo:heeftOmschrijving ?standpunt_omschrijving.
+    ?standpunt_omschrijving ceo:omschrijving ?omschrijving .
+    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+    filter regex(?omschrijving, "neo-gotisch|neo-gotische", "i").
+    
+    BIND (
+      (IF(regex(?omschrijving, "neo-gotisch", "i"), 1, 0) +
+       IF(regex(?omschrijving, "neo-gotische", "i"), 1, 0))
+      AS ?aantalGevondenWoorden
+    )
+  }
+}
+order by ?nummer
