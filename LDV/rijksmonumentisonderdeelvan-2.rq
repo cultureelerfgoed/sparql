@@ -1,0 +1,57 @@
+#+ name: rijksmonumentisonderdeelvan-2
+#+ description: - 531019 Complex
+#- - 531015 Hoofdobject Complex
+#- - 18329 Werelderfgoed 
+#- - 40035 Gezicht 
+#- - 46869 Complex & Werelderfgoed
+#- - 15669 Gezicht & Werelderfgoed
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix units: <https://eulersharp.sourceforge.net/2003/03swap/units#>
+
+select ?rijksmonument ?rijksmonumentnummer ?complex ?complexnummer ?type ?werelderfgoed ?werelderfgoednummer ?gezicht ?gezichtnummer ?rmGeometry ('green' as ?geogezColor) ('blue' as ?geowhColor) ('red' as ?rmGeometryColor) ?rmGeometry ?geowh ?geogez
+where {
+  graph graph:instanties-rce {
+    ?rijksmonument a ceo:Rijksmonument ;
+                   ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                   ceo:heeftGeometrie/geo:asWKT ?rmGeometry .
+
+    optional {
+      ?complex ceo:heeftHoofdobject ?rijksmonument ;
+               ceo:complexnummer ?complexnummer .
+      bind("Hoofdobject" as ?type)
+    }
+
+    optional {
+      ?complex ceo:heeftRijksmonument ?rijksmonument ;
+               ceo:complexnummer ?complexnummer .
+      bind("Rijksmonument" as ?type)
+    }
+
+    optional {
+      ?werelderfgoed a ceo:Werelderfgoed ;
+                     ceo:werelderfgoednummer ?werelderfgoednummer ;
+                     ceo:heeftGeometrie/geo:asWKT ?geowh .
+      #Het kan zijn dat de bufferwaarde aangepast moet worden.
+      #origineel werkt met virtuoso, maar niet met speedy. te weinig arguments
+       filter(geof:sfWithin(?rmGeometry, geof:buffer(?geowh, 0.0005)) || geof:sfWithin(?geowh, geof:buffer(?rmGeometry, 0.0005)))
+      #poging met speedy en buffer en units. Geen werelderfgoed
+      #filter(geof:sfWithin(?rmGeometry, geof:buffer(?geowh, 55.60, units:metre)) || geof:sfWithin(?geowh, geof:buffer(?rmGeometry, 55.60, units:metre)))
+      #speedy zonder units. veel treffers, maar geen werelderfgoed, waar geometrie afwijkt. Zoals 46869
+      # filter(geof:sfWithin(?rmGeometry, ?geowh) || geof:sfWithin(?geowh, ?rmGeometry))
+     
+    }
+
+    optional {
+      ?gezicht a ceo:Gezicht ;
+               ceo:gezichtsnummer ?gezichtnummer ;
+               ceo:heeftGeometrie/geo:asWKT ?geogez .
+      filter(geof:sfWithin(?rmGeometry, ?geogez))
+    }
+  }
+}
