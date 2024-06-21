@@ -1,0 +1,61 @@
+#+ name: Query-17-2-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select distinct ?choi ?label ?rijksmonumentnummer ?functie (group_concat(distinct ?material) as ?gevondenMaterialen) where {
+  graph graph:instanties-rce {
+    ?choi rdf:type ceo:Rijksmonument.
+    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?choi ceo:heeftOmschrijving ?omschrijving_.
+    bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
+    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
+    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+    ?omschrijving_ ceo:omschrijving ?label.
+
+    bind(if(regex(?label, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
+    bind(if(regex(?label, "staal", "i"), "staal", "") as ?matchLabel2)
+    bind(if(regex(?label, "stalen", "i"), "stalen", "") as ?matchLabel3)
+    bind(if(regex(?label, "welijzer", "i"), "welijzer", "") as ?matchLabel4)
+    bind(if(regex(?label, "gietijzer", "i"), "gietijzer", "") as ?matchLabel5)
+    bind(if(regex(?label, "smeedijzer", "i"), "smeedijzer", "") as ?matchLabel6)
+    bind(if(regex(?label, "RVS", "i"), "RVS", "") as ?matchLabel7)
+    bind(if(regex(?label, "corten", "i"), "corten", "") as ?matchLabel8)
+    bind(if(regex(?label, "roestvast", "i"), "roestvast", "") as ?matchLabel9)
+    bind(if(regex(?label, "roestvrij", "i"), "roestvrij", "") as ?matchLabel10)
+    bind(if(regex(?label, "ijzeren", "i"), "ijzeren", "") as ?matchLabel11)
+
+    bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
+                if(?matchLabel2 != "", " ", ""), ?matchLabel2,
+                if(?matchLabel3 != "", " ", ""), ?matchLabel3,
+                if(?matchLabel4 != "", " ", ""), ?matchLabel4,
+                if(?matchLabel5 != "", " ", ""), ?matchLabel5,
+                if(?matchLabel6 != "", " ", ""), ?matchLabel6,
+                if(?matchLabel7 != "", " ", ""), ?matchLabel7,
+                if(?matchLabel8 != "", " ", ""), ?matchLabel8,
+                if(?matchLabel9 != "", " ", ""), ?matchLabel9,
+                if(?matchLabel10 != "", " ", ""), ?matchLabel10,
+                if(?matchLabel11 != "", " ", ""), ?matchLabel11) as ?material)
+  }
+
+  filter(?material != "")
+
+  optional {
+    ?choi ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .
+    graph graph:bebouwdeomgeving {
+      optional {
+        ?functies skos:broader/skos:prefLabel ?oorspronkelijkeFunctie .
+        bind(replace(?oorspronkelijkeFunctie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+      }
+    }
+  }
+        bind(concat("Rijksmonument: ", ?rijksmonumentnummer, " Functie: ", ?functie, " Gevonden materialen: ", ?gevondenMaterialen) as ?geometrieLabel)
+
+}
+group by ?choi ?label ?rijksmonumentnummer ?oorspronkelijkeFunctie ?functie 
