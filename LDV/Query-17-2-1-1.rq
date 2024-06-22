@@ -7,55 +7,126 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-select distinct ?choi ?label ?rijksmonumentnummer ?functie (group_concat(distinct ?material) as ?gevondenMaterialen) where {
+select distinct ?choi ?omschrijving ?rijksmonumentnummer
+  (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+  ?hoofdcategorie ?subcategorie ?functie   (group_concat(distinct ?extraFunction) as ?extraFunctions) ?toelichting
+  (group_concat(distinct ?material) as ?gevondenMaterialen)
+
+
+where {
   graph graph:instanties-rce {
     ?choi rdf:type ceo:Rijksmonument.
-    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
-    ?choi ceo:heeftOmschrijving ?omschrijving_.
-    bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
-    ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
-    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-    ?omschrijving_ ceo:omschrijving ?label.
+    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
+    bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
 
-    bind(if(regex(?label, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
-    bind(if(regex(?label, "staal", "i"), "staal", "") as ?matchLabel2)
-    bind(if(regex(?label, "stalen", "i"), "stalen", "") as ?matchLabel3)
-    bind(if(regex(?label, "welijzer", "i"), "welijzer", "") as ?matchLabel4)
-    bind(if(regex(?label, "gietijzer", "i"), "gietijzer", "") as ?matchLabel5)
-    bind(if(regex(?label, "smeedijzer", "i"), "smeedijzer", "") as ?matchLabel6)
-    bind(if(regex(?label, "RVS", "i"), "RVS", "") as ?matchLabel7)
-    bind(if(regex(?label, "corten", "i"), "corten", "") as ?matchLabel8)
-    bind(if(regex(?label, "roestvast", "i"), "roestvast", "") as ?matchLabel9)
-    bind(if(regex(?label, "roestvrij", "i"), "roestvrij", "") as ?matchLabel10)
-    bind(if(regex(?label, "ijzeren", "i"), "ijzeren", "") as ?matchLabel11)
+    bind(if(regex(?omschrijving, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
+    bind(if(regex(?omschrijving, "staal", "i"), "staal", "") as ?matchLabel2)
+    bind(if(regex(?omschrijving, "stalen", "i"), "stalen", "") as ?matchLabel3)
+    bind(if(regex(?omschrijving, "welijzer", "i"), "welijzer", "") as ?matchLabel4)
+    bind(if(regex(?omschrijving, "gietijzer", "i"), "gietijzer", "") as ?matchLabel5)
+    bind(if(regex(?omschrijving, "smeedijzer", "i"), "smeedijzer", "") as ?matchLabel6)
+    bind(if(regex(?omschrijving, "rvs", "i"), "RVS", "") as ?matchLabel7)
+    bind(if(regex(?omschrijving, "corten", "i"), "corten", "") as ?matchLabel8)
+    bind(if(regex(?omschrijving, "roestvast", "i"), "roestvast", "") as ?matchLabel9)
+    bind(if(regex(?omschrijving, "roestvrij", "i"), "roestvrij", "") as ?matchLabel10)
+    bind(if(regex(?omschrijving, "ijzeren", "i"), "ijzeren", "") as ?matchLabel11)
+    bind(if(regex(?omschrijving, "roest", "i"), "roest", "") as ?matchLabel12)
 
-    bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
-                if(?matchLabel2 != "", " ", ""), ?matchLabel2,
-                if(?matchLabel3 != "", " ", ""), ?matchLabel3,
-                if(?matchLabel4 != "", " ", ""), ?matchLabel4,
-                if(?matchLabel5 != "", " ", ""), ?matchLabel5,
-                if(?matchLabel6 != "", " ", ""), ?matchLabel6,
-                if(?matchLabel7 != "", " ", ""), ?matchLabel7,
-                if(?matchLabel8 != "", " ", ""), ?matchLabel8,
-                if(?matchLabel9 != "", " ", ""), ?matchLabel9,
-                if(?matchLabel10 != "", " ", ""), ?matchLabel10,
-                if(?matchLabel11 != "", " ", ""), ?matchLabel11) as ?material)
+    bind(concat(
+      if(?matchLabel1 != "", " ", ""), ?matchLabel1,
+      if(?matchLabel2 != "", " ", ""), ?matchLabel2,
+      if(?matchLabel3 != "", " ", ""), ?matchLabel3,
+      if(?matchLabel4 != "", " ", ""), ?matchLabel4,
+      if(?matchLabel5 != "", " ", ""), ?matchLabel5,
+      if(?matchLabel6 != "", " ", ""), ?matchLabel6,
+      if(?matchLabel7 != "", " ", ""), ?matchLabel7,
+      if(?matchLabel8 != "", " ", ""), ?matchLabel8,
+      if(?matchLabel9 != "", " ", ""), ?matchLabel9,
+      if(?matchLabel10 != "", " ", ""), ?matchLabel10,
+      if(?matchLabel11 != "", " ", ""), ?matchLabel11,
+      if(?matchLabel12 != "", " ", ""), ?matchLabel12
+    ) as ?material)
   }
-
+  
   filter(?material != "")
+  filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
 
   optional {
-    ?choi ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .
-    graph graph:bebouwdeomgeving {
-      optional {
-        ?functies skos:broader/skos:prefLabel ?oorspronkelijkeFunctie .
-        bind(replace(?oorspronkelijkeFunctie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
-      }
-    }
+    ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
+    ?functies_ ceo:kennisregistratieToelichting ?toelichting.
+    ?functies_ ceo:heeftFunctieNaam ?functiesl .
+    ?functiesl skos:prefLabel ?functies.
   }
-        bind(concat("Rijksmonument: ", ?rijksmonumentnummer, " Functie: ", ?functie, " Gevonden materialen: ", ?gevondenMaterialen) as ?geometrieLabel)
 
+  # Categorize the functions
+  bind(
+    if(?functiesl in (
+      rn:11c897ed-d35e-4191-9254-7ab95d9d63bc, 
+      rn:b8077035-db8f-47f1-ae1d-e64f75344fcf, 
+      rn:5b7dd16c-fa8d-4d68-984a-9ec0efc650d4, 
+      rn:5013dcbc-1090-42e9-bc22-92de47e43783, 
+      rn:b797b89c-1e0a-4ce7-869b-817cd98259b0, 
+      rn:b2511baf-3b70-4667-98dd-1b850c7ea53f, 
+      rn:92cda3e4-8c6a-41dc-9a81-02f8aba88b25, 
+      rn:d60159d2-8b55-47b7-8301-5ac82b0f2d7f, 
+      rn:8d4228b6-7f8d-4b78-b870-901879af8c04, 
+      rn:e88ccbf4-e41d-49bf-9876-0f71db0e6646, 
+      rn:74a847b5-1e0f-4f66-b910-90d2c8d9fa04, 
+      rn:1680dfc0-666a-4a01-9781-59e9af26ec51, 
+      rn:0be0a6c9-0738-41cc-aaac-550d258c4261, 
+      rn:25fac0f1-77a2-4587-ab04-dfcb66959dd8, 
+      rn:abd4446e-e169-40a0-8a0d-60779722b6e5
+    ), ?functiesl, "")
+    as ?hoofdcategorie
+  )
+
+  bind(
+    if(?functiesl in (
+      rn:02418c16-915a-4cd7-a879-03a23ea37329, rn:4c929499-3065-400d-ab76-1fa7913dc38e, rn:fa8551c3-d862-4275-ad7a-66a1b1eeaf0d,
+      rn:9d3835fd-b5c9-4086-973f-ebe0cbd40c80, rn:80f5dbd8-8633-4767-927f-81493ee7c968, rn:3a49a436-e9df-40bd-a56b-f4378b663f9b,
+      rn:3e26d0f1-292f-4b3e-b7b3-30900c7ef6f2, rn:3567847f-0147-492f-9503-4bcb3000e488, rn:31eec563-bc4d-44ba-a385-a6595613254c,
+      rn:d875f81c-81f7-485b-b596-3b7621cdad7e, rn:e95cb75d-b99c-4ae9-841c-827b28e75458, rn:6fee4845-6f17-4247-bc24-8634075edfb2,
+      rn:a3dbebf9-a237-4caa-9ee6-347c9d30dd9e, rn:313b3bdc-e1bd-40b2-b7b3-5d49db458f1c, rn:232b5d30-be10-43ef-863f-976e8b958617,
+      rn:cfc3a2fc-7c57-4aa1-bd90-215bd875013a, rn:911ae069-f670-44b0-b586-990fc6fe5932, rn:b964b9ca-8f5a-42de-b96c-ce8320db9e95,
+      rn:c2e1ad07-1db7-441e-b481-7c7361f1e548, rn:73fe5198-5667-4362-9922-25ac3b81e353, rn:ef7701f2-53b5-40df-a675-d1ab28d43d14,
+      rn:4cbdb812-a515-473f-bbdf-989ed004a37f, rn:a26fb834-feaf-4820-bfd7-01dfc656c360, rn:f943883b-bc53-4d4d-bfab-35da6c10e80a,
+      rn:2c3b7359-d418-4bcd-8c12-f680b3b864db, rn:0aa25245-aff8-46c0-a1c6-ab91553ec14a, rn:f5e022f5-d86a-40ee-8d2c-99736b75e1d7,
+      rn:e770da3b-a06f-4153-a86b-1da6470d73de, rn:0e3aadbe-3a28-4ff6-a636-7819b73d7f8a, rn:9f3a4d85-96fa-48ff-b157-e11e5d23d584,
+      rn:36d66656-3af2-421b-9866-5743b418eb5b, rn:03e545c5-c025-4c87-92ff-f3afda170d63, rn:b159e2fa-53fe-431b-8dbd-56bd61686b5d,
+      rn:41f21979-b6c4-422c-a14a-6f0bfc892ed4, rn:65c68477-e894-4372-8e90-102047de5c89, rn:018dcba3-de05-4819-bfa7-1f84af7d69f1,
+      rn:c3b627f6-d406-4cde-9308-26455cce7ef6, rn:a781b134-f459-4051-b449-1cb1cd9f4643, rn:4bb244a7-0a1e-4586-805a-f4de1b84a54d,
+      rn:41df105b-6109-49db-b29f-f78745951060, rn:e9839157-a494-4458-9b22-278349feb961, rn:83d47a41-c2ad-4e77-90c4-15fbcf41fea4,
+      rn:467e8572-d9ca-4bea-bd27-4bc7d6e2d3d5, rn:8007723a-3c96-4105-bc23-520434d7f5c3, rn:f5b139d1-3d00-478f-baef-35527e802ce4,
+      rn:2aee2024-9410-4791-a1a0-a3299c427e3e, rn:3b0228bf-3153-4a9d-86bb-19ea529f040e, rn:6cc6b34b-f903-4351-8519-94b0e0515f2d,
+      rn:4a6c6753-75e3-4ef6-8cec-deb9b99cacff, rn:9d7b28fc-62bd-450d-a8ad-34c7496f6b09, rn:5756c39a-dc4c-47f0-855f-b80e7240a00e,
+      rn:05606ed7-8375-401d-965d-9300010fc6c1, rn:6155372e-f952-4aa1-ae22-cdf59a14af70, rn:dd5ff7ae-4312-49b5-be3d-420868f03393,
+      rn:b96c67d9-48d0-4037-b33f-38d6459feeb0, rn:902c2145-c6da-4cd1-90ae-ab0a4bdaf512, rn:b310b911-d793-4637-be04-19c521f1c5bb,
+      rn:d02716c1-7f85-4ec5-a802-572e5a5f1726, rn:8dceb71b-02fd-4b2b-a477-8baeb0eb4105, rn:aab8d355-b7c6-4ca3-ae18-b985883899e7,
+      rn:41b8341b-f9d8-4655-af4b-682c4fb06206, rn:7f5881b3-89d2-4ae5-83f3-b336a47bb545, rn:ff297b52-93f0-4d84-9022-dca0ed813b47,
+      rn:d3f6bc1f-28d2-4c4d-ab89-99244a0d52cc, rn:03f70e6e-4cda-4501-8545-a738ba6ee868, rn:fc41f142-d52e-498d-b6e7-528e4dc2984d
+    ), ?functiesl, "")
+    as ?subcategorie
+  )
+
+  bind(
+    if(?functiesl in (
+      rn:a0f885a0-206c-4a90-8e3e-c4eba6a692b2, rn:ba91fe7e-0dd7-4eaf-8cf4-9d0aaac4db16, rn:1f0e475e-798a-4dde-ad59-2761627f7025,
+      rn:27ad6f30-88e1-48f5-a1b8-25b25e6f6f2a, rn:bfb3308f-32ca-49cc-b574-89269ec3e2b7, rn:7a7acbde-9f84-4b78-b6e4-8ce0873213fa,
+      rn:4668c61c-652b-416c-8b9a-48a52f62ca5a, rn:41fbf2b6-6328-4363-8333-e1676c9ab0ee, rn:57424a25-9966-4ba6-8b0d-54a234a0e59f,
+      rn:b73b9b8a-89da-4713-98bd-ef8387229bf2, rn:db53abd6-3ef4-4933-a514-8c1e9c4fee8b, rn:fda9d84c-bdfa-4f37-8b6d-c9c290d99c45,
+      rn:933b305e-7b4c-4f8b-8fb4-c217c85d6961, rn:ece29aea-4ca6-4f8f-a2a1-a555fa5b93b7, rn:74a84fc3-1356-467c-aec7-e15838249dcc,
+      rn:b7651ce6-350b-49f2-ae44-8171cfe1093e, rn:cfab6c1f-3843-4e52-a412-277419f9d270, rn:4922394c-4927-4642-9c64-c699ff847cba,
+      rn:3a0a8c24-26af-4fff-8bc2-cafe5d70f0b5, rn:b926c0cc-4ab1-443a-a879-6c5f938bdae3
+    ), ?functiesl, "")
+    as ?extraFunction
+  )
+
+  bind(
+    if(?subcategorie = "" && ?extraFunction = "", ?functies, "") as ?functie
+  )
 }
-group by ?choi ?label ?rijksmonumentnummer ?oorspronkelijkeFunctie ?functie 
+group by ?choi ?omschrijving ?rijksmonumentnummer ?hoofdcategorie ?subcategorie ?functie ?extraFunction ?toelichting
