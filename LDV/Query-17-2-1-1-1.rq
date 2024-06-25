@@ -1,4 +1,4 @@
-#+ name: Query-17-2-1-1
+#+ name: Query-17-2-1-1-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
@@ -9,11 +9,7 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-select distinct ?choi ?omschrijving ?rijksmonumentnummer 
-                ?hoofdcategorie ?subcategorie 
-                (group_concat(distinct ?functie ; separator="; ") as ?functies)
-                ?toelichting 
-                (group_concat(distinct ?material ; separator=", ") as ?gevondenMaterialen)
+select *
 where {
   graph graph:instanties-rce {
     ?choi rdf:type ceo:Rijksmonument.
@@ -23,7 +19,7 @@ where {
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^xsd:boolean.
     bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
-    
+
     bind(if(regex(?omschrijving, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
     bind(if(regex(?omschrijving, "staal", "i"), "staal", "") as ?matchLabel2)
     bind(if(regex(?omschrijving, "stalen", "i"), "stalen", "") as ?matchLabel3)
@@ -37,20 +33,18 @@ where {
     bind(if(regex(?omschrijving, "ijzeren", "i"), "ijzeren", "") as ?matchLabel11)
     bind(if(regex(?omschrijving, "roest", "i"), "roest", "") as ?matchLabel12)
 
-    bind(concat(
-          if(?matchLabel1 != "", "ijzer", ""), 
-          if(?matchLabel2 != "", "staal", ""),
-          if(?matchLabel3 != "", "stalen", ""),
-          if(?matchLabel4 != "", "welijzer", ""),
-          if(?matchLabel5 != "", "gietijzer", ""),
-          if(?matchLabel6 != "", "smeedijzer", ""),
-          if(?matchLabel7 != "", "RVS", ""),
-          if(?matchLabel8 != "", "corten", ""),
-          if(?matchLabel9 != "", "roestvast", ""),
-          if(?matchLabel10 != "", "roestvrij", ""),
-          if(?matchLabel11 != "", "ijzeren", ""),
-          if(?matchLabel12 != "", "roest", "")
-        ) as ?material)
+    bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
+                if(?matchLabel2 != "", " ", ""), ?matchLabel2,
+                if(?matchLabel3 != "", " ", ""), ?matchLabel3,
+                if(?matchLabel4 != "", " ", ""), ?matchLabel4,
+                if(?matchLabel5 != "", " ", ""), ?matchLabel5,
+                if(?matchLabel6 != "", " ", ""), ?matchLabel6,
+                if(?matchLabel7 != "", " ", ""), ?matchLabel7,
+                if(?matchLabel8 != "", " ", ""), ?matchLabel8,
+                if(?matchLabel9 != "", " ", ""), ?matchLabel9,
+                if(?matchLabel10 != "", " ", ""), ?matchLabel10,
+                if(?matchLabel11 != "", " ", ""), ?matchLabel11,
+                if(?matchLabel12 != "", " ", ""), ?matchLabel12) as ?material)
   }
   filter(?material != "")
   filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
@@ -58,15 +52,19 @@ where {
   optional {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
     ?functies_ ceo:kennisregistratieToelichting ?toelichting.
+    ?functies_ ceo:heeftFunctieNaam ?functies .
     ?functies_ ceo:formeelStandpunt "1"^^xsd:boolean.
-        ?functies_ ceo:heeftFunctieNaam/skos:prefLabel ?functie .
 
     graph graph:bebouwdeomgeving {
- ?functie skos:hiddenLabel ?label .
+      optional {
+        ?functies skos:prefLabel ?functie .
+        ?functies skos:hiddenLabel ?label.
+        ?functies skos:notation ?notation.
+        bind(if(strlen(str(?notation)) =1 , ?functie, "") as ?hoofdcategorie)
+        bind(if(strlen(str(?label)) = 2, ?functie, "") as ?subcategorie)
+        # Debug lines
+        bind(strlen(str(?label)) as ?labelLength)
+      }
     }
   }
-  
-  bind(if(strlen(str(?label)) = 1, ?functie, "") as ?hoofdcategorie)
-  bind(if(strlen(str(?label)) = 2, ?functie, "") as ?subcategorie)
 }
-group by ?choi ?omschrijving ?rijksmonumentnummer ?hoofdcategorie ?subcategorie ?toelichting
