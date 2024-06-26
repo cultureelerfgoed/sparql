@@ -9,62 +9,44 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-select *
+select distinct ?choi (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?rijksmonumentnummer ?hoofdcategorie ?subcategorie ?vunctie ?functie ?functie2 ?TFU ?TBW
 where {
   graph graph:instanties-rce {
     ?choi rdf:type ceo:Rijksmonument.
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
-    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
-    ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
-    ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
-    ?standpunt_omschrijving ceo:formeelStandpunt "1"^^xsd:boolean.
-    bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
-
-    bind(if(regex(?omschrijving, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
-    bind(if(regex(?omschrijving, "staal", "i"), "staal", "") as ?matchLabel2)
-    bind(if(regex(?omschrijving, "stalen", "i"), "stalen", "") as ?matchLabel3)
-    bind(if(regex(?omschrijving, "welijzer", "i"), "welijzer", "") as ?matchLabel4)
-    bind(if(regex(?omschrijving, "gietijzer", "i"), "gietijzer", "") as ?matchLabel5)
-    bind(if(regex(?omschrijving, "smeedijzer", "i"), "smeedijzer", "") as ?matchLabel6)
-    bind(if(regex(?omschrijving, "rvs", "i"), "RVS", "") as ?matchLabel7)
-    bind(if(regex(?omschrijving, "corten", "i"), "corten", "") as ?matchLabel8)
-    bind(if(regex(?omschrijving, "roestvast", "i"), "roestvast", "") as ?matchLabel9)
-    bind(if(regex(?omschrijving, "roestvrij", "i"), "roestvrij", "") as ?matchLabel10)
-    bind(if(regex(?omschrijving, "ijzeren", "i"), "ijzeren", "") as ?matchLabel11)
-    bind(if(regex(?omschrijving, "roest", "i"), "roest", "") as ?matchLabel12)
-
-    bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
-                if(?matchLabel2 != "", " ", ""), ?matchLabel2,
-                if(?matchLabel3 != "", " ", ""), ?matchLabel3,
-                if(?matchLabel4 != "", " ", ""), ?matchLabel4,
-                if(?matchLabel5 != "", " ", ""), ?matchLabel5,
-                if(?matchLabel6 != "", " ", ""), ?matchLabel6,
-                if(?matchLabel7 != "", " ", ""), ?matchLabel7,
-                if(?matchLabel8 != "", " ", ""), ?matchLabel8,
-                if(?matchLabel9 != "", " ", ""), ?matchLabel9,
-                if(?matchLabel10 != "", " ", ""), ?matchLabel10,
-                if(?matchLabel11 != "", " ", ""), ?matchLabel11,
-                if(?matchLabel12 != "", " ", ""), ?matchLabel12) as ?material)
-  }
-  filter(?material != "")
-  filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
-
-  optional {
-    ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
-    ?functies_ ceo:kennisregistratieToelichting ?toelichting.
-    ?functies_ ceo:heeftFunctieNaam ?functies .
-    ?functies_ ceo:formeelStandpunt "1"^^xsd:boolean.
-
-    graph graph:bebouwdeomgeving {
-      optional {
-        ?functies skos:prefLabel ?functie .
-        ?functies skos:hiddenLabel ?label.
-        ?functies skos:notation ?notation.
-        bind(if(strlen(str(?notation)) =1 , ?functie, "") as ?hoofdcategorie)
-        bind(if(strlen(str(?label)) = 2, ?functie, "") as ?subcategorie)
-        # Debug lines
-        bind(strlen(str(?label)) as ?labelLength)
-      }
+    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_.
+    optional {
+      ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
+      ?functies_ ceo:heeftFunctieNaam ?functies.
+      ?functies skos:prefLabel ?functiel.
+      ?functies_ ceo:formeelStandpunt "1"^^xsd:boolean.
     }
   }
+
+  graph graph:bebouwdeomgeving {
+    optional {
+      ?functies skos:hiddenLabel ?label.
+    }
+  }
+
+  BIND (IF(BOUND(?label) && strlen(str(?label)) < 2, ?functiel, "") AS ?hoofdcategorie)
+  BIND (IF(BOUND(?label) && strlen(str(?label)) = 2, ?functiel, "") AS ?subcategorie)
+  BIND (IF(BOUND(?hoofdcategorie) && ?hoofdcategorie != "", "", ?functiel) AS ?filteredFunctie1)
+  BIND (IF(BOUND(?subcategorie) && ?subcategorie != "", "", ?filteredFunctie1) AS ?functie)
+  BIND (IF(CONTAINS(STR(?label), "_TFU"), "functie", "") AS ?TFU)
+  BIND (IF(CONTAINS(STR(?label), "_TBW"), "type", "") AS ?TBW)
+
+  # Lijst van specifieke functies
+  VALUES ?specifiekeFunctie {"Turbinehal" "Hoogspanningsmast" "Gasfabriek" "Pompstation" "Gashouder" 
+                             "Schakelstation" "Pompgebouw(M05)" "Elektriciteitscentrale" "Zuiveringshuis" 
+                             "Waterzuivering" "Filtergebouw" "Hoogtorenstation" "Telescopische gashouder" 
+                             "Gasmengstation" "Spreng(M)" "Retort" "Regulateurshuis" "Transformatorgebouw" 
+                             "Waterstation(M)" "Watertoren"}
+
+  # Stel ?functie2 in op "Nutsbedrijven" als ?functie in de lijst van specifieke functies zit
+  BIND (IF(?functie IN (?specifiekeFunctie), "Nutsbedrijven", "") AS ?functie2)
+  BIND(COALESCE(IF(BOUND(?functie2) && ?functie2 != "", CONCAT(?functie2, "; ", ?functie), ?functie), ?functie) AS ?vunctie)
+
+
 }
