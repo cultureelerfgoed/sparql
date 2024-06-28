@@ -1,0 +1,18 @@
+#+ name: Query-34-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?rmn ?rm ?brr ?bag ?adres WHERE {
+  GRAPH graph:instanties-rce {
+  ?rm a ceo:Rijksmonument.
+  ?rm ceo:rijksmonumentnummer ?rmn.
+  ?rm ceo:heeftBasisregistratieRelatie ?brr.
+  ?brr ceo:heeftBAGRelatie ?bag.
+  ?bag ceo:volledigAdres ?adres.
+  
+  }
+}
