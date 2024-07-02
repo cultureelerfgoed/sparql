@@ -40,7 +40,7 @@ where {
     ?choi rdf:type ceo:Rijksmonument.
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
-    ?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.
+    #   ?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
@@ -77,12 +77,21 @@ where {
   filter(?materiaal != "")
   filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
 
+
+
   optional {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
     ?functies_ ceo:heeftFunctieNaam ?functies .
     ?functies skos:prefLabel ?functie .
     bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
   }
+
+
+graph graph:punten {
+optional {
+?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.}
 }
+
+  }
 group by ?choi ?omschrijving ?rijksmonumentnummer ?geometrie ?geometrieLabel
 
