@@ -1,15 +1,11 @@
 #+ name: Query-6-10
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
-
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 # We definiëren de gebruikte prefixes voor namespaces aan het begin van de query.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
 # We selecteren de variabelen die we willen ophalen in de resultaten.
