@@ -8,12 +8,13 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-select distinct ?choi ?omschrijving (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?functie (group_concat(distinct ?material) as ?gevondenMaterialen)
+select distinct ?choi ?provincie ?omschrijving (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?functie (group_concat(distinct ?material) as ?gevondenMaterialen)
 where {
   graph graph:instanties-rce {
-    ?choi rdf:type ceo:Rijksmonument.
+    ?choi a ceo:Rijksmonument.
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
+
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
@@ -54,5 +55,8 @@ where {
     ?functies skos:prefLabel ?functie .
    ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
    }
+  ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+  graph graph:owms {
+    ?prov skos:prefLabel ?provincie.}
 }
-group by ?choi ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie
+group by ?choi ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie

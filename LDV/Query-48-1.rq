@@ -32,7 +32,7 @@ select distinct
     '</tr>',
     '<td><b>Register: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
     '</table>'), rdf:HTML) as ?geometrieLabel)
-  ?geometrie
+  ?geometrie ?provincie
 
 
 where {
@@ -85,7 +85,9 @@ where {
     ?functies skos:prefLabel ?functie .
     bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
   }
-
+  ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+  graph graph:owms {
+    ?prov skos:prefLabel ?provincie.}
 
 graph graph:punten {
 optional {
@@ -93,5 +95,5 @@ optional {
 }
 
   }
-group by ?choi ?omschrijving ?rijksmonumentnummer ?geometrie ?geometrieLabel
+group by ?choi ?provincie ?omschrijving ?rijksmonumentnummer ?geometrie ?geometrieLabel
 
