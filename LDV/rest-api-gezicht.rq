@@ -31,6 +31,7 @@ CONSTRUCT {
     GRAPH graph:instanties-rce {
       {
         # Selecting distinct instances with their associated information
+        #! paginate: true
         SELECT DISTINCT $this {
           $this
             a ceo:Gezicht ;
@@ -41,7 +42,7 @@ CONSTRUCT {
             ceo:gezichtsnummer ?gezichtsnummer.
         }
         LIMIT 5
-        # Pagination (comment)
+
       }
     }
   }

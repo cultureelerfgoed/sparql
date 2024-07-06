@@ -8,13 +8,12 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-select distinct ?choi ?provincie ?omschrijving (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?functie (group_concat(distinct ?material) as ?gevondenMaterialen)
+select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?provincie ?functie ?categorieenfunctie (group_concat(distinct ?material) as ?gevondenMaterialen) ?omschrijving
 where {
   graph graph:instanties-rce {
     ?choi a ceo:Rijksmonument.
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
-
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
@@ -53,10 +52,34 @@ where {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
     ?functies_ ceo:heeftFunctieNaam ?functies .
     ?functies skos:prefLabel ?functie .
-   ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-   }
+    ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+
+    graph graph:bebouwdeomgeving {
+      optional {
+        ?functies skos:broader ?broader1 .
+        ?broader1 skos:prefLabel ?functie1 .
+        filter(?functie1 != "bebouwde omgeving")
+        optional {
+          ?broader1 skos:broader ?broader2 .
+          ?broader2 skos:prefLabel ?functie2 .
+          filter(?functie2 != "bebouwde omgeving")
+          optional {
+            ?broader2 skos:broader ?broader3 .
+            ?broader3 skos:prefLabel ?functie3 .
+            filter(?functie3 != "bebouwde omgeving")
+          }
+        }
+      }
+    }
+    bind(concat(
+      if(bound(?functie1), concat("", ?functie1), ""), 
+      if(bound(?functie2), concat(" | ", ?functie2), ""), 
+      if(bound(?functie3), concat(" | ", ?functie3), "")
+    ) as ?categorieenfunctie)
+  }
   ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
   graph graph:owms {
     ?prov skos:prefLabel ?provincie.}
+
 }
-group by ?choi ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie
+group by ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie ?categorieenfunctie

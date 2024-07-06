@@ -28,6 +28,7 @@ CONSTRUCT {
   # The GRAPH clause specifies the named graph where the data is retrieved from.
   GRAPH graph:instanties-rce {
     {
+              #! paginate: true
       # The SELECT clause retrieves instances of a specific type of object (Vondsten)
       # along with certain properties and binds variables for filtering purposes.
       SELECT DISTINCT $this {
@@ -55,7 +56,7 @@ CONSTRUCT {
         FILTER(!BOUND(?archeologischeComplexen1) || ?archeologischeComplexen1 = ?archeologischeComplexen2)
       }
       LIMIT 5
-      # Paginate
+
     }
     # The subsequent triple patterns represent the traversal of linked data
     # starting from the instances of Vondsten and exploring their relationships.

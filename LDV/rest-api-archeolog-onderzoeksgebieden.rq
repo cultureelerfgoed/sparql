@@ -15,23 +15,24 @@ construct {
 } where {
   graph graph:instanties-rce {
     {
+      #! paginate: true
       select $this {
         $this
           a ceo:ArcheologischOnderzoeksgebied;
-      		ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer.
+          ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer.
         bind(?woonplaatsnaam as ?woonplaatsnaam1)
         optional {
           $this ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam2.
         }
         filter(!bound(?woonplaatsnaam1) || ?woonplaatsnaam1 = ?woonplaatsnaam2)
-        
+
         bind(?vondstlocaties as ?vondstlocaties1)
         optional {
           $this ceo:bevatObject ?vondstlocaties2.
-          	 ?vondstlocaties2 a ceo:Vondstlocatie.
+          ?vondstlocaties2 a ceo:Vondstlocatie.
         }
         filter(!bound(?vondstlocaties1) || ?vondstlocaties1 = ?vondstlocaties2)
-        
+
         bind(?archeologischeComplexen as ?archeologischeComplexen1)
         optional {
           $this ceo:bevatObject ?archeologischeComplexen2.
@@ -40,7 +41,7 @@ construct {
         filter(!bound(?archeologischeComplexen1) || ?archeologischeComplexen1 = ?archeologischeComplexen2)
       }
       limit 5
-      # paginate
+
     }
     $this ?p1 ?o1.
     optional {

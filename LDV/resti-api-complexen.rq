@@ -30,6 +30,7 @@ CONSTRUCT {
   # WHERE Clause: Defines conditions that the data must meet to be included in the query results.
   GRAPH graph:instanties-rce {
     {
+              #! paginate: true
       # SELECT DISTINCT: Subquery selects distinct values for variable $this representing a complex object.
       SELECT DISTINCT $this ?rijksmonumentnummer {
         $this
@@ -50,8 +51,7 @@ CONSTRUCT {
         FILTER(!BOUND(?rijksmonumenten) || ?rijksmonumentnummer = ?rijksmonumenten)
       }
       LIMIT 5
-      # Pagination Logic: Limits the number of results returned by the query.
-      # paginate
+
     }
     $this ?p1 ?o1.
     OPTIONAL {

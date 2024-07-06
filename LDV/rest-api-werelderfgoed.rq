@@ -28,6 +28,7 @@ CONSTRUCT {
 } WHERE {
   GRAPH graph:instanties-rce {
     {
+                  #! paginate: true
       # Selecting distinct instances with their associated information
       SELECT DISTINCT $this ?werelderfgoednummer  {
         $this
@@ -41,7 +42,7 @@ CONSTRUCT {
         BIND(CONCAT('https://whc.unesco.org/en/list/',STR(?werelderfgoednummer)) AS ?url)
       }
       LIMIT 5
-      # Pagination (comment)
+
     }
   }
   # Including the 'werelderfgoed_hvdl' graph in the query

@@ -17,51 +17,52 @@ construct {
 } where {
   graph graph:instanties-rce {
     {
+      #! paginate: true
       select distinct $this {
         $this
           a ceo:Vondstlocatie;
           ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer.
-        
+
         bind(?archeologischeComplexen as ?archeologischeComplexen1)
         optional {
           $this ceo:ligtInObject ?archeologischeComplexen2.
           ?archeologischeComplexen2 a ceo:ArcheologischComplex.
         }
         filter(!bound(?archeologischeComplexen1) || ?archeologischeComplexen1 = ?archeologischeComplexen2)
-        
+
         bind(?archeologischeOnderzoeksgebieden as ?archeologischeOnderzoeksgebieden1)
         optional {
           $this ceo:ligtInObject ?archeologischeOnderzoeksgebieden2.
           ?archeologischeOnderzoeksgebieden2 a ceo:ArcheologischOnderzoeksgebied.
-        }           
-        filter(!bound(?archeologischeOnderzoeksgebieden1) || ?archeologischeOnderzoeksgebieden1 = ?archeologischeOnderzoeksgebieden2)    
-        
+        }
+        filter(!bound(?archeologischeOnderzoeksgebieden1) || ?archeologischeOnderzoeksgebieden1 = ?archeologischeOnderzoeksgebieden2)
+
         bind(?archis2Vondstmeldingsnummer as ?archis2Vondstmeldingsnummer1)
         optional {
           $this ceo:archis2Vondstmeldingsnummer ?archis2Vondstmeldingsnummer2.
         }
-        filter(!bound(?archis2Vondstmeldingsnummer1) || ?archis2Vondstmeldingsnummer1 = ?archis2Vondstmeldingsnummer2)         
-        
+        filter(!bound(?archis2Vondstmeldingsnummer1) || ?archis2Vondstmeldingsnummer1 = ?archis2Vondstmeldingsnummer2)
+
         bind(?archis2Waarnemingsnummer as ?archis2Waarnemingsnummer1)
         optional {
           $this ceo:archis2Waarnemingsnummer ?archis2Waarnemingsnummer2.
         }
-        filter(!bound(?archis2Waarnemingsnummer1) || ?archis2Waarnemingsnummer1 = ?archis2Waarnemingsnummer2)         
-        
+        filter(!bound(?archis2Waarnemingsnummer1) || ?archis2Waarnemingsnummer1 = ?archis2Waarnemingsnummer2)
+
         bind(?grondsporen as ?grondsporen1)
         optional {
           $this ceo:bevatObject ?grondsporen2.
           ?grondsporen2 a ceo:Grondsporen.
         }
-        filter(!bound(?grondsporen1) || ?grondsporen1 = ?grondsporen2)  
-        
+        filter(!bound(?grondsporen1) || ?grondsporen1 = ?grondsporen2)
+
         bind(?vondsten as ?vondsten1)
         optional {
           $this ceo:bevatObject ?vondsten2.
           ?vondsten2 a ceo:Vondsten.
         }
-        filter(!bound(?vondsten1) || ?vondsten1 = ?vondsten2)  
-        
+        filter(!bound(?vondsten1) || ?vondsten1 = ?vondsten2)
+
         bind(?woonplaatsnaam as ?woonplaatsnaam1)
         optional {
           $this ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam2.
@@ -81,12 +82,12 @@ construct {
           ?o3 ?p4 ?o4.
           optional {
             ?o4 ?p5 ?o5.
-#            optional {
-#              ?o5 ?p6 ?o6.
-#              optional {
-#                ?o6 ?p7 ?o7.
-#              }
-#            }
+            #            optional {
+            #              ?o5 ?p6 ?o6.
+            #              optional {
+            #                ?o6 ?p7 ?o7.
+            #              }
+            #            }
           }
         }
       }

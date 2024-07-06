@@ -1,0 +1,28 @@
+#+ name: Query-1-17
+#+ description: Actor en rol toegevoegd uit PoolParty in de graph:actorenrol
+#- exactMatch opgenomen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select distinct * where {
+  Graph graph:instanties-rce {
+  ?cho a ceo:Rijksmonument.
+  ?cho ceo:rijksmonumentnummer ?nummer.
+  optional {?cho ceo:heeftGeometrie/geo:asWKT ?geometrie.}
+  ?cho ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+    }
+  graph graph:actorenrol {
+  ?actorenrol ceo:heeftActor ?actor.
+  ?actor rdfs:label ?actorLabel.
+  optional {?actor skos:exactMatch ?link.}
+  optional{?actor ceo:plaatsActor ?plaatsActor. }
+  ?actorenrol ceo:heeftRol/skos:prefLabel ?rol.
+}
+  Bind(concat("Rijksmonumentnummer: ",?nummer, " Rol: ", ?rol, " Actor: ",?actorLabel)as ?geometrieLabel)
+}

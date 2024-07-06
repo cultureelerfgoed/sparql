@@ -15,6 +15,7 @@ construct {
 } where {
   graph graph:instanties-rce {
     {
+      #! paginate: true
       select distinct $this {
         $this
           a ceo:ArcheologischTerrein;
@@ -24,16 +25,16 @@ construct {
           $this ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam2.
         }
         filter(!bound(?woonplaatsnaam1) || ?woonplaatsnaam1 = ?woonplaatsnaam2)
-        
+
         bind(?archeologischeComplexen as ?archeologischeComplexen1)
         optional {
-          $this ceo:bevatObject ?archeologischeComplexen2. 
+          $this ceo:bevatObject ?archeologischeComplexen2.
           ?archeologischeComplexen2 a ceo:ArcheologischComplex.
         }
         filter(!bound(?archeologischeComplexen1) || ?archeologischeComplexen1 = ?archeologischeComplexen2)
       }
       limit 5
-      # paginate
+
     }
     $this ?p1 ?o1.
     optional {
