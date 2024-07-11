@@ -1,0 +1,22 @@
+#+ name: Query-10-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?concept ?label (GROUP_CONCAT(?broaderLabel; SEPARATOR=" --> ") AS ?hierarchy)
+WHERE {
+  <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?concept .
+  ?concept skos:prefLabel ?label .
+  
+  OPTIONAL {
+    ?concept skos:broader* ?broaderConcept .
+    ?broaderConcept skos:prefLabel ?broaderLabel .
+    FILTER (?broaderConcept != ?concept)
+    FILTER (LANG(?broaderLabel) = "nl")
+    FILTER (LANG(?label) = "nl")
+  }
+}
+
+GROUP BY ?concept ?label
+ORDER BY ?concept
+LIMIT 1000
