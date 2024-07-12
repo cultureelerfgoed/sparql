@@ -1,0 +1,60 @@
+#+ name: Wie-kreeg-een-tombe-epitaaf-en-wandmonum
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX wdt:<http://www.wikidata.org/prop/direct/>
+PREFIX wd:<http://www.wikidata.org/entity/>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo:<https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wgs84:<http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geo:<http://www.opengis.net/ont/geosparql#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema:<https://schema.org/>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT DISTINCT ?beroepEnRang ?graftype (COUNT(?graftype) AS ?aantal)
+
+WHERE {
+  ?grafmonument ceox:typologie ?grafsoort .
+  ?grafmonument ceox:IsTerNagedachtenisVan/ceox:beroepEnRang ?status .
+  
+  BIND(IF(REGEX(?status, "^(koning|adel|graaf|gravin|baron|baronesse|prins|prinses|hertog|jonkheer)$","i"), "adel", 
+      IF(REGEX(?status, "^(bisschop|heilige|predikant|pastoor|kerkstichter|kerkbouwheer|abdis|kannunik|rijksgraaf|kerkmeester)$|^(en Ouderling der kerk van Leeuwarden)\\s$","i"), "geestelijke",
+        IF(REGEX(?status, "^(hoogleraar|professor|natuurkundige astronoom|theoloog|uitvinder|wetenschapper|wiskundige|waterbouwkundige|filoloog|rechtsgeleerde|onderzoeker|medisch anatomisch en botanisch professor|thesaurier|lector|schoolmeester|rector|student)$","i"), "geleerde",
+          IF(REGEX(?status, "^(schrijver|dichter|auteur|schilder|voorzanger)$","i"), "kunstenaar",
+            IF(REGEX(?status, "^(erfheer|kasteelheer|landheer|vrijheer|patriciër)$","i"), "heer",
+              IF(REGEX(?status, "^(stichter|stichtster)$|^(stichter)\\s$","i"), "stichter",
+                IF(REGEX(?status, "^(ambachtsheer|ambachtsvrouw|metselaar)$|^(ambachtsheer)\\s$","i"), "ambachtslid",
+                  IF(REGEX(?status, "^(arts|stadsmedicus)$","i"), "medici",
+                    IF(REGEX(?status, "^(kapitein|kapitein-ter-zee|schepen|luitenant-ter-zee|vlootvoogd|president-schepen|kapitein eerste klasse|schout-bij-nacht)$","i"), "marine",
+              IF(REGEX(?status, "^(burgemeester|ambassadeur|diplomaat|,statenlid|gouverneur|politicus|raad van staten lid|raadpenionaris|stadhouder|president hoge raad|raadsheer|statenlid|ambtsjonker|gecommitteerde raad der heeren staten van friesland|gecommitteerde raad van staten|lid Raad van Staten|lid gedeputeerde staten|staten lid|drost|dijkgraaf|kanselier|grietman|koninklijke adviseur|inspecteur-generaal|rentmeester-generaal|rentmeester|bewindhebber VOC|bewindvoerder VOC|gedeputeerde east-india-company|gedeputeerde te velde)$|^\\s(secretaris|raadpensionaris)$","i"), "ambtenaar",
+                
+                         IF(REGEX(?status, "^(baljuw|baljuw van de hoge vierschaar|jurist|advocaat|griffier)$|^\\s(baljuw)$","i"), "rechtsgeleerden",
+                          IF(REGEX(?status, "^(militair|commandeur|kolonel|colonel|seargant-majoor|luitenant-admiraal|luitenant-kolonel|luitenant-generaal|maarschalk|vice-admiraal|veldmaarschalk|stadscommandant|generaal|ritmeester|majoor commandant te Bergen op Zoom|kapitein van de burgerwacht|meester generaal der artillerie|vrijwillig jager der Leidsche Hoogeschool|gedeputeerde ter velde|directeur der approches fortificaties en loopgraven)$|^\\s(colonel|kolonel)$","i"), "militair",
+                            ?status)))))))))))) AS ?beroepEnRang)
+  
+  
+   BIND(IF(REGEX(?grafsoort, "^(Epitaaf/Wandmonument|Wandmonument, epitaaf|Epitaaf, wandmonument|Wandmonument, epitaaf)"), "Epitaaf, Wandmonument", 
+      IF(REGEX(?grafsoort, "^(Tombe, wandmonument|Wandmonument, tombe|Tombe , wandmonument)", "(i|[^,/])"), "Tombe, Wandmonument",
+        IF(REGEX(?grafsoort, "Tombe, cenotaaf", "i"), "Tombe, Cenotaaf",
+          IF(REGEX(?grafsoort, "^(Tombe|Tombe, vrijstaand|Vrijstaand, tombe)", "i"), "Tombe",
+          IF(REGEX(?grafsoort, "^(Wandmonument)"), "Wandmonument",
+              IF(REGEX(?grafsoort, "^(Vrijstaand)|^(Vrijstaand)\\s"), "Vrijstaand",   
+              #Voor Epitaaf is er bij de structuur een fout waardoor whitespaces voor en erna zorgen dat het als iets anders wordt gezien.
+              IF(REGEX(?grafsoort, "^(Epitaaf)$|^(Epitaaf)\\s|^\\s(Epitaaf)\\s|Houten epitaaf", "i"), "Epitaaf",
+             
+                  ?grafsoort))))))) AS ?graftype)
+  
+  FILTER(REGEX(?graftype, "^(Tombe|Epitaaf|Wandmonument)$"))
+ 
+
+  
+} 
+
+GROUP BY ?beroepEnRang ?graftype
+ORDER BY ?beroepEnRang ?graftype

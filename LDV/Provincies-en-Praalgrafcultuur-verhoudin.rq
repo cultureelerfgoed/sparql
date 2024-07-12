@@ -1,0 +1,22 @@
+#+ name: Provincies-en-Praalgrafcultuur-verhoudin
+#+ description: In elke streek, stad, dorp of kerk ontwikkelde zich een eigen kenmerkende praalgrafcultuur, welke veelal kon worden toegeschreven aan de locatie of aanwezigheid van significante gebouwen, zoals universiteiten. Deze praalgrafcultuur was ook vaak terug te zien in de typologie van de grafmonumenten. Hier willen we de typologieverhouding laten zien van praalgraven per provincie en waar mogelijk de herkomst daarvan tonen.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT distinct  ?provincie  (COUNT(?typologie) AS ?typologieAantal)
+WHERE {
+ OPTIONAL { ?gebedshuis ceox:heeftAdresgegevens/ceox:heeftProvincie/skos:prefLabel ?provincie ;
+              ceox:heeftGrafmonument ?grafmonument .
+  ?grafmonument ceox:heeftGrafmonumentType ?typologie .
+  FILTER(lang(?provincie) = 'nl')
+ }
+ 
+  
+
+}
+GROUP BY ?provincie 
+ORDER BY DESC(?typologieAantal)

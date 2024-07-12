@@ -1,0 +1,20 @@
+#+ name: top10ontwerpersenbeeldhoudersgrafmonumen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT DISTINCT ?vervaardiger (COUNT(?gebeurtenis) as ?aantalGrafmonumenten) 
+WHERE {
+?gebeurtenis ceox:heeftActorEnRol/ceox:heeftRol/rdfs:label ?label .
+  FILTER(?label = 'vervaardiger')
+?gebeurtenis ceox:heeftActorEnRol/schema:name ?vervaardiger .
+?gebeurtenis ceox:heeftActorEnRol/ceox:heeftRol/rdfs:label 'vervaardiger' .
+ 
+
+}
+GROUP BY ?vervaardiger
+ORDER BY DESC(?aantalGrafmonumenten)

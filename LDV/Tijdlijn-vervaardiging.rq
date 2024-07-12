@@ -1,0 +1,23 @@
+#+ name: Tijdlijn-vervaardiging
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+
+select distinct ?eventMedia ?eventLabel ?eventStart
+where {
+  ?grafmonument a ceox:Grafmonument;
+                schema:image ?eventMedia ;
+                ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:heeftBeginDatering ?eventStart .
+
+  ?grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol ?actorEnRol .
+  ?actorEnRol ceox:heeftRol/rdfs:label ?rol ;
+              ceox:heeftActor/ceox:heeftNaam ?eventLabel .
+  filter(?rol = 'bijgezette')
+
+
+}
+

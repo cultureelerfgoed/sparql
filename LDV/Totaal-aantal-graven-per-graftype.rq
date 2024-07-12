@@ -1,0 +1,29 @@
+#+ name: Totaal-aantal-graven-per-graftype
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+
+#SELECT DISTINCT ?grafsoort (COUNT(DISTINCT ?grafmonument) AS ?aantal) ?graftype 
+SELECT DISTINCT ?graftype  (COUNT(DISTINCT ?grafmonument) AS ?totaal) 
+WHERE {
+  ?grafmonument ceox:typologie ?grafsoort .
+  
+    
+  BIND(IF(REGEX(?grafsoort, "^(Epitaaf/Wandmonument|Wandmonument, epitaaf|Epitaaf, wandmonument|Wandmonument, epitaaf)"), "Epitaaf, Wandmonument", 
+      IF(REGEX(?grafsoort, "^(Tombe, wandmonument|Wandmonument, tombe|Tombe , wandmonument)", "(i|[^,/])"), "Wandmonument",
+      
+          IF(REGEX(?grafsoort, "^(Tombe|Tombe, vrijstaand|Vrijstaand, tombe|Tombe, cenotaaf|Tombe, Cenotaaf)", "i"), "Tombe",
+          IF(REGEX(?grafsoort, "^(Wandmonument)|Gedenkmonument, Wandmonument|(Wandmonument)\\s|\\s(Wandmonument)|wandmonument"), "Wandmonument",
+              #IF(REGEX(?grafsoort, "^(Vrijstaand)|^(Vrijstaand)\\s"), "Vrijstaand",   
+              #Voor Epitaaf is er bij de structuur een fout waardoor whitespaces voor en erna zorgen dat het als iets anders wordt gezien.
+              IF(REGEX(?grafsoort, "^(Epitaaf)$|^(Epitaaf)\\s|^\\s(Epitaaf)\\s|Houten epitaaf|Epitaaf, Toegangspoort|Epitaaf, Gedenkteken|Epitaaf, Cenotaaf", "i"), "Epitaaf",
+             
+                  "Overig"))))) AS ?graftype)
+ 
+
+} 
+
+
+GROUP BY ?graftype 
+ORDER BY ?graftype

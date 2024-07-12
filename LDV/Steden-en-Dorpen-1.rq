@@ -1,0 +1,41 @@
+#+ name: Steden-en-Dorpen-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+SELECT *
+
+{
+  {
+SELECT DISTINCT ?wkt ?typeGrafmonument ?gebedshuisNaam ?grafmonument
+WHERE {
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/sparql> {
+    ?gebedshuis a ceox:Gebedshuis .
+    OPTIONAL {
+      ?gebedshuis ceox:heeftNaam/ceox:naam ?gebedshuisNaam .
+    }
+    OPTIONAL {
+      ?gebedshuis ceox:heeftGeometrie/wgs84:asWKT ?geometrie .
+      BIND(STRDT(?geometrie, <http://www.opengis.net/ont/geosparql#wktLiteral>) AS ?wkt)
+    }
+  }
+
+  ?gebedshuis ceox:heeftGrafmonument ?grafmonument .
+  ?grafmonument ceox:heeftGrafmonumentType/rdfs:label ?typeGrafmonument .
+
+  # Optional bindings for label and color
+ # BIND(if(?typeGrafmonument = "Epitaaf", "red", if(?typeGrafmonument = "Tombe", "purple", if(?typeGrafmonument = "Wandmonument", "maroon", "black"))) AS ?wktColor)
+
+}
+GROUP BY ?wkt ?wktColor ?gebedshuisNaam ?typeGrafmonument ?grafmonument
+HAVING (COUNT(?grafmonument) > 0)
+}
+  BIND(concat(STR(?gebedshuisNaam)) AS ?wktLabel)
+}
+

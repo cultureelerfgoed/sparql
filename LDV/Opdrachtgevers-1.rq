@@ -1,0 +1,20 @@
+#+ name: Opdrachtgevers-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select (sample(?beeldhouwerNaam) AS ?vervaardiger) (count(distinct ?grafmonument) as ?aantalGrafmonumenten)
+where {
+
+  ?grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol ?actorEnRol .
+  ?actorEnRol ceox:heeftRol/(rdfs:label|skos:prefLabel) ?rol .
+  ?actorEnRol ceox:heeftActor ?beeldhouwer ;
+              ceox:heeftActor/ceox:heeftNaam ?beeldhouwerNaam .
+  filter(?rol in ('ontwerper', 'vervaardiger'))
+}
+group by ?beeldhouwer
+having (count(distinct ?grafmonument) > 1)
+order by desc(?aantalGrafmonumenten)

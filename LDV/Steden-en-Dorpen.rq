@@ -1,0 +1,32 @@
+#+ name: Steden-en-Dorpen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+
+
+SELECT DISTINCT ?geometrie ?typologie ?geometrieLabel ?geometrieColor (COUNT(?grafmonument) AS ?aantalPraalgraven)
+
+WHERE {
+  ?Gebedshuis ceox:hoortBij ?grafmonument ;
+              ceox:huidigeNaam ?gebedshuisNaam ;
+              ceox:heeftAdresgegevens/ceox:woonplaats ?woonplaats ;
+              ceox:heeftGeometrie/geo:asWKT ?geometrie .
+  ?grafmonument ceox:typologie ?typologie .
+
+  BIND(concat(STR(?woonplaats), STR(?aantalPraalgraven), ", ",STR(?gebedshuisNaam),": ", STR(?typologie)) AS ?geometrieLabel)
+  BIND(if(?typologie="Epitaaf", "red", if(?typologie="Tombe", "purple", if(?typologie="Wandmonument", "maroon", "black"))) as ?geometrieColor)
+
+}
+GROUP BY ?geometrie ?typologie ?geometrieLabel ?geometrieColor
+
+
+
+
+#GROUP BY ?Geometrie ?typologie
+#ORDER BY DESC(?aantalPraalgraven) ?typologie

@@ -1,0 +1,28 @@
+#+ name: Epitaal-Tombe-en-Wandmonumenten-over-de-
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+
+SELECT ?periode (COUNT(?grafsoort) AS ?perTypologieAantal) ?grafsoort
+
+WHERE { 
+  OPTIONAL{
+   ?grafmonument ceox:typologie ?grafsoort ;
+                 ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:datering ?jaar .}
+  
+BIND(IF(REGEX(?jaar, "-"), STRAFTER(?jaar, "-"), IF(REGEX(?jaar, "^ca. "), STRAFTER(?jaar, " "), ?jaar)) AS ?jaarEind)
+  BIND(xsd:integer(?jaarEind) AS ?jaarSchatting)
+  
+BIND(IF(?jaarSchatting < 1200, "voor 1200",
+       IF(?jaarSchatting >= 1200 && ?jaarSchatting < 1500, "1200 - 1500", 
+        IF(?jaarSchatting >= 1500 && ?jaarSchatting < 1800, "1500 - 1800", 
+          IF(?jaarSchatting >= 1800, "na 1800",
+            ?jaarSchatting)))) AS ?periode)
+
+  FILTER(?grafsoort = "Epitaaf" || ?grafsoort = "Tombe" || ?grafsoort = "Wandmonument")
+ 
+  } 
+GROUP BY ?periode ?grafsoort
+ORDER BY ?periode ?grafsoort

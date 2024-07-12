@@ -1,0 +1,16 @@
+#+ name: Opdrachtgevers
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?Beeldhouwer (COUNT(?Grafmonument) AS ?aantalGrafmonumenten)
+WHERE {
+      OPTIONAL{?Grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol/ceox:naam ?Beeldhouwer .} 
+}
+GROUP BY ?Beeldhouwer 
+  HAVING (COUNT(?Grafmonument) > 1)
+ORDER BY DESC(?aantalGrafmonumenten)
+
+

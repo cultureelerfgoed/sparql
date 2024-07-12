@@ -1,0 +1,28 @@
+#+ name: grafmonumenten-vervaardiging-periode
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+SELECT DISTINCT ?periode (COUNT(?grafmonument) AS ?aantalGrafmonumenten)  WHERE {
+  ?grafmonument rdf:type ceox:Grafmonument .
+  ?grafmonument ceox:heeftGebeurtenis/ceox:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam .
+  FILTER(?gebeurtenisNaam = 'vervaardiging'@nl)
+
+ OPTIONAL{ ?grafmonument ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:heeftBeginDatering ?bouwJaar .
+  BIND(xsd:float(SUBSTR(STR(?bouwJaar), 1, 4)) AS ?jaar)
+   BIND(
+    IF(?jaar <= 1600, 1600,
+      FLOOR(?jaar / 10) * 10 + 10
+    ) AS ?periode
+  )
+ }
+FILTER(BOUND(?periode))
+
+}
+group by ?periode
+order by ?periode

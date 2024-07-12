@@ -1,0 +1,33 @@
+#+ name: Aantal-praalgraven-per-status-overledene
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+
+SELECT DISTINCT ?beroepEnRang (COUNT(DISTINCT ?grafsoort) AS ?aantal)
+
+WHERE {
+  OPTIONAL{
+  ?rijksmonument ceox:hoortBij ?grafmonument .
+  ?grafmonument ceox:typologie ?grafsoort .
+    ?grafmonument ceox:IsTerNagedachtenisVan/ceox:beroepEnRang ?status .}
+  
+    BIND(IF(REGEX(?status, "^(koning|adel|graaf|gravin|baron|baronesse|prins|prinses|hertog|jonkheer)$","i"), "adel", 
+      IF(REGEX(?status, "^(bisschop|heilige|predikant|pastoor|kerkstichter|kerkbouwheer|abdis|kannunik|rijksgraaf|kerkmeester)$|^(en Ouderling der kerk van Leeuwarden)\\s$","i"), "geestelijke",
+        IF(REGEX(?status, "^(hoogleraar|professor|natuurkundige astronoom|theoloog|uitvinder|wetenschapper|wiskundige|waterbouwkundige|filoloog|rechtsgeleerde|onderzoeker|medisch anatomisch en botanisch professor|thesaurier|lector|schoolmeester|rector|student)$","i"), "geleerde",
+          IF(REGEX(?status, "^(schrijver|dichter|auteur|schilder|voorzanger)$","i"), "kunstenaar",
+            IF(REGEX(?status, "^(erfheer|kasteelheer|landheer|vrijheer|patriciër|ambachtsheer|ambachtsvrouw)$","i"), "patriciaat",
+              IF(REGEX(?status, "^(stichter|stichtster)$|^(stichter)\\s$","i"), "stichter",
+                
+                  IF(REGEX(?status, "^(arts|stadsmedicus)$","i"), "medici",
+                    IF(REGEX(?status, "^(kapitein|kapitein-ter-zee|schepen|luitenant-ter-zee|vlootvoogd|president-schepen|kapitein eerste klasse|schout-bij-nacht)$","i"), "marine",
+              IF(REGEX(?status, "^(burgemeester|ambassadeur|diplomaat|,statenlid|gouverneur|politicus|raad van staten lid|raadpenionaris|stadhouder|president hoge raad|raadsheer|statenlid|ambtsjonker|gecommitteerde raad der heeren staten van friesland|gecommitteerde raad van staten|lid Raad van Staten|lid gedeputeerde staten|staten lid|drost|dijkgraaf|kanselier|grietman|koninklijke adviseur|inspecteur-generaal|rentmeester-generaal|rentmeester|bewindhebber VOC|bewindvoerder VOC|gedeputeerde east-india-company|gedeputeerde te velde)$|^\\s(secretaris|raadpensionaris)$","i"), "ambtenaar",
+                
+                         IF(REGEX(?status, "^(baljuw|baljuw van de hoge vierschaar|jurist|advocaat|griffier)$|^\\s(baljuw)$","i"), "rechtsgeleerden",
+                          IF(REGEX(?status, "^(militair|commandeur|kolonel|colonel|seargant-majoor|luitenant-admiraal|luitenant-kolonel|luitenant-generaal|maarschalk|vice-admiraal|veldmaarschalk|stadscommandant|generaal|ritmeester|majoor commandant te Bergen op Zoom|kapitein van de burgerwacht|meester generaal der artillerie|vrijwillig jager der Leidsche Hoogeschool|gedeputeerde ter velde|directeur der approches fortificaties en loopgraven)$|^\\s(colonel|kolonel)$","i"), "militair",
+                            "Overig"))))))))))) AS ?beroepEnRang)
+} 
+
+GROUP BY ?beroepEnRang
+ORDER BY DESC(?aantal)

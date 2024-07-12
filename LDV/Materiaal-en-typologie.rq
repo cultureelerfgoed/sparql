@@ -1,0 +1,17 @@
+#+ name: Materiaal-en-typologie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?materiaal (COUNT(?Grafmonument) AS ?aantalGrafmonumenten)
+WHERE {
+  OPTIONAL {
+  ?Gebedshuis ceox:hoortBij ?Grafmonument .
+   ?Grafmonument ceox:typologie ?typologie ;
+                ceox:hekwerk ?hekwerk ;
+                ceox:materiaalSpecificaties ?materiaal .
+  }
+} 
+
+GROUP BY ?materiaal
