@@ -1,0 +1,35 @@
+#+ name: RM-naam-adres-functie
+#+ description: Rijksmonumenten met naam, adres, functie, beschrijving
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT DISTINCT ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?oorspronkelijkefunctie ?huidigefunctie ?datumInschrijving ?stijlEnCultuur ?type ?actor ?omschrijving 
+
+WHERE 
+{
+  GRAPH graph:instanties-rce {
+    MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    OPTIONAL {?rijksmonument ceo:heeftNaam/ceo:naam ?naam.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.}
+    OPTIONAL {?rijksmonument ceo:heeftOmschrijving ?omschrijving1 . ?omschrijving1 ceo:omschrijving ?omschrijving  ; ceo:formeelStandpunt "1"^^xsd:boolean.}
+    OPTIONAL {?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?ofunctienaam.
+    ?ofunctienaam skos:prefLabel ?oorspronkelijkefunctie .}
+    OPTIONAL {?rijksmonument ceo:heeftHuidigeFunctie/ceo:heeftFunctieNaam ?hfunctienaam.
+    ?hfunctienaam skos:prefLabel ?huidigefunctie .}
+    OPTIONAL { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijlEnCultuur. }
+    OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type. }
+    OPTIONAL {?rijksmonument ceo:heeftGebeurtenis/ceo:heeftActorEnRol ?actorRol . ?actorRol ceo:heeftActor ?actor}
+    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+}
+}LIMIT 10

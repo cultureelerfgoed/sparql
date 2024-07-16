@@ -13,7 +13,7 @@ SELECT *
 
 {
   {
-SELECT DISTINCT ?wkt ?typeGrafmonument ?gebedshuisNaam ?grafmonument
+SELECT DISTINCT ?wkt ?typeGrafmonument ?gebedshuisNaam ?grafmonument ?gebedshuis
 WHERE {
   SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/sparql> {
     ?gebedshuis a ceox:Gebedshuis .
@@ -33,9 +33,10 @@ WHERE {
  # BIND(if(?typeGrafmonument = "Epitaaf", "red", if(?typeGrafmonument = "Tombe", "purple", if(?typeGrafmonument = "Wandmonument", "maroon", "black"))) AS ?wktColor)
 
 }
-GROUP BY ?wkt ?wktColor ?gebedshuisNaam ?typeGrafmonument ?grafmonument
+GROUP BY ?wkt ?wktColor ?gebedshuisNaam ?typeGrafmonument ?grafmonument ?gebedshuis
 HAVING (COUNT(?grafmonument) > 0)
 }
-  BIND(concat(STR(?gebedshuisNaam)) AS ?wktLabel)
+  BIND(strdt(concat('<ul><li>','Gebedshuis: <a href="',URI(?gebedshuis),'"', 'target="_blank">',str(?gebedshuisNaam),'</a>',
+                    '<li>','Grafmonument: <a href="',URI(?grafmonument),'"', 'target="_blank">',str(?typeGrafmonument),'</a>','</li></ul>'), rdf:HTML) AS ?wktLabel)
 }
 

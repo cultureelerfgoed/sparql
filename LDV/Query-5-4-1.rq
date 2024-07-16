@@ -9,34 +9,33 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
 PREFIX sor: <https://data.kkg.kadaster.nl/sor/model/def/>
 PREFIX kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
 SELECT DISTINCT * WHERE {
+  GRAPH graph:instanties-rce {
+    ?cho a ceo:Rijksmonument .
+    ?cho ceo:rijksmonumentnummer ?rm.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?origineleGemeentecode.
+  optional{ 
+   ?cho ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
+      ?basisregistratieRelatie ceo:heeftBAGRelatie ?bagRelatie .
+      ?bagRelatie  ceo:heeftGemeente ?gemeente .}
+  }
+ # OPTIONAL {
+ #   GRAPH graph:owms {
+ #     ?gemeente2 owms:CBSCode ?cbscode.
+  #  }
+  }
+ # FILTER (BOUND(?gemeente2) && BOUND(?origineleGemeentecode))
+ # BIND (
+ #   IF(strlen(str(?origineleGemeentecode)) = 1, CONCAT("000", str(?origineleGemeentecode)),
+ #   IF(strlen(str(?origineleGemeentecode)) = 2, CONCAT("00", str(?origineleGemeentecode)),
+ #   IF(strlen(str(?origineleGemeentecode)) = 3, CONCAT("0", str(?origineleGemeentecode)),
+ #   IF(strlen(str(?origineleGemeentecode)) = 4, str(?origineleGemeentecode),
+  #  "invalid")))) AS ?aangepasteGemeentecode)
 
-  ?sub a ceo:Rijksmonument .
-  ?sub ceo:rijksmonumentnummer ?rm.
-  #BIND(xsd:integer(?perceel) AS ?intPerceel)
-  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
-  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
-  ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
-
-OPTIONAL { ?sub ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?origineleGemeentecode }
-     FILTER (BOUND(?origineleGemeentecode))
-
-BIND (
-    IF(STRLEN(STR(?origineleGemeentecode)) = 1, CONCAT("000", STR(?origineleGemeentecode)),
-      IF(STRLEN(STR(?origineleGemeentecode)) = 2, CONCAT("00", STR(?origineleGemeentecode)),
-      IF(STRLEN(STR(?origineleGemeentecode)) = 3, CONCAT("0", STR(?origineleGemeentecode)),
-      IF(STRLEN(STR(?origineleGemeentecode)) = 4, STR(?origineleGemeentecode), 
-      "invalid")))) AS ?aangepasteGemeentecode)
-
- # FILTER (?aangepasteGemeentecode != "invalid")
-
-#  SERVICE <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
-#    ?otherSub a sor:Perceel.
-#    ?otherSub sor:perceelnummer ?intPerceel .
-#    ?otherSub kad:akrAanduiding ?gem.
- #   ?otherSub dc:identifier ?aangepasteGemeentecode. 
-#  }
-
-}
 LIMIT 100
