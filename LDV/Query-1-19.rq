@@ -1,0 +1,17 @@
+#+ name: Query-1-19
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?artefact ?ABRcode ?beginGeldigheid
+WHERE {
+  <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  
+  ?artefactUri skos:prefLabel ?artefact ;
+               <https://data.cultureelerfgoed.nl/id/rnce#codeAbr> ?ABRcode ;
+               <https://data.cultureelerfgoed.nl/id/rnce#beginningOfValidity> ?beginGeldigheid .
+  
+  #FILTER (?beginGeldigheid > "2012-09-12"^^xsd:date)
+  FILTER (LANG(?artefact) = "nl")
+}

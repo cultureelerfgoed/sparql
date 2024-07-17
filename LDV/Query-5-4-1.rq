@@ -1,41 +1,41 @@
 #+ name: Query-5-4-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
-PREFIX sor: <https://data.kkg.kadaster.nl/sor/model/def/>
-PREFIX kad: <https://data.kkg.kadaster.nl/kad/model/def/>
-PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
-PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-SELECT DISTINCT * WHERE {
-  GRAPH graph:instanties-rce {
+select distinct ?cho ?gemeentenaam ?cbscode ?kadastraleGemeentecode ?perceel ?sectie where {
+  graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument .
+    ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
     ?cho ceo:rijksmonumentnummer ?rm.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?origineleGemeentecode.
-  optional{ 
-   ?cho ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie.
-      ?basisregistratieRelatie ceo:heeftBAGRelatie ?bagRelatie .
-      ?bagRelatie  ceo:heeftGemeente ?gemeente .}
-  }
- # OPTIONAL {
- #   GRAPH graph:owms {
- #     ?gemeente2 owms:CBSCode ?cbscode.
-  #  }
-  }
- # FILTER (BOUND(?gemeente2) && BOUND(?origineleGemeentecode))
- # BIND (
- #   IF(strlen(str(?origineleGemeentecode)) = 1, CONCAT("000", str(?origineleGemeentecode)),
- #   IF(strlen(str(?origineleGemeentecode)) = 2, CONCAT("00", str(?origineleGemeentecode)),
- #   IF(strlen(str(?origineleGemeentecode)) = 3, CONCAT("0", str(?origineleGemeentecode)),
- #   IF(strlen(str(?origineleGemeentecode)) = 4, str(?origineleGemeentecode),
-  #  "invalid")))) AS ?aangepasteGemeentecode)
+    optional{
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .}
+    GRAPH graph:owms {
+     ?gemeente owms:CBSCode ?cbscode.
+    }
 
-LIMIT 100
+  BIND (
+     IF(strlen(str(?origineleGemeentecode)) = 1, CONCAT("000", str(?origineleGemeentecode)),
+     IF(strlen(str(?origineleGemeentecode)) = 2, CONCAT("00", str(?origineleGemeentecode)),
+     IF(strlen(str(?origineleGemeentecode)) = 3, CONCAT("0", str(?origineleGemeentecode)),
+     IF(strlen(str(?origineleGemeentecode)) = 4, str(?origineleGemeentecode),
+    "invalid")))) AS ?kadastraleGemeentecode)
+  }
+    BIND (xsd:integer(?perceel) AS ?integerPerceel)
+
+    }
+      limit 10

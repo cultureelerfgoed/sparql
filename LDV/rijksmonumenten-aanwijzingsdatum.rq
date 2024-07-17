@@ -1,0 +1,32 @@
+#+ name: rijksmonumenten-aanwijzingsdatum
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select distinct ?datumInschrijving (group_concat(distinct ?fullAddress; separator=", ") as ?adres) ?woonplaatsnaam ?provincie
+  (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?cho ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    ?cho ceo:heeftBasisregistratieRelatie ?brr.
+    ?brr ceo:heeftBAGRelatie ?bag.
+    ?bag ceo:volledigAdres ?fullAddress.
+    ?bag ceo:woonplaatsnaam ?woonplaatsnaam.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+    graph graph:owms {
+      ?prov skos:prefLabel ?provincie.
+    }
+  }
+}
+group by ?datumInschrijving ?woonplaatsnaam ?provincie ?rijksmonumentnummer
+order by ?datumInschrijving
