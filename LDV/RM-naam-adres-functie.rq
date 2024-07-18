@@ -10,7 +10,7 @@ PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-SELECT DISTINCT ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?oorspronkelijkefunctie ?huidigefunctie ?datumInschrijving ?stijlEnCultuur ?type ?actor ?omschrijving 
+SELECT ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?functie ?datumInschrijving ?jaarInschrijvings ?omschrijving 
 
 WHERE 
 {
@@ -23,13 +23,11 @@ WHERE
     OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.}
     OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.}
     OPTIONAL {?rijksmonument ceo:heeftOmschrijving ?omschrijving1 . ?omschrijving1 ceo:omschrijving ?omschrijving  ; ceo:formeelStandpunt "1"^^xsd:boolean.}
-    OPTIONAL {?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?ofunctienaam.
-    ?ofunctienaam skos:prefLabel ?oorspronkelijkefunctie .}
-    OPTIONAL {?rijksmonument ceo:heeftHuidigeFunctie/ceo:heeftFunctieNaam ?hfunctienaam.
-    ?hfunctienaam skos:prefLabel ?huidigefunctie .}
-    OPTIONAL { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijlEnCultuur. }
-    OPTIONAL { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type. }
-    OPTIONAL {?rijksmonument ceo:heeftGebeurtenis/ceo:heeftActorEnRol ?actorRol . ?actorRol ceo:heeftActor ?actor}
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
+    ?functienaam skos:prefLabel ?functie .
     ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving) 
+  FILTER (?jaarInschrijving >= "1960"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <="1968"^^<http://www.w3.org/2001/XMLSchema#integer>)
+    bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
 }
-}LIMIT 10
+}
