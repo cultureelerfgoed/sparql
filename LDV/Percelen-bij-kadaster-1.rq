@@ -1,0 +1,24 @@
+#+ name: Percelen-bij-kadaster-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix dct: <http://purl.org/dc/terms/>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix brk: <https://brk.basisregistraties.overheid.nl/brk2/def/>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+
+select ?kad ?aanduiding ?perceelnummer ?sectie ?gemeente ?oppervlakte
+where {
+  service <https://api.labs.kadaster.nl/datasets/brk/dkk/services/default/sparql> {
+    ?kad a brk:KadastraleAanduiding ;
+         skos:prefLabel ?aanduiding ;
+         brk:perceelnummer ?perceelnummer ;
+         brk:sectie ?sectie ;
+         brk:kadastraleGemeente ?gemeente .
+    ?perceel a brk:PerceelRegistratie .
+    ?perceel skos:prefLabel ?aanduiding.
+    ?perceel brk:kadastraleGrootte ?oppervlakte .
+}
+  }
+limit 1000

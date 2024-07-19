@@ -21,21 +21,13 @@ select distinct ?cho ?gemeentenaam ?cbscode ?kadastraleGemeentecode ?perceel ?se
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
-    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?origineleGemeentecode.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?kadastraleGemeentecode.
     optional{
       ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .}
     GRAPH graph:owms {
      ?gemeente owms:CBSCode ?cbscode.
     }
-
-  BIND (
-     IF(strlen(str(?origineleGemeentecode)) = 1, CONCAT("000", str(?origineleGemeentecode)),
-     IF(strlen(str(?origineleGemeentecode)) = 2, CONCAT("00", str(?origineleGemeentecode)),
-     IF(strlen(str(?origineleGemeentecode)) = 3, CONCAT("0", str(?origineleGemeentecode)),
-     IF(strlen(str(?origineleGemeentecode)) = 4, str(?origineleGemeentecode),
-    "invalid")))) AS ?kadastraleGemeentecode)
-  }
     BIND (xsd:integer(?perceel) AS ?integerPerceel)
-
     }
+  }
       limit 10

@@ -5,6 +5,7 @@ prefix dct: <http://purl.org/dc/terms/>
 prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
 
 select *
 where {
@@ -13,6 +14,7 @@ where {
     ?kad sor:perceelnummer ?perceelnummer .
     ?kad sor:oppervlakte ?oppervlakte.
     ?kad sor:sectie ?sectie.
+    ?kad kad:akrAanduiding ?aanduiding.
     ?kad geo:sfWithin ?gem.
     ?gem dct:identifier  ?cbscode   .
     ?gem skos:prefLabel ?gemeentenaam.
