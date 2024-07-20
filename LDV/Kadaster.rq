@@ -1,0 +1,34 @@
+#+ name: Kadaster
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+prefix kad-con: <https://data.kkg.kadaster.nl/kad/model/con/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix triply_optimize: <https://triplydb.com/Triply/sparql/id/value/true>
+select * {
+    ?rijksmonument
+      a ceo:Rijksmonument;
+      ceo:cultuurhistorischObjectnummer ?cho;
+      ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
+      ceo:heeftGeometrie/geo:asWKT ?wkt;
+      ceo:heeftLocatieAanduiding/ceo:locatienaam ?woonplaats ;
+  #    ceo:heeftKennisregistratie ?kennisregistratie .
+  #  ?kennisregistratie
+   #   ceo:heeftFunctieNaam <https://data.cultureelerfgoed.nl/term/id/rn/6fa5f251-cd84-4f3a-acb7-7c219df2540f> .
+  
+service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {}
+  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
+  optional { ?vbo sor:maaktDeelUitVan/sor:oorspronkelijkBouwjaar ?bouwjaar. }
+  optional { ?gebouwzone sor:hoortBij ?vbo ; skos:prefLabel ?naam. }
+  bind(strdt(concat(
+    '<dl><dt>RCE</dt><dd><a href="',str(?rijksmonument),'">',str(?cho),'</a></dd>',
+    '<dt>Kadaster</dt><dd><a href="',str(?vbo),'">',str(?vboId),'</a></dd>',
+	if(bound(?bouwjaar),concat('<dt>Bouwjaar</dt><dd>',str(?bouwjaar),'</dd>'),''),
+    if(bound(?naam),concat('<dt>Gebouwnaam</dt><dd>',str(?naam),'</dd>'),''),
+    '</dl>'),rdf:HTML) as ?wktLabel)
+  bind(if(bound(?naam),'red','blue') as ?wktColor)
+}

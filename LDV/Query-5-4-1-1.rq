@@ -1,0 +1,47 @@
+#+ name: Query-5-4-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix brk: <https://brk.basisregistraties.overheid.nl/brk2/def/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select distinct ?cho ?gemeentenaam ?cbscode ?kadastraleGemeentecode ?perceel ?sectie ?oppervlakte ?shape where {
+  # Part 1: Retrieve Rijksmonument data
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument .
+    ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
+    ?cho ceo:rijksmonumentnummer ?rm.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel .
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie .
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam .
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?kadastraleGemeentecode .
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .
+    }
+    GRAPH graph:owms {
+      ?gemeente owms:CBSCode ?cbscode .
+    }
+  }
+
+  # Bind the gemeenteUri based on the kadastraleGemeentecode
+  BIND (IRI(CONCAT("https://brk.basisregistraties.overheid.nl/brk2/id/kadastraleGemeente/", ?kadastraleGemeentecode)) AS ?gemeenteUri)
+  BIND (xsd:integer(?perceel) AS ?integerPerceel)
+
+  # Part 2: Retrieve Kadastrale Aanduiding data from external service
+  service <https://api.labs.kadaster.nl/datasets/brk/dkk/services/default/sparql> {
+    ?kad a brk:KadastraleAanduiding ;
+         skos:prefLabel ?aanduiding ;
+         brk:perceelnummer ?integerPerceel ;
+         brk:sectie ?sectie ;
+         brk:kadastraleGemeente ?gemeenteUri .
+    ?perceelUri a brk:PerceelRegistratie ;
+                skos:prefLabel ?aanduiding ;
+                brk:kadastraleGrootte ?oppervlakte ;
+                brk:begrenzing ?shape .
+  }
+}
+limit 10

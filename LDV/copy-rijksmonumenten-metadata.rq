@@ -1,0 +1,50 @@
+#+ name: copy-rijksmonumenten-metadata
+#+ description: copy van Sandra's query Rijksmonumenten met inhoudelijke metadata, maar dan met speedy service voor ophalen van > 10000 resultaten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+select ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?functie ?datumInschrijving ?jaarInschrijvings ?omschrijving
+
+where
+{
+  graph graph:instanties-rce {
+    minus {
+      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>
+    }
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    optional {
+      ?rijksmonument ceo:heeftNaam/ceo:naam ?naam.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+    }
+    optional {
+      ?rijksmonument ceo:heeftOmschrijving ?omschrijving1 .
+      ?omschrijving1 ceo:omschrijving ?omschrijving  ;
+                     ceo:formeelStandpunt "1"^^xsd:boolean.
+    }
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
+    ?functienaam skos:prefLabel ?functie .
+    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    bind(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
+    filter (?jaarInschrijving >= "1960"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <="1968"^^<http://www.w3.org/2001/XMLSchema#integer>)
+    bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
+  }
+}
+limit 135000
