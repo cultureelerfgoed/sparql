@@ -19,7 +19,7 @@ where {
     ?perceel a brk:PerceelRegistratie .
     ?perceel skos:prefLabel ?aanduiding.
     ?perceel brk:kadastraleGrootte ?oppervlakte .
-    ?perceel brk:begrenzing ?shape.
+    ?perceel brk:begrenzing_wgs84 ?shape.
 }
   }
 limit 1000

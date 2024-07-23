@@ -1,0 +1,36 @@
+#+ name: kadaster-ff2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://data.kkg.kadaster.nl/graph/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt: <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select *
+where {
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+
+    ?vbo a bag:Nummeraanduiding.
+    ?vbo bag:identificatie ?id.
+    #  ?vbo bag:huisnummer ?huisnummer .
+    ?vbo bag:huisnummer ?rawHuisnummer .
+    ?vbo bag:postcode ?postcode .
+    ?vbo bag:ligtAan/bag:ligtIn/skos:prefLabel ?woonplaatsnaam.
+    ?vbo bag:ligtAan/skos:prefLabel ?straat .
+    bind(xsd:integer(?rawHuisnummer) as ?huisnummer)
+    ?perceel
+      a <https://data.kkg.kadaster.nl/sor/model/def/Perceel>;
+      sor:hoortBij ?nummeraanduiding;
+      sor:oppervlakte ?perceelOppervlakte .
+
+  }
+}
+
+limit 200
+

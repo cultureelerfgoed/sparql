@@ -1,7 +1,5 @@
 #+ name: termennetwerk-monumenten-sample
 #+ description: termenentwerk query with sample address
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonument/services/Rijksmonument/sparql
-
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

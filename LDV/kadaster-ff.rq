@@ -1,0 +1,17 @@
+#+ name: kadaster-ff
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+select * {
+  service <https://api.labs.kadaster.nl/datasets/bag/lv/services/default/sparql> {
+    ?openbareRuimte sor:ligtIn ?woonplaats.
+    ?nummeraanduiding
+      sor:huisnummer ?huisnummer;
+      sor:ligtAan ?openbareRuimte;
+      sor:postcode ?postcode.
+  #  ?verblijfsobject
+  #    sor:hoofdadres ?nummeraanduiding;
+  #    sor:maaktDeelUitVan ?gebouw.
+  }
+}
+limit 250
