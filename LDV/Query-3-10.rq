@@ -1,0 +1,72 @@
+#+ name: Query-3-10
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+#SELECT *
+select ?matchfix (count(distinct ?artefactUri) as ?aantal)
+
+where {
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ;
+                 skos:exactMatch ?match .
+    filter (lang(?artefact) = "nl") .
+    bind("exact" as ?matchfix)
+  }
+  union
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ;
+                 skos:closeMatch ?match .
+    filter (lang(?artefact) = "nl")  .
+    bind("close" as ?matchfix)
+  }
+  union
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ;
+                 skos:broadMatch ?match .
+    filter (lang(?artefact) = "nl")  .
+    bind("broad" as ?matchfix)
+  }
+  union
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ;
+                 skos:narrowMatch ?match .
+    filter (lang(?artefact) = "nl")  .
+    bind("narrow" as ?matchfix)
+  }
+  union
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ;
+                 skos:relatedMatch ?match .
+    filter (lang(?artefact) = "nl")  .
+    bind("related" as ?matchfix)
+  }
+  union
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact .
+    filter not exists {
+      ?artefactUri skos:exactMatch ?match
+    } .
+    filter not exists {
+      ?artefactUri skos:closeMatch ?match
+    } .
+    filter not exists {
+      ?artefactUri skos:broadMatch ?match
+    } .
+    filter not exists {
+      ?artefactUri skos:narrowMatch ?match
+    } .
+    filter not exists {
+      ?artefactUri skos:relatedMatch ?match
+    } .
+    filter (lang(?artefact) = "nl")  .
+    bind ("geen match" as ?matchfix)
+  }
+} group by ?matchfix

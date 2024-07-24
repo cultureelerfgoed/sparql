@@ -1,0 +1,27 @@
+#+ name: Query-5-6
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT ?periodeCategorie (COUNT(DISTINCT ?categorieUri) as ?aantal)
+WHERE {
+  {
+    # PREH
+    <https://data.cultureelerfgoed.nl/term/id/abr/ce8b351f-de2a-43e3-bd11-3fbfa220b515> skos:narrower+ ?categorieUri .
+    BIND("PREH" AS ?periodeCategorie)
+  }
+  UNION
+  {
+    # ROM
+    <https://data.cultureelerfgoed.nl/term/id/abr/478ef0e5-f18a-46d4-b671-cf45392f7259> skos:narrower+ ?categorieUri .
+    BIND("ROM" AS ?periodeCategorie)
+  }
+  UNION
+  {
+    # MENT
+    <https://data.cultureelerfgoed.nl/term/id/abr/e76ccfbe-c5b0-4602-bd39-437c19f4c453> skos:narrower+ ?categorieUri .
+    BIND("MENT" AS ?periodeCategorie)
+  }
+}
+GROUP BY ?periodeCategorie
