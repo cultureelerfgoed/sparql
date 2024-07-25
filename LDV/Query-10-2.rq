@@ -3,6 +3,7 @@
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?uri ?artefact ?hierarchie ?widget 
 WHERE {
@@ -10,7 +11,9 @@ WHERE {
     SELECT ?uri ?artefact (GROUP_CONCAT(?label; SEPARATOR="<br/>") AS ?hierarchie)
     WHERE {
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower* ?uri .
-      ?uri skos:prefLabel ?artefact .
+      ?uri skos:prefLabel ?artefact ; <https://data.cultureelerfgoed.nl/id/rnce#beginningOfValidity> ?beginGeldigheid .
+  
+  
 
       OPTIONAL {
         ?uri skos:broader+ ?broaderConcept .

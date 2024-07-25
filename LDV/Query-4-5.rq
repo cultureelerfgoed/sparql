@@ -1,0 +1,57 @@
+#+ name: Query-4-5
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?validityYear (COUNT(?artefactUri) as ?aantal)
+WHERE {
+               {
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity "2012-09-12"^^<http://www.w3.org/2001/XMLSchema#date>  .
+  FILTER (LANG(?artefact) = "nl")
+  BIND("2012" AS ?validityYear) 
+  }
+  UNION
+  {
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity "2014-12-08"^^<http://www.w3.org/2001/XMLSchema#date>  .
+  FILTER (LANG(?artefact) = "nl")
+  BIND("2014" AS ?validityYear) 
+  }
+   UNION
+  {
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity "2015-06-19"^^<http://www.w3.org/2001/XMLSchema#date>  .
+  FILTER (LANG(?artefact) = "nl")
+  BIND("2015" AS ?validityYear) 
+  }            
+  UNION
+
+  {
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity "2020-11-20"^^<http://www.w3.org/2001/XMLSchema#date>  .
+  FILTER (LANG(?artefact) = "nl")
+  BIND("2020" AS ?validityYear) 
+  }
+  UNION
+  {
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity "2024-07-11"^^xsd:date  .
+  FILTER (LANG(?artefact) = "nl")
+  BIND("2024" AS ?validityYear) 
+  }
+}
+                 
+ GROUP BY ?validityYear

@@ -1,0 +1,29 @@
+#+ name: Query-8-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT ?label ?value
+WHERE {
+  {
+    # Totaal aantal artefacten
+    SELECT (STR("Totaal") AS ?label) (COUNT(DISTINCT ?artefactUri) AS ?value)
+    WHERE {
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    }
+  }
+  UNION
+  {
+    # Aantal artefacten per status
+    SELECT ?label (COUNT(?artefactUri) AS ?value)
+    WHERE {
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+      ?artefactUri skos:prefLabel ?artefact ;
+                   rnce:hasConceptStatus/skos:prefLabel ?label .
+      FILTER (LANG(?artefact) = "nl")
+    }
+    GROUP BY ?label
+  }
+}
+ORDER BY ?label

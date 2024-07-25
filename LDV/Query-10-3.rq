@@ -1,0 +1,15 @@
+#+ name: Query-10-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?artefact
+WHERE {
+               
+               
+<https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:hasMaterialAbr/skos:prefLabel ?materiaal }
+LIMIT 10

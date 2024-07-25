@@ -1,0 +1,27 @@
+#+ name: Query-7-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?geldigheidArtefact (COUNT(DISTINCT ?artefactUri) AS ?aantal)
+WHERE {
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 rnce:beginningOfValidity ?beginValidatiedatum .
+    FILTER ( ?beginValidatiedatum = "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
+    BIND("nieuw" AS ?geldigheidArtefact) 
+  }
+  UNION
+  {
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 rnce:beginningOfValidity ?beginValidatiedatum .
+    
+    FILTER ( ?beginValidatiedatum < "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
+    BIND("bestaand" AS ?geldigheidArtefact) 
+  }
+}
+GROUP BY ?geldigheidArtefact
