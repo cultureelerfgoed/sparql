@@ -1,0 +1,16 @@
+#+ name: Query-12-4
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT ?aardewerkcategorie ?beginPeriode ?eindPeriode
+
+WHERE { 
+  <https://data.cultureelerfgoed.nl/term/id/abr/6b152e0a-34da-4309-bd3e-c7140ca58640> skos:narrower+ ?cat_uri .
+  ?cat_uri skos:prefLabel ?aardewerkcategorie ; rnce:hasBeginPeriodAbr/skos:prefLabel ?beginPeriode ; rnce:hasEndPeriodAbr/skos:prefLabel ?eindPeriode
+      
+
+} 
+ORDER BY ?aardewerkcategorie
+LIMIT 1

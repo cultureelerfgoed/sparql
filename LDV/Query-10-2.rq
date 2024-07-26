@@ -29,7 +29,7 @@ WHERE {
   <div style="border: 1px solid black; padding: 10px; margin: 10px;">
     <h2>{{artefact}}</h2>
     <p style="color: black; font-style: italic;">Broader Labels:</p>
-    <p style="color: green;">{{hierarchie}}</p>
+    <p style="color: gray;">{{hierarchie}}</p>
   </div>
   '''^^rdf:HTML AS ?widget)
 }

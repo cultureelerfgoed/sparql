@@ -13,5 +13,5 @@ WHERE {
                rnce:hasEndPeriodAbr/skos:prefLabel ?eindPeriode
 }
 ORDER BY ?artefactUri
-LIMIT 10
+LIMIT 1
 
