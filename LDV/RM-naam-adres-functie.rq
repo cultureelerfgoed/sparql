@@ -10,7 +10,7 @@ PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-SELECT ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?functie ?datumInschrijving ?jaarInschrijvings ?omschrijving 
+SELECT ?rijksmonumentnummer ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?functie ?datumInschrijving ?beginDatum ?eindDatum ?omschrijving 
 
 WHERE 
 {
@@ -26,8 +26,12 @@ WHERE
     ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
     ?functienaam skos:prefLabel ?functie .
     ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
-    BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving) 
-  FILTER (?jaarInschrijving >= "1960"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <="1968"^^<http://www.w3.org/2001/XMLSchema#integer>)
-    bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
+    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+  ?gebeurtenis ceo:heeftDatering ?datering.
+  ?datering ceo:heeftBeginDatering ?beginDatering.
+    ?beginDatering ceo:datum ?beginDatum.
+  ?datering ceo:heeftEindDatering ?eindDatering.
+    ?eindDatering ceo:datum ?eindDatum.
 }
 }

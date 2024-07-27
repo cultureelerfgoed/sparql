@@ -1,0 +1,19 @@
+#+ name: Query-4-7
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+select distinct * where {
+  graph graph:instanties-rce {
+    ?s a ceo:Rijksmonument.
+    ?s ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?s ceo:rijksmonumentnummer ?rijksmonument.
+    ?s ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+    ?s ceo:heeftBasisregistratieRelatie ?brr.
+    ?brr ceo:heeftBAGRelatie ?br.
+  #  ?br ceo:verblijfsobjectIdentificatie ?vbo.
+        FILTER NOT EXISTS {?br ceo:verblijfsobjectIdentificatie ?vbo.}
+    }
+  
+}

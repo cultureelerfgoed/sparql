@@ -1,0 +1,95 @@
+#+ name: kadaster
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix status: <https://data.kkg.kadaster.nl/kad/model/con/>
+prefix wbk: <https://data.labs.kadaster.nl/cbs/wbk/vocab/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+select distinct ?akrAanduiding ?oppervlakte ?perceelnummer ?bouwjaar ?gemeentenaam ?verblijfsobjectLabel ?buurtNaam ?vlakGeometrie ("red" as ?vlakGeometrieColor)  ?groottePerceel ?straatNaam ?mapEndpoint
+  (group_concat(distinct ?gebruiksdoel; separator=" ") as ?gebruiksdoelen)
+  (group_concat(distinct ?typeGebouwBRT; separator=" ") as ?typenGebouw)
+  (?perceelGrens as ?shape) ('green' as ?shapeColor)
+
+  (strdt(concat(
+    '<h2><a href="',str(?gebouw),'">',?adresRegelEen,'</a></h2>',
+    '<h3>',?adresRegelTwee,'</h3>',
+    '<h3>',?kadAanduidingFiltered,'</h3>',
+    '<dl>',
+    '<dt>Perceelgrootte</dt><dd>',?groottePerceel,' m²</dd>',
+    '<dt>Perceelnummer</dt><dd>',?perceelnummer,'</dd>',
+    '<dt>Sectie</dt><dd>',?sectie,'</dd>',
+    '<dt>Gebruiksoppervlakte</dt><dd>',?oppervlakte,' m²</dd>',
+    '<dt>Bouwjaar</dt><dd>',str(?bouwjaar),'</dd>',
+    '<dt>Gebruiksdoelen</dt><dd>',(group_concat(distinct ?gebruiksdoel)),'</dd>',
+    '</dl>'),rdf:HTML) as ?shapeLabel)
+where {
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+    ?koppeling
+      rdf:object ?nummeraanduiding;
+      rdf:subject ?perceel.
+    ?nummeraanduiding
+      a sor:Nummeraanduiding;
+      sor:postcode ?postcode;
+      sor:huisnummer ?huisnummer;
+      sor:ligtAan ?openbareRuimte;
+    optional {
+      ?nummeraanduiding sor:huisletter ?huisletter.
+    }
+    optional {
+      ?nummeraanduiding sor:huisnummertoevoeging ?toevoeging.
+    }
+    ?openbareRuimte
+      a sor:OpenbareRuimte;
+      skos:prefLabel ?straatNaam;
+      sor:ligtIn ?woonplaats.
+    ?perceel
+      geo:hasGeometry/geo:asWKT ?perceelGrens;
+      kad:akrAanduiding ?akrAanduiding;
+      sor:hoortBij ?nummeraanduiding;
+      sor:oppervlakte ?groottePerceel;
+      sor:sectie ?sectie;
+      sor:perceelnummer ?perceelnummer.
+    ?verblijfsobject
+      geo:hasGeometry/geo:asWKT ?puntGeometrie;
+      sor:gebruiksdoel/skos:prefLabel ?gebruiksdoel;
+      sor:hoofdadres ?nummeraanduiding;
+      sor:maaktDeelUitVan ?gebouw;
+      sor:oppervlakte ?oppervlakte.
+  bind(replace(str(?verblijfsobject),'.*[/#]','') as ?verblijfsobjectLabel)
+    ?woonplaats
+      a sor:Woonplaats;
+      skos:prefLabel ?woonplaatsNaam;
+    optional {
+      ?gebouwzone
+        kad:type/skos:prefLabel ?typeGebouwBRT;
+        sor:hoortBij ?verblijfsobject.
+    }
+    ?gebouw
+      geo:hasGeometry
+        [ geo:asWKT ?vlakGeometrie;
+          rdfs:isDefinedBy bag: ];
+      geo:sfWithin ?buurt;
+      sor:oorspronkelijkBouwjaar ?bouwjaar.
+    ?buurt
+      geo:sfWithin ?wijk;
+      rdfs:label ?buurtNaam.
+    ?wijk
+      geo:sfWithin ?gemeente;
+      rdfs:label ?wijknaam.
+    ?gemeente rdfs:label ?gemeentenaam.
+  }
+  bind(<https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?request=GetCapabilities> as ?mapEndpoint)
+  bind(concat(str(?straatNaam),' ',str(?huisnummer),' ',str(?huisletter), str(?toevoeging)) as ?adresRegelEen)
+  bind(concat(str(?postcode),' ',str(?woonplaatsNaam)) as ?adresRegelTwee)
+  bind(concat(str(?akrAanduiding),'-',str(?sectie),'-',str(?perceelnummer)) as ?kadAanduiding)
+  bind(coalesce(?kadAanduiding,'Appartementsrecht') as ?kadAanduidingFiltered)
+
+}
+limit 150

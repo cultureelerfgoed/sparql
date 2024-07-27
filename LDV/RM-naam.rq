@@ -1,0 +1,22 @@
+#+ name: RM-naam
+#+ description: De (officiële) naam van een rijksmonument opvragen uit het rijksmonumentenregister.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT ?rijksmonumentnummer ?naam 
+
+WHERE 
+{
+  GRAPH graph:instanties-rce {
+    MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    OPTIONAL {?rijksmonument ceo:heeftNaam/ceo:naam ?naam.}
+}
+}
