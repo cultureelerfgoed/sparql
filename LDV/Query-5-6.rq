@@ -9,19 +9,19 @@ WHERE {
   {
     # PREH
     <https://data.cultureelerfgoed.nl/term/id/abr/ce8b351f-de2a-43e3-bd11-3fbfa220b515> skos:narrower+ ?categorieUri .
-    BIND("PREH" AS ?periodeCategorie)
+    BIND("Prehistorie" AS ?periodeCategorie)
   }
   UNION
   {
     # ROM
     <https://data.cultureelerfgoed.nl/term/id/abr/478ef0e5-f18a-46d4-b671-cf45392f7259> skos:narrower+ ?categorieUri .
-    BIND("ROM" AS ?periodeCategorie)
+    BIND("Romeinse tijd" AS ?periodeCategorie)
   }
   UNION
   {
     # MENT
     <https://data.cultureelerfgoed.nl/term/id/abr/e76ccfbe-c5b0-4602-bd39-437c19f4c453> skos:narrower+ ?categorieUri .
-    BIND("MENT" AS ?periodeCategorie)
+    BIND("Middeleeuwen/Nieuwe tijd" AS ?periodeCategorie)
   }
 }
 GROUP BY ?periodeCategorie

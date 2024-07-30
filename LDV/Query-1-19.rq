@@ -4,14 +4,14 @@
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?artefact ?ABRcode ?beginGeldigheid
+SELECT ?Artefact ?ABRcode ?Begingeldigheid
 WHERE {
   <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   
-  ?artefactUri skos:prefLabel ?artefact ;
+  ?artefactUri skos:prefLabel ?Artefact ;
                <https://data.cultureelerfgoed.nl/id/rnce#codeAbr> ?ABRcode ;
-               <https://data.cultureelerfgoed.nl/id/rnce#beginningOfValidity> ?beginGeldigheid .
+               <https://data.cultureelerfgoed.nl/id/rnce#beginningOfValidity> ?Begingeldigheid .
   
   #FILTER (?beginGeldigheid > "2012-09-12"^^xsd:date)
-  FILTER (LANG(?artefact) = "nl")
+  FILTER (LANG(?Artefact) = "nl")
 } LIMIT 10

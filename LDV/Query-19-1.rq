@@ -1,0 +1,119 @@
+#+ name: Query-19-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT ?baseUri
+       (SUM(?exactCount) AS ?exactMatchCount)
+       (SUM(?closeCount) AS ?closeMatchCount)
+       (SUM(?broadCount) AS ?broadMatchCount)
+       (SUM(?narrowCount) AS ?narrowMatchCount)
+       (SUM(?relatedCount) AS ?relatedMatchCount)
+WHERE {
+  {
+    # Query voor skos:exactMatch
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 skos:exactMatch ?exactMatch .
+
+    BIND (
+      SUBSTR(
+        str(?exactMatch),
+        1,
+        STRLEN(str(?exactMatch)) - STRLEN(REPLACE(str(?exactMatch), "^.*/", "")) - 1
+      ) AS ?baseUri
+    )
+
+    BIND(1 AS ?exactCount)
+    BIND(0 AS ?closeCount)
+    BIND(0 AS ?broadCount)
+    BIND(0 AS ?narrowCount)
+    BIND(0 AS ?relatedCount)
+  }
+  UNION
+  {
+    # Query voor skos:closeMatch
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 skos:closeMatch ?closeMatch .
+
+    BIND (
+      SUBSTR(
+        str(?closeMatch),
+        1,
+        STRLEN(str(?closeMatch)) - STRLEN(REPLACE(str(?closeMatch), "^.*/", "")) - 1
+      ) AS ?baseUri
+    )
+
+    BIND(0 AS ?exactCount)
+    BIND(1 AS ?closeCount)
+    BIND(0 AS ?broadCount)
+    BIND(0 AS ?narrowCount)
+    BIND(0 AS ?relatedCount)
+  }
+  UNION
+  {
+    # Query voor skos:broadMatch
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 skos:broadMatch ?broadMatch .
+
+    BIND (
+      SUBSTR(
+        str(?broadMatch),
+        1,
+        STRLEN(str(?broadMatch)) - STRLEN(REPLACE(str(?broadMatch), "^.*/", "")) - 1
+      ) AS ?baseUri
+    )
+
+    BIND(0 AS ?exactCount)
+    BIND(0 AS ?closeCount)
+    BIND(1 AS ?broadCount)
+    BIND(0 AS ?narrowCount)
+    BIND(0 AS ?relatedCount)
+  }
+  UNION
+  {
+    # Query voor skos:narrowMatch
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 skos:narrowMatch ?narrowMatch .
+
+    BIND (
+      SUBSTR(
+        str(?narrowMatch),
+        1,
+        STRLEN(str(?narrowMatch)) - STRLEN(REPLACE(str(?narrowMatch), "^.*/", "")) - 1
+      ) AS ?baseUri
+    )
+
+    BIND(0 AS ?exactCount)
+    BIND(0 AS ?closeCount)
+    BIND(0 AS ?broadCount)
+    BIND(1 AS ?narrowCount)
+    BIND(0 AS ?relatedCount)
+  }
+  UNION
+  {
+    # Query voor skos:relatedMatch
+    <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+    ?artefactUri skos:prefLabel ?artefact ; 
+                 skos:relatedMatch ?relatedMatch .
+
+    BIND (
+      SUBSTR(
+        str(?relatedMatch),
+        1,
+        STRLEN(str(?relatedMatch)) - STRLEN(REPLACE(str(?relatedMatch), "^.*/", "")) - 1
+      ) AS ?baseUri
+    )
+
+    BIND(0 AS ?exactCount)
+    BIND(0 AS ?closeCount)
+    BIND(0 AS ?broadCount)
+    BIND(0 AS ?narrowCount)
+    BIND(1 AS ?relatedCount)
+  }
+}
+GROUP BY ?baseUri

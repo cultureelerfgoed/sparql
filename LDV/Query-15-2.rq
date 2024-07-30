@@ -1,0 +1,10 @@
+#+ name: Query-15-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
+construct  WHERE {
+  ?artefact a <https://data.cultureelerfgoed.nl/id/rnce#ArtefactAbr> ; ?pred ?obj .
+} LIMIT 100
