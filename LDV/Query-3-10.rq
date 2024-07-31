@@ -8,47 +8,47 @@ prefix rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 select ?matchfix (count(distinct ?artefactUri) as ?aantal)
 
 where {
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:exactMatch ?match .
     filter (lang(?artefact) = "nl") .
-    bind("exact" as ?matchfix)
-  }
+    bind("exactMatch" as ?matchfix)
+  } }
   union
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:closeMatch ?match .
     filter (lang(?artefact) = "nl")  .
-    bind("close" as ?matchfix)
-  }
+    bind("closeMatch" as ?matchfix)
+  } }
   union
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:broadMatch ?match .
     filter (lang(?artefact) = "nl")  .
-    bind("broad" as ?matchfix)
-  }
+    bind("broadMatch" as ?matchfix)
+  } }
   union
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:narrowMatch ?match .
     filter (lang(?artefact) = "nl")  .
-    bind("narrow" as ?matchfix)
-  }
+    bind("narrowMatch" as ?matchfix)
+  } }
   union
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:relatedMatch ?match .
     filter (lang(?artefact) = "nl")  .
-    bind("related" as ?matchfix)
-  }
+    bind("relatedMatch" as ?matchfix)
+  } }
   union
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact .
     filter not exists {
@@ -68,5 +68,5 @@ where {
     } .
     filter (lang(?artefact) = "nl")  .
     bind ("geen match" as ?matchfix)
-  }
+  } }
 } group by ?matchfix

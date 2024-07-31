@@ -6,22 +6,22 @@ PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
 SELECT ?periodeCategorie (COUNT(DISTINCT ?categorieUri) as ?aantal)
 WHERE {
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # PREH
     <https://data.cultureelerfgoed.nl/term/id/abr/ce8b351f-de2a-43e3-bd11-3fbfa220b515> skos:narrower+ ?categorieUri .
     BIND("Prehistorie" AS ?periodeCategorie)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # ROM
     <https://data.cultureelerfgoed.nl/term/id/abr/478ef0e5-f18a-46d4-b671-cf45392f7259> skos:narrower+ ?categorieUri .
     BIND("Romeinse tijd" AS ?periodeCategorie)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # MENT
     <https://data.cultureelerfgoed.nl/term/id/abr/e76ccfbe-c5b0-4602-bd39-437c19f4c453> skos:narrower+ ?categorieUri .
     BIND("Middeleeuwen/Nieuwe tijd" AS ?periodeCategorie)
-  }
+  } }
 }
 GROUP BY ?periodeCategorie

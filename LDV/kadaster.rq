@@ -12,9 +12,8 @@ prefix status: <https://data.kkg.kadaster.nl/kad/model/con/>
 prefix wbk: <https://data.labs.kadaster.nl/cbs/wbk/vocab/>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-select distinct ?akrAanduiding ?oppervlakte ?perceelnummer ?bouwjaar ?gemeentenaam ?verblijfsobjectLabel ?buurtNaam ?vlakGeometrie ("red" as ?vlakGeometrieColor)  ?groottePerceel ?straatNaam ?mapEndpoint
+select distinct ?akrAanduiding ?oppervlakte ?perceelnummer ?bouwjaar ?gemeentenaam ?verblijfsobjectLabel  ?vlakGeometrie ("red" as ?vlakGeometrieColor)  ?groottePerceel ?straatNaam ?mapEndpoint
   (group_concat(distinct ?gebruiksdoel; separator=" ") as ?gebruiksdoelen)
-  (group_concat(distinct ?typeGebouwBRT; separator=" ") as ?typenGebouw)
   (?perceelGrens as ?shape) ('green' as ?shapeColor)
 
   (strdt(concat(
@@ -27,6 +26,7 @@ select distinct ?akrAanduiding ?oppervlakte ?perceelnummer ?bouwjaar ?gemeentena
     '<dt>Sectie</dt><dd>',?sectie,'</dd>',
     '<dt>Gebruiksoppervlakte</dt><dd>',?oppervlakte,' m²</dd>',
     '<dt>Bouwjaar</dt><dd>',str(?bouwjaar),'</dd>',
+    '<dt>Buurtnaam: </dt><dd>',?buurtNaam,'</h4>',
     '<dt>Gebruiksdoelen</dt><dd>',(group_concat(distinct ?gebruiksdoel)),'</dd>',
     '</dl>'),rdf:HTML) as ?shapeLabel)
 where {

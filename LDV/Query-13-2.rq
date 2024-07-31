@@ -6,10 +6,10 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 SELECT ?artefact ?codeAbr
 #SELECT (COUNT(?artefactUri) AS ?aantal)
 
-WHERE {
+WHERE { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
   <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ;
                skos:scopeNote ?scopeNote ;  <https://data.cultureelerfgoed.nl/id/rnce#codeAbr> ?codeAbr .
   FILTER (CONTAINS(?scopeNote, "combinatieterm"))
   FILTER (LANG(?artefact) = "nl")
-} LIMIT 10
+} } LIMIT 10

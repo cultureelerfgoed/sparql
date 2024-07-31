@@ -7,7 +7,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?uri ?artefact ?hierarchie ?widget 
 WHERE {
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     SELECT ?uri ?artefact (GROUP_CONCAT(?label; SEPARATOR="<br/>") AS ?hierarchie)
     WHERE {
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower* ?uri .
@@ -19,9 +19,9 @@ WHERE {
         ?uri skos:broader+ ?broaderConcept .
         ?broaderConcept skos:prefLabel ?label .
         FILTER (LANG(?label) = "nl")
-      }
+      } 
       FILTER (LANG(?artefact) = "nl")
-    }
+    } 
     GROUP BY ?uri ?artefact
   }
   
@@ -32,7 +32,7 @@ WHERE {
     <p style="color: gray;">{{hierarchie}}</p>
   </div>
   '''^^rdf:HTML AS ?widget)
-}
+} }
 GROUP BY ?uri ?artefact ?hierarchie ?widget
 ORDER BY ?uri
 LIMIT 100

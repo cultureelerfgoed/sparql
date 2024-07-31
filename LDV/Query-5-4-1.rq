@@ -13,17 +13,17 @@ prefix owms: <http://standaarden.overheid.nl/owms/terms/>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-select distinct ?cho ?gemeentenaam ?postcode ?cbscode ?kadastraleGemeentecode ?perceel ?sectie where {
+select distinct ?cho ?gemeentenaam ?postcode ?cbscode ?kadastraleGemeentecode ?kadastraleGemeenteUri ?perceel ?sectie where {
   graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument .
     ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
     ?cho ceo:rijksmonumentnummer ?rm.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
-        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.
-
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?kadastraleGemeentecode.
+    BIND(CONCAT("https://brk.basisregistraties.overheid.nl/brk2/id/kadastraleGemeente/", ?kadastraleGemeentecode) AS ?kadastraleGemeenteUri)
     optional{
       ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .}
     GRAPH graph:owms {
@@ -32,4 +32,4 @@ select distinct ?cho ?gemeentenaam ?postcode ?cbscode ?kadastraleGemeentecode ?p
     BIND (xsd:integer(?perceel) AS ?integerPerceel)
     }
   }
-      limit 10
+limit 100

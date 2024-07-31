@@ -7,21 +7,21 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?geldigheidArtefact (COUNT(DISTINCT ?artefactUri) AS ?aantal)
 WHERE {
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
                  rnce:beginningOfValidity ?beginValidatiedatum .
     FILTER ( ?beginValidatiedatum = "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
     BIND("nieuw" AS ?geldigheidArtefact) 
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
                  rnce:beginningOfValidity ?beginValidatiedatum .
     
     FILTER ( ?beginValidatiedatum < "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
     BIND("bestaand" AS ?geldigheidArtefact) 
-  }
+  } }
 }
 GROUP BY ?geldigheidArtefact

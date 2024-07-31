@@ -3,9 +3,14 @@
 #- Een zogenaamd "Fransje".
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT * WHERE {
-  ?rijksmonument a ceo:Rijksmonument ; ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ; ceo:rijksmonumentnummer ?rijksmonumentnummer .
-} LIMIT 10
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+select * where {
+  graph graph:instanties-rce {
+    ?rijksmonument a ceo:Rijksmonument ;
+                   ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ;
+                   ceo:rijksmonumentnummer ?rijksmonumentnummer .
+  }
+} limit 10

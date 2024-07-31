@@ -17,7 +17,7 @@ prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select ?werelderfgoed ?cultuurhistorischObjectnummer ?werelderfgoedstatus ?werelderfgoedtype ?werelderfgoednummer ?registratiedatum ?jaarvaninschrijving ?heeftNaam ?huidigeNaam ?registratiedatum_naam ?formeelStandpunt
+select ?mapEndpoint ?werelderfgoed ?cultuurhistorischObjectnummer ?werelderfgoedstatus ?werelderfgoedtype ?werelderfgoednummer ?registratiedatum ?jaarvaninschrijving ?heeftNaam ?huidigeNaam ?registratiedatum_naam ?formeelStandpunt
   ?geometrietype ?geometriekwaliteit ?geometrie_rd ?geometrie_WGS84 ?geometrie_WGS84Color ?geometrie_WGS84Label ?oppervlakteinvierkantekilometers ?oppervlakteinvierkantemeters ?oppervlakteinhectare
 where {
   graph graph:instanties-rce {
@@ -54,4 +54,6 @@ where {
     BIND(CONCAT('Naam: ', ?heeftNaam, ', Werelderfgoednummer: ', ?werelderfgoednummer, ', Registratiedatum: ', ?registratiedatum, ', Werelderfgoedtype: ', ?werelderfgoedtype) AS ?geometrie_WGS84Label)
    # bind(?geometrie_WGS84 as ?geometrie_WGS84Label)
     bind("red" as ?geometrie_WGS84Color)
+    bind(<https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?request=GetCapabilities&service=wms> as ?mapEndpoint)
+  
   }

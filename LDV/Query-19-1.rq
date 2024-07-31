@@ -5,23 +5,23 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
 SELECT ?baseUri
-       (SUM(?exactCount) AS ?exactMatchCount)
-       (SUM(?closeCount) AS ?closeMatchCount)
-       (SUM(?broadCount) AS ?broadMatchCount)
-       (SUM(?narrowCount) AS ?narrowMatchCount)
-       (SUM(?relatedCount) AS ?relatedMatchCount)
+       (SUM(?exactCount) AS ?exactMatch)
+       (SUM(?closeCount) AS ?closeMatch)
+       (SUM(?broadCount) AS ?broadMatch)
+       (SUM(?narrowCount) AS ?narrowMatch)
+       (SUM(?relatedCount) AS ?relatedMatch)
 WHERE {
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # Query voor skos:exactMatch
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
-                 skos:exactMatch ?exactMatch .
+                 skos:exactMatch ?exact_Match .
 
     BIND (
       SUBSTR(
-        str(?exactMatch),
+        str(?exact_Match),
         1,
-        STRLEN(str(?exactMatch)) - STRLEN(REPLACE(str(?exactMatch), "^.*/", "")) - 1
+        STRLEN(str(?exact_Match)) - STRLEN(REPLACE(str(?exact_Match), "^.*/", "")) - 1
       ) AS ?baseUri
     )
 
@@ -30,19 +30,19 @@ WHERE {
     BIND(0 AS ?broadCount)
     BIND(0 AS ?narrowCount)
     BIND(0 AS ?relatedCount)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # Query voor skos:closeMatch
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
-                 skos:closeMatch ?closeMatch .
+                 skos:closeMatch ?close_Match .
 
     BIND (
       SUBSTR(
-        str(?closeMatch),
+        str(?close_Match),
         1,
-        STRLEN(str(?closeMatch)) - STRLEN(REPLACE(str(?closeMatch), "^.*/", "")) - 1
+        STRLEN(str(?close_Match)) - STRLEN(REPLACE(str(?close_Match), "^.*/", "")) - 1
       ) AS ?baseUri
     )
 
@@ -51,19 +51,19 @@ WHERE {
     BIND(0 AS ?broadCount)
     BIND(0 AS ?narrowCount)
     BIND(0 AS ?relatedCount)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # Query voor skos:broadMatch
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
-                 skos:broadMatch ?broadMatch .
+                 skos:broadMatch ?broad_Match .
 
     BIND (
       SUBSTR(
-        str(?broadMatch),
+        str(?broad_Match),
         1,
-        STRLEN(str(?broadMatch)) - STRLEN(REPLACE(str(?broadMatch), "^.*/", "")) - 1
+        STRLEN(str(?broad_Match)) - STRLEN(REPLACE(str(?broad_Match), "^.*/", "")) - 1
       ) AS ?baseUri
     )
 
@@ -72,19 +72,19 @@ WHERE {
     BIND(1 AS ?broadCount)
     BIND(0 AS ?narrowCount)
     BIND(0 AS ?relatedCount)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # Query voor skos:narrowMatch
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
-                 skos:narrowMatch ?narrowMatch .
+                 skos:narrowMatch ?narrow_Match .
 
     BIND (
       SUBSTR(
-        str(?narrowMatch),
+        str(?narrow_Match),
         1,
-        STRLEN(str(?narrowMatch)) - STRLEN(REPLACE(str(?narrowMatch), "^.*/", "")) - 1
+        STRLEN(str(?narrow_Match)) - STRLEN(REPLACE(str(?narrow_Match), "^.*/", "")) - 1
       ) AS ?baseUri
     )
 
@@ -93,19 +93,19 @@ WHERE {
     BIND(0 AS ?broadCount)
     BIND(1 AS ?narrowCount)
     BIND(0 AS ?relatedCount)
-  }
+  } }
   UNION
-  {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     # Query voor skos:relatedMatch
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
-                 skos:relatedMatch ?relatedMatch .
+                 skos:relatedMatch ?related_Match .
 
     BIND (
       SUBSTR(
-        str(?relatedMatch),
+        str(?related_Match),
         1,
-        STRLEN(str(?relatedMatch)) - STRLEN(REPLACE(str(?relatedMatch), "^.*/", "")) - 1
+        STRLEN(str(?related_Match)) - STRLEN(REPLACE(str(?related_Match), "^.*/", "")) - 1
       ) AS ?baseUri
     )
 
@@ -114,6 +114,6 @@ WHERE {
     BIND(0 AS ?broadCount)
     BIND(0 AS ?narrowCount)
     BIND(1 AS ?relatedCount)
-  }
+  } }
 }
 GROUP BY ?baseUri
