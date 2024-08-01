@@ -5,7 +5,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?validityYear (COUNT(?artefactUri) AS ?aantal)
+SELECT ?validityYear (COUNT(DISTINCT?artefactUri) AS ?aantal)
 WHERE {
   { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
@@ -14,7 +14,7 @@ WHERE {
     FILTER (LANG(?artefact) = "nl")
     
     # Filter voor 2012
-    FILTER (?validityDate >= "2012-01-01"^^xsd:date && ?validityDate < "2013-01-01"^^xsd:date)
+    FILTER (?validityDate >= "2012-01-01"^^xsd:date && ?validityDate < "2012-12-31"^^xsd:date)
     BIND("2012" AS ?validityYear)
   } }
   UNION
@@ -25,7 +25,7 @@ WHERE {
     FILTER (LANG(?artefact) = "nl")
     
     # Filter voor 2014
-    FILTER (?validityDate >= "2014-01-01"^^xsd:date && ?validityDate < "2015-01-01"^^xsd:date)
+    FILTER (?validityDate >= "2014-01-01"^^xsd:date && ?validityDate < "2014-12-31"^^xsd:date)
     BIND("2014" AS ?validityYear)
   } }
   UNION
@@ -36,7 +36,7 @@ WHERE {
     FILTER (LANG(?artefact) = "nl")
     
     # Filter voor 2015
-    FILTER (?validityDate >= "2015-06-19"^^xsd:date && ?validityDate < "2015-06-20"^^xsd:date)
+    FILTER (?validityDate >= "2015-01-01"^^xsd:date && ?validityDate < "2015-12-31"^^xsd:date)
     BIND("2015" AS ?validityYear)
   } }
   UNION
@@ -47,7 +47,7 @@ WHERE {
     FILTER (LANG(?artefact) = "nl")
     
     # Filter voor 2020
-    FILTER (?validityDate >= "2020-11-20"^^xsd:date && ?validityDate < "2020-11-21"^^xsd:date)
+    FILTER (?validityDate >= "2020-01-01"^^xsd:date && ?validityDate < "2020-12-31"^^xsd:date)
     BIND("2020" AS ?validityYear)
   } }
   UNION
@@ -58,7 +58,7 @@ WHERE {
     FILTER (LANG(?artefact) = "nl")
     
     # Filter voor 2024
-    FILTER (?validityDate >= "2024-07-11"^^xsd:date && ?validityDate < "2024-07-12"^^xsd:date)
+    FILTER (?validityDate >= "2024-01-01"^^xsd:date && ?validityDate < "2024-12-31"^^xsd:date)
     BIND("2024" AS ?validityYear)
   } }
 }

@@ -1,0 +1,130 @@
+#+ name: Query-29-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
+  
+  # 1. Aantal artefacten totaal
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("1. Aantal artefacten totaal" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact . 
+              MINUS { ?artefactUri rnce:hasConceptStatus <https://data.cultureelerfgoed.nl/term/id/abr/d9995dd3-9198-4229-8700-65330be1cbfd> }. 
+  FILTER (LANG(?artefact) = "nl")
+
+    }
+  }
+  UNION
+  # 2. Aantal vervallen artefacten
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("2. Aantal vervallen artefacten" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:hasConceptStatus/ skos:prefLabel "vervallen"@nl .
+  FILTER (LANG(?artefact) = "nl")
+    }
+  }
+  UNION
+  # 3. Aantal nieuwe artefacten
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("3. Aantal nieuwe artefacten" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:beginningOfValidity ?beginValidatiedatum . MINUS { ?artefactUri rnce:hasConceptStatus <https://data.cultureelerfgoed.nl/term/id/abr/d9995dd3-9198-4229-8700-65330be1cbfd> }.
+  
+  FILTER (LANG(?artefact) = "nl") .
+  FILTER (?beginValidatiedatum = "2024-07-11"^^xsd:date)
+    }
+  }
+  UNION
+  # 4. Aantal oude artefacten met opvolgend artefact
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("4. Aantal oude artefacten met opvolgend artefact" AS ?category)  
+  <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:hasSuccessorAbr/skos:prefLabel ?hasSuccessor . 
+  FILTER (LANG(?artefact) = "nl")
+    }
+  } 
+  UNION
+  # 5. Aantal artefacten met scopeNote
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("5. Aantal artefacten met scopeNote" AS ?category)
+       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ;
+             skos:scopeNote ?scopeNote . MINUS { ?artefactUri rnce:hasConceptStatus <https://data.cultureelerfgoed.nl/term/id/abr/d9995dd3-9198-4229-8700-65330be1cbfd> }.
+  FILTER (LANG(?artefact) = "nl")
+    }
+  }
+  UNION
+  # 6. Aantal matches met andere thesauri
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("6. Aantal matches met andere thesauri" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+      ?artefactUri skos:prefLabel ?artefact ;
+                   skos:exactMatch|skos:closeMatch|skos:broadMatch|skos:narrowMatch|skos:relatedMatch ?match .
+      FILTER (LANG(?artefact) = "nl")
+      
+    }
+  }
+  UNION
+  # 7. Aantal artefacten met Abrcode
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("7. Aantal artefacten met Abrcode" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:codeAbr ?Abrcode  .
+  FILTER (LANG(?artefact) = "nl")
+    }
+  }
+  UNION
+  # 8. Aantal artefacten met PANcode
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("8. Aantal artefacten met PANcode" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ; 
+               rnce:codePAN ?PANcode  .
+  FILTER (LANG(?artefact) = "nl")
+    }
+  }
+  UNION
+  # 9. Aantal artefacten met periode
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("9. Aantal artefacten met periode" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ;  rnce:hasBeginPeriodAbr/skos:prefLabel ?beginperiode ; rnce:hasEndPeriodAbr/skos:prefLabel ?eindperiode 
+  FILTER (LANG(?artefact) = "nl")
+}
+               }
+UNION
+  # 10. Aantal artefacten met Deventer vormcode
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("10. Aantal artefacten met Deventer vormcode" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ;
+   rnce:hasDeventerObjectCode ?Deventervormcode .
+  FILTER (LANG(?artefact) = "nl") }}
+ UNION
+  # 11. Aantal artefacten met Deventer bakselcode
+  {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+      BIND("11. Aantal artefacten met Deventer bakselcode" AS ?category)
+      <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
+  ?artefactUri skos:prefLabel ?artefact ;
+   rnce:hasDeventerWareCode ?Deventerbakselcode .
+  FILTER (LANG(?artefact) = "nl") }}
+}
+GROUP BY ?category
