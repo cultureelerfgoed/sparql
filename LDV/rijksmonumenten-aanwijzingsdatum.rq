@@ -29,4 +29,3 @@ where {
   }
 }
 group by ?datumInschrijving ?woonplaatsnaam ?provincie ?rijksmonumentnummer
-order by ?datumInschrijving
