@@ -12,24 +12,33 @@ prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
 prefix owms: <http://standaarden.overheid.nl/owms/terms/>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-select distinct ?cho ?gemeentenaam ?postcode ?cbscode ?kadastraleGemeentecode ?kadastraleGemeenteUri ?perceel ?sectie where {
+select distinct ?cho ?straatnaam ?huisnummer ?postcode ?gemeente ?kadastraleGemeentecode ?kadastraleGemeenteUri ?gemeentenaam ?perceel ?sectie where {
   graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument .
     ?cho ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864.
     ?cho ceo:rijksmonumentnummer ?rm.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
-    OPTIONAL {?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.}
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.
+    }
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:openbareRuimte ?straatnaam.
+    }
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:huisnummer ?huisnummer.
+    }
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
     ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentecode ?kadastraleGemeentecode.
-    BIND(CONCAT("https://brk.basisregistraties.overheid.nl/brk2/id/kadastraleGemeente/", ?kadastraleGemeentecode) AS ?kadastraleGemeenteUri)
+    bind(concat("https://brk.basisregistraties.overheid.nl/brk2/id/kadastraleGemeente/", ?kadastraleGemeentecode) as ?kadastraleGemeenteUri)
     optional{
-      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente .}
-    GRAPH graph:owms {
-     ?gemeente owms:CBSCode ?cbscode.
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente_ .
     }
-    BIND (xsd:integer(?perceel) AS ?integerPerceel)
+    graph graph:owms {
+      ?gemeente_ skos:prefLabel ?gemeente.
     }
   }
-limit 100
+}
+limit 20

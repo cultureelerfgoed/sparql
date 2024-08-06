@@ -8,7 +8,7 @@ prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix brk: <https://brk.basisregistraties.overheid.nl/brk2/def/>
 prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
 
-select ?kad ?aanduiding ?perceelnummer ?sectie ?gemeente ?oppervlakte ?shape
+select ?kad ?aanduiding ?perceelnummer ?sectie ?gemeente ?oppervlakte
 where {
   service <https://api.labs.kadaster.nl/datasets/brk/dkk/services/default/sparql> {
     ?kad a brk:KadastraleAanduiding ;
@@ -19,7 +19,7 @@ where {
     ?perceel a brk:PerceelRegistratie .
     ?perceel skos:prefLabel ?aanduiding.
     ?perceel brk:kadastraleGrootte ?oppervlakte .
-    ?perceel brk:begrenzing_wgs84 ?shape.
+ #   ?perceel brk:begrenzing_wgs84 ?shape.
 }
   }
 limit 1000
