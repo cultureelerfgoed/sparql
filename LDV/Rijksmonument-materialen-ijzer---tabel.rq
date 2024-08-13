@@ -17,8 +17,8 @@ where {
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
-    bind(replace(?omschrijving_, "\n", " ") as ?omschrijving)
-    
+    bind(replace(replace(?omschrijving_, "\r", ""), "\n", "") as ?omschrijving)
+
     bind(if(regex(?omschrijving, "\\b(ijzer)\\b", "i"), "ijzer", "") as ?matchLabel1)
     bind(if(regex(?omschrijving, "staal", "i"), "staal", "") as ?matchLabel2)
     bind(if(regex(?omschrijving, "stalen", "i"), "stalen", "") as ?matchLabel3)
@@ -72,14 +72,15 @@ where {
       }
     }
     bind(concat(
-      if(bound(?functie1), concat("", ?functie1), ""), 
-      if(bound(?functie2), concat(" | ", ?functie2), ""), 
+      if(bound(?functie1), concat("", ?functie1), ""),
+      if(bound(?functie2), concat(" | ", ?functie2), ""),
       if(bound(?functie3), concat(" | ", ?functie3), "")
     ) as ?categorieenfunctie)
   }
   ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
   graph graph:owms {
-    ?prov skos:prefLabel ?provincie.}
+    ?prov skos:prefLabel ?provincie.
+  }
 
 }
 group by ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie ?categorieenfunctie
