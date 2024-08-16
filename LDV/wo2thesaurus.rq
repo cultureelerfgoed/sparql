@@ -1,0 +1,71 @@
+#+ name: wo2thesaurus
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/IvaDimitrova/cho-development/services/cho-development-1/sparql
+
+#! cache: false
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix text: <http://jena.apache.org/text#>
+
+
+# construct {
+#   ?uri a skos:Concept ;
+#        skos:prefLabel ?prefLabel ;
+#        skos:altLabel ?altLabel ;
+#        skos:hiddenLabel ?hiddenLabel ;
+#        skos:scopeNote ?scopeNote ;
+#        skos:broader ?broader_uri ;
+#        skos:narrower ?narrower_uri ;
+#        skos:exactMatch ?exactMatch_uri .
+#   ?broader_uri skos:prefLabel ?broader_prefLabel .
+#   ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+# }
+select *
+where {
+  # ?uri ?predicate ?label.
+
+
+  (?uri ?score) text:query (?predicate ?query).
+  ?uri a skos:Concept;
+       skos:prefLabel ?label.
+
+  values ?predicate {
+  skos:prefLabel skos:altLabel
+}
+  # Exclude terms from the 'Technische Lijsten', a concept scheme with terms that should only be used by NOB
+  filter not exists {
+    ?uri skos:inScheme <https://data.niod.nl/WO2_Thesaurus/11183>
+  }
+  filter(lang(?label) = "nl")
+  # filter(contains(lcase(?label), lcase(?query)))
+
+  optional {
+    ?uri skos:prefLabel ?prefLabel .
+    filter(lang(?prefLabel) = "nl" )
+  }
+  optional {
+    ?uri skos:scopeNote ?scopeNote .
+    filter(lang(?scopeNote) = "nl")
+  }
+  optional {
+    ?uri skos:altLabel ?altLabel .
+    filter(lang(?altLabel) = "nl")
+  }
+  optional {
+    ?uri skos:hiddenLabel ?hiddenLabel .
+    filter(lang(?hiddenLabel) = "nl")
+  }
+  optional {
+    ?uri skos:broader ?broader_uri .
+    ?broader_uri skos:prefLabel ?broader_prefLabel .
+    filter(lang(?broader_prefLabel) = "nl")
+  }
+  optional {
+    ?uri skos:narrower ?narrower_uri .
+    ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+    filter(lang(?narrower_prefLabel) = "nl")
+  }
+  optional {
+    ?uri skos:exactMatch ?exactMatch_uri . # Has no labels.
+  }
+}
+limit 1000
