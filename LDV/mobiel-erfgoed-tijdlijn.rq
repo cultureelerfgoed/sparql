@@ -1,0 +1,18 @@
+#+ name: mobiel-erfgoed-tijdlijn
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix dct: <http://purl.org/dc/terms/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix crm: <http://www.cidoc-crm.org/cidoc-crm/>
+
+select distinct * where {
+  service <https://api.data.netwerkdigitaalerfgoed.nl/datasets/MCN/Mobiele-Collectie-Nederland-crm/sparql> {
+    ?s skos:prefLabel ?eventLabel ;
+      crm:P62i_is_depicted_by/crm:P65i_is_shown_by ?eventMedia;
+       crm:P16_was_used_for/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?eventDate .
+  }
+} 
+LIMIT 10
