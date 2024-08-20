@@ -9,21 +9,26 @@ prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix crm: <http://www.cidoc-crm.org/cidoc-crm/>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-select distinct * where {
+select distinct ?beginYear ?endYear ?eventDateBegin ?eventDateEnd ?eventLabel ?eventMedia ?widgetImageLink  ?formattedYearsDifference
+?s ?techniek ?yearsDifference (SAMPLE(?typeVoertuig) AS ?filterTypeVoertuig)
+where {
   service <https://api.data.netwerkdigitaalerfgoed.nl/datasets/MCN/Mobiele-Collectie-Nederland-crm/sparql> {
-    ?s skos:prefLabel ?eventLabel ;
-       crm:P62i_is_depicted_by/crm:P65i_is_shown_by ?eventMedia;
-       (crm:P16_was_used_for/crm:P4_has_time-span/crm:P82a_begin_of_the_begin) ?eventDateBegin;
-       (crm:P16_was_used_for/crm:P4_has_time-span/crm:P82b_end_of_the_end) ?eventDateEnd;
-       crm:P16_was_used_for/crm:P32_used_general_technique/crm:P1_is_identified_by ?techniek .
+    ?s skos:prefLabel ?eventLabel .
+    OPTIONAL{?s crm:P62i_is_depicted_by/crm:P65i_is_shown_by ?eventMedia. }
+    OPTIONAL{?s (crm:P16_was_used_for/crm:P4_has_time-span/crm:P82a_begin_of_the_begin) ?eventDateBegin.}
+    OPTIONAL{?s (crm:P16_was_used_for/crm:P4_has_time-span/crm:P82b_end_of_the_end) ?eventDateEnd.}
+    OPTIONAL{?s crm:P16_was_used_for/crm:P32_used_general_technique/crm:P1_is_identified_by ?techniek .}
+    OPTIONAL{?s crm:P16_was_used_for/crm:P2_has_type/crm:P1_is_identified_by ?typeVoertuig .}
     bind(xsd:integer(?eventDateBegin) as ?beginYear)
     bind(xsd:integer(?eventDateEnd) as ?endYear)
     bind(?endYear - ?beginYear as ?yearsDifference)
+
+    bind(?eventMedia AS ?widgetImageLink )
 
   }
 
   filter(?yearsDifference <1000)
   bind(if(?yearsDifference > 1, concat(?eventDateBegin," - ",?eventDateEnd,"; ", str(?yearsDifference), " jaren operationele dienst"),concat(str(?yearsDifference), " jaar operationele dienst")) as ?formattedYearsDifference)
 }
-
+group by ?beginYear ?endYear ?eventDateBegin ?eventDateEnd ?eventLabel ?eventLabel ?eventMedia ?widgetImageLink  ?formattedYearsDifference ?s ?techniek ?yearsDifference
 order by ?beginYear
