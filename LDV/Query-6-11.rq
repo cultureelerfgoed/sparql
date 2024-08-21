@@ -1,0 +1,21 @@
+#+ name: Query-6-11
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?datumInschrijving (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?gemeente ?provincie ?monumentaard
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?cho ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+    ?cho ceo:heeftBasisregistratieRelatie ?brr.
+    filter not exists {
+      ?brr ceo:heeftBRKRelatie ?brk.
+    }
+  }
+}

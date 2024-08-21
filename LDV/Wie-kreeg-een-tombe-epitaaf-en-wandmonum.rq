@@ -1,5 +1,5 @@
 #+ name: Wie-kreeg-een-tombe-epitaaf-en-wandmonum
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
 
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
@@ -12,16 +12,14 @@ PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
 PREFIX wgs84:<http://www.w3.org/2003/01/geo/wgs84_pos#>
 PREFIX geo:<http://www.opengis.net/ont/geosparql#>
-PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
 PREFIX schema:<https://schema.org/>
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
 SELECT DISTINCT ?beroepEnRang ?graftype (COUNT(?graftype) AS ?aantal)
 
 WHERE {
-  ?grafmonument ceox:typologie ?grafsoort .
-  ?grafmonument ceox:IsTerNagedachtenisVan/ceox:beroepEnRang ?status .
+  ?grafmonument ceox:heeftGrafmonumentType/rdfs:label ?grafsoort .
+  ?grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol/ceox:heeftActor/ceox:heeftStatus/rdfs:label ?status .
   
   BIND(IF(REGEX(?status, "^(koning|adel|graaf|gravin|baron|baronesse|prins|prinses|hertog|jonkheer)$","i"), "adel", 
       IF(REGEX(?status, "^(bisschop|heilige|predikant|pastoor|kerkstichter|kerkbouwheer|abdis|kannunik|rijksgraaf|kerkmeester)$|^(en Ouderling der kerk van Leeuwarden)\\s$","i"), "geestelijke",

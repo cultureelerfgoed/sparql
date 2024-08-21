@@ -1,13 +1,12 @@
 #+ name: Totaal-aantal-graven-per-graftype
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
 
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-
-#SELECT DISTINCT ?grafsoort (COUNT(DISTINCT ?grafmonument) AS ?aantal) ?graftype 
 SELECT DISTINCT ?graftype  (COUNT(DISTINCT ?grafmonument) AS ?totaal) 
 WHERE {
-  ?grafmonument ceox:typologie ?grafsoort .
+  ?grafmonument ceox:heeftGrafmonumentType/rdfs:label ?grafsoort .
   
     
   BIND(IF(REGEX(?grafsoort, "^(Epitaaf/Wandmonument|Wandmonument, epitaaf|Epitaaf, wandmonument|Wandmonument, epitaaf)"), "Epitaaf, Wandmonument", 

@@ -1,19 +1,20 @@
 #+ name: Epitaal-Tombe-en-Wandmonumenten-over-de-
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
 
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 
 SELECT ?periode (COUNT(?grafsoort) AS ?perTypologieAantal) ?grafsoort
 
 WHERE { 
   OPTIONAL{
-   ?grafmonument ceox:typologie ?grafsoort ;
-                 ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:datering ?jaar .}
+   ?grafmonument ceox:heeftGrafmonumentType/rdfs:label ?grafsoort ;
+                 ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:heeftBeginDatering ?jaar .}
   
-BIND(IF(REGEX(?jaar, "-"), STRAFTER(?jaar, "-"), IF(REGEX(?jaar, "^ca. "), STRAFTER(?jaar, " "), ?jaar)) AS ?jaarEind)
-  BIND(xsd:integer(?jaarEind) AS ?jaarSchatting)
+
+  BIND(xsd:integer(?jaar) AS ?jaarSchatting)
   
 BIND(IF(?jaarSchatting < 1200, "voor 1200",
        IF(?jaarSchatting >= 1200 && ?jaarSchatting < 1500, "1200 - 1500", 
@@ -21,7 +22,7 @@ BIND(IF(?jaarSchatting < 1200, "voor 1200",
           IF(?jaarSchatting >= 1800, "na 1800",
             ?jaarSchatting)))) AS ?periode)
 
-  FILTER(?grafsoort = "Epitaaf" || ?grafsoort = "Tombe" || ?grafsoort = "Wandmonument")
+  FILTER(?grafsoort = "epitaaf" || ?grafsoort = "tombe" || ?grafsoort = "wandmonument")
  
   } 
 GROUP BY ?periode ?grafsoort

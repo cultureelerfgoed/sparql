@@ -7,17 +7,75 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix schema: <https://schema.org/>
 prefix foaf: <http://xmlns.com/foaf/0.1/>
 
-select distinct ?eventMedia ?eventLabel ?eventStart
+select distinct ?grafmonumentID ?bijgezetteNaam ?ontwerperNaam ?opdrachtgeverNaam
+?beschrijvingGrafmonument ?grafmonument  (coalesce(?afbeeldingGrafmonument, ?media) AS ?images) ?grafmonumentNr 
+
+
+where{
+  {
+
+select distinct ?grafmonumentID ?grafmonument (max(?rolBijgezette) as ?bijgezette) (max(?rolOntwerper) as ?ontwerper)
+  (max(?rolVervaardiger) as ?vervaardiger) 
+  (max(?naamVervaardiger) AS ?vervaardigerNaam)
+  (max(?naamBijgezette) AS ?bijgezetteNaam)
+  (max(?naamOpdrachtgever) AS ?opdrachtgeverNaam)
+  (max(?naamOntwerper) AS ?ontwerperNaam)
+  (max(?eventMedia) AS ?media)
+(max(?afbGrafmonument) AS ?afbeeldingGrafmonument)
+    (max(?beschrijving) AS ?omschrijving)
+    (max(?heeftHekwerk) AS ?hekwerk)
+    (max(?eventStart) AS ?vervaardigingsJaar)
+    (max(?huidigePlaatsing) AS ?plaatsing)
+
+
 where {
   ?grafmonument a ceox:Grafmonument;
-                ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:heeftBeginDatering ?eventStart .
+                ceox:grafmonumentID ?grafmonumentID .
+  optional{
+    ?grafmonument rdfs:comment ?beschrijving .
+  }
+    optional{
+    ?grafmonument schema:image ?afbGrafmonument .
+  }
+  optional{
+    ?grafmonument ceox:heeftGrafmonumentType/rdfs:label ?grafmonumentType .
+  }
+  optional{
+    ?grafmonument ceox:heeftHekwerk ?heeftHekwerk .
+  }
+    optional{
+    ?grafmonument ceox:heeftHuidigePlaatsing ?huidigePlaatsing .
+  }
+  optional{
+    ?grafmonument ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:heeftBeginDatering ?eventStart .
+  }
+  optional{
+    ?grafmonument ceox:heeftMateriaal ?materiaal .
+  }
 
   ?grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol ?actorEnRol .
-  ?actorEnRol ceox:heeftRol/rdfs:label ?rol ;
-              ceox:heeftActor/ceox:heeftNaam ?eventLabel ;
-              ceox:heeftActor/foaf:depiction ?eventMedia .
-  filter(?rol = 'bijgezette')
+  ?actorEnRol ceox:heeftRol/rdfs:label ?rol .
+  ?actorEnRol ceox:heeftActor/ceox:heeftNaam ?eventLabel .
+  OPTIONAL{?actorEnRol ceox:heeftActor/foaf:depiction ?eventMedia .}
+
+  bind(if(str(?rol) = "bijgezette", ?rol, '') as ?rolBijgezette)
+  bind(if(str(?rol) = "vervaardiger" || ?rol = 'Vervaardiger', ?rol, '') as ?rolVervaardiger)
+  bind(if(str(?rol) = 'ontwerper', ?rol, '') as ?rolOntwerper)
+  bind(if(str(?rol) = 'opdrachtgever', ?rol, '') as ?rolOpdrachtgever)
+
+  bind(if(?rol = ?rolOntwerper, ?eventLabel, '') AS ?naamOntwerper)
+  bind(if(?rol = ?rolBijgezette, ?eventLabel, '') AS ?naamBijgezette)
+  bind(if(?rol = ?rolVervaardiger, ?eventLabel, '') AS ?naamVervaardiger)
+  bind(if(?rol = ?rolOpdrachtgever, ?eventLabel, '') AS ?naamOpdrachtgever)
+  
+
 
 
 }
-
+group by ?grafmonumentID ?grafmonument 
+  }
+  Bind(concat('Start vervaardiging: ', str(?vervaardigingsJaar), ' | ' , str(?omschrijving), " | Bijgezette: ", str(?bijgezetteNaam), " | ", "Vervaardiger: ", str(?vervaardigerNaam), " | ", "Opdrachtgever(s): ", str(?opdrachtgeverNaam)) as ?beschrijvingGrafmonument)
+bind(concat(str(?grafmonumentID)) AS ?grafmonumentNr)
+}
+order by ?grafmonumentID
+limit 10
