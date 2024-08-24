@@ -1,5 +1,5 @@
 #+ name: Materiaal-en-typologie
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
 
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

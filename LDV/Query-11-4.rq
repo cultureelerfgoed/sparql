@@ -1,0 +1,33 @@
+#+ name: Query-11-4
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?class ceo:aantalInstanties ?aantalInstantiesPerClass .
+  ?property ceo:aantalInstanties ?aantalInstantiesPerProperty .
+}
+WHERE {
+  {
+    SELECT ?class (COUNT(?instantie) AS ?aantalInstantiesPerClass)
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?instantie a/rdfs:subClassOf* ?class.
+      }
+    }
+    GROUP BY ?class
+  }
+  UNION
+  {
+    SELECT ?property (COUNT(*) AS ?aantalInstantiesPerProperty)
+    WHERE {
+      GRAPH graph:instanties-rce {
+        [] ?property [].
+      }
+    }
+    GROUP BY ?property
+  }
+}
+ORDER BY COALESCE(?class, ?property)
