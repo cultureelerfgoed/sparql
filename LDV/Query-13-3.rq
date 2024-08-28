@@ -1,0 +1,35 @@
+#+ name: Query-13-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select DISTINCT (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?gemeentel ?provinciel ?gemeentenaam ?locatieomschrijving ?monumentaard
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:gemeentenaam ?gemeentenaam.
+    ?cho ceo:heeftBasisregistratieRelatie ?brr.
+    optional {
+      ?cho ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatieomschrijving.
+    }
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente.
+    }
+    optional {
+      ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie.
+    }
+    filter not exists {
+      ?brr ceo:heeftBAGRelatie ?bag.
+    }
+  }
+  graph graph:owms {
+    ?gemeente skos:prefLabel ?gemeentel.
+    ?provincie skos:prefLabel ?provinciel.
+  }
+}
+ORDER BY ?gemeentel ?monumentenregister ?monumentaard

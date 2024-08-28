@@ -7,19 +7,19 @@ prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix text: <http://jena.apache.org/text#>
 
 
-# construct {
-#   ?uri a skos:Concept ;
-#        skos:prefLabel ?prefLabel ;
-#        skos:altLabel ?altLabel ;
-#        skos:hiddenLabel ?hiddenLabel ;
-#        skos:scopeNote ?scopeNote ;
-#        skos:broader ?broader_uri ;
-#        skos:narrower ?narrower_uri ;
-#        skos:exactMatch ?exactMatch_uri .
-#   ?broader_uri skos:prefLabel ?broader_prefLabel .
-#   ?narrower_uri skos:prefLabel ?narrower_prefLabel .
-# }
-select *
+construct {
+  ?uri a skos:Concept ;
+       skos:prefLabel ?prefLabel ;
+       skos:altLabel ?altLabel ;
+       skos:hiddenLabel ?hiddenLabel ;
+       skos:scopeNote ?scopeNote ;
+       skos:broader ?broader_uri ;
+       skos:narrower ?narrower_uri ;
+       skos:exactMatch ?exactMatch_uri .
+  ?broader_uri skos:prefLabel ?broader_prefLabel .
+  ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+}
+# select *
 where {
   # ?uri ?predicate ?label.
 
