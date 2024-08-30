@@ -1,0 +1,31 @@
+#+ name: RM-actor
+#+ description: De actoren bij een rijksmonument opvragen.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT ?rijksmonumentnummer ?actor ?actorLabel ?plaatsActor ?rol
+
+WHERE 
+{
+  GRAPH graph:instanties-rce {
+    MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+      ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+    }
+  graph graph:actorenrol {
+  ?actorenrol ceo:heeftActor ?actor.
+  ?actor rdfs:label ?actorLabel.
+  optional {?actor skos:exactMatch ?link.}
+  optional{?actor ceo:plaatsActor ?plaatsActor. }
+  ?actorenrol ceo:heeftRol/skos:prefLabel ?rol.
+}
+}

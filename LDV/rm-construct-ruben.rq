@@ -1,0 +1,82 @@
+#+ name: rm-construct-ruben
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix schema: <http://schema.org/>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+construct {
+  ?cho a schema:LandmarksOrHistoricalBuildings ;
+       schema:identifier ?rijksmonumentnummer ;
+       schema:name ?naam ;
+       schema:category ?monumentaard ;
+      # schema:address ?br ;
+       schema:additionalType ?functie ;
+       schema:description ?omschrijving ;
+         schema:sameAs ?monument_uri .
+
+
+#  ?br a schema:PostalAddress ;
+     ?cho      schema:streetAddress ?adres ;
+           schema:postalCode ?postcode ;
+           schema:addressLocality ?woonplaats ;
+           schema:AdministrativeArea ?gemeente ;
+               schema:addressRegion ?provincie .
+           
+}
+  where {
+    graph graph:instanties-rce {
+      ?cho a ceo:Rijksmonument.
+      ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+      ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+
+      bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_uri)
+
+
+      optional {
+        ?cho ceo:heeftNaam/ceo:naam ?naam.
+      }
+
+      ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br.
+        ?br ceo:volledigAdres ?adres.
+        ?br ceo:postcode ?postcode_.
+        ?br ceo:woonplaatsnaam ?woonplaats.
+        bind(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
+      }
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente_.
+      }
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie_.
+      }
+
+      optional {
+        ?cho ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functieNaam.
+        ?functieNaam skos:prefLabel ?functies .
+         bind(replace(?functies, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
+      }
+
+      optional {
+        ?cho ceo:heeftOmschrijving ?omschrijving_ .
+        ?omschrijving_ ceo:omschrijving ?omschrijving .
+        ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .
+      }
+    }
+
+    graph graph:owms {
+      optional {
+        ?gemeente_ skos:prefLabel ?gemeente.
+      }
+      optional {
+        ?provincie_ skos:prefLabel ?provincie.
+      }
+    }
+  }
+ # limit 10000

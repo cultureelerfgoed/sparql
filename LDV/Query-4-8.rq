@@ -1,0 +1,85 @@
+#+ name: Query-4-8
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/joop-van-der-heiden/ff/sparql
+
+PREFIX schema: <https://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+    ?newPersonUri a skos:Concept ;
+                  skos:prefLabel ?prefLabel ;
+                  skos:altLabel ?altLabel ;
+                  skos:scopeNote ?scopeNote ;
+                  skos:notation ?notation ;
+                  skos:example ?example ;
+                  skos:exactMatch ?exactMatch ;
+                  rdfs:seeAlso ?seeAlso .
+}
+WHERE {
+  # Zoek alle bestaande schema:Person entiteiten
+  ?personUri rdf:type schema:Person .
+
+  # Voor elke schema:Person entiteit, genereer een unieke URI
+  BIND(IRI(CONCAT("https://data.cultureelerfgoed.nl/term/rn/id/", STRUUID(),  STRAFTER(STR(?personUri), "#"))) AS ?newPersonUri)
+
+  # Map de naam naar skos:prefLabel
+  OPTIONAL {
+    ?personUri schema:name ?name .
+    ?personUri schema:birthDate ?birthDate .
+    ?personUri schema:deathDate ?deathDate .
+    BIND(
+      IF(BOUND(?birthDate) && BOUND(?deathDate),
+         CONCAT(?name, " (", STR(?birthDate), " - ", STR(?deathDate), ")"),
+         ?name
+      ) AS ?prefLabel
+    )
+  }
+
+  # Map schema:alternateName naar skos:altLabel
+  OPTIONAL {
+    ?personUri schema:alternateName ?altLabel .
+  }
+
+  # Map relevante velden naar skos:scopeNote
+  OPTIONAL {
+    ?personUri schema:birthDate ?birthDate .
+    ?personUri schema:birthPlace ?birthPlace .
+    ?personUri schema:deathDate ?deathDate .
+    ?personUri schema:deathPlace ?deathPlace .
+    ?personUri schema:description ?description .
+    ?personUri schema:gender ?gender .
+    ?personUri schema:nationality ?nationality .
+
+    BIND(
+      CONCAT(
+        IF(BOUND(?birthDate), CONCAT("Geboortedatum: ", STR(?birthDate), "; "), ""),
+        IF(BOUND(?birthPlace), CONCAT("Geboorteplaats: ", ?birthPlace, "; "), ""),
+        IF(BOUND(?deathDate), CONCAT("Sterfdatum: ", STR(?deathDate), "; "), ""),
+        IF(BOUND(?deathPlace), CONCAT("Sterfplaats: ", ?deathPlace, "; "), ""),
+        IF(BOUND(?gender), CONCAT("Geslacht: ", STRAFTER(STR(?gender), "https://schema.org/"), "; "), ""),
+        IF(BOUND(?nationality), CONCAT("Nationaliteit: ", ?nationality, "; "), ""),
+        IF(BOUND(?description), CONCAT("Omschrijving: ", ?description), "")
+      ) AS ?scopeNote
+    )
+  }
+
+  # Map schema:identifier naar skos:notation
+  OPTIONAL {
+    ?personUri schema:identifier ?notation .
+  }
+
+  # Map schema:additionalType naar skos:example
+  OPTIONAL {
+    ?personUri schema:additionalType ?example .
+  }
+
+  # Map schema:seeAlso en schema:url naar skos:exactMatch
+  OPTIONAL {
+    { ?personUri rdfs:seeAlso ?seeAlso . }
+    UNION
+    { ?personUri schema:url ?seeAlso . }
+  }
+}
+
+LIMIT 1
