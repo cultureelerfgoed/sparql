@@ -1,5 +1,5 @@
 #+ name: Query-12-5
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -8,11 +8,11 @@ SELECT ?classOrProperty ?aantal1 ?aantal2 (?aantal1 - ?aantal2 AS ?verschil)
 
 WHERE {
   # Haal het aantal instanties per class/property uit de eerste graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-08-23T12-11-37> {
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-08-27T08-46-51> {
     ?classOrProperty ceo:aantalInstanties ?aantal1 .
   }
   # Haal het aantal instanties per class/property uit de tweede graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-08-27T08-46-51> {
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-08-30T10-16-54> {
     ?classOrProperty ceo:aantalInstanties ?aantal2 . 
   }
 }

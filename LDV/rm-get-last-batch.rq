@@ -1,0 +1,89 @@
+#+ name: rm-get-last-batch
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix schema: <http://schema.org/>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+construct {
+  ?cho a schema:LandmarksOrHistoricalBuildings ;
+       schema:identifier ?rijksmonumentnummer ;
+       schema:name ?naam ;
+       schema:category ?monumentaard ;
+       schema:address ?br ;
+       schema:additionalType ?functie ;
+       schema:description ?omschrijving ;
+         schema:sameAs ?monument_uri .
+
+
+  ?br a schema:PostalAddress ;
+          schema:streetAddress ?adres ;
+           schema:postalCode ?postcode ;
+           schema:addressLocality ?woonplaats ;
+           schema:AdministrativeArea ?gemeente ;
+               schema:addressRegion ?provincie .
+           
+}
+  where {
+    graph graph:instanties-rce {
+      ?cho a ceo:Rijksmonument.
+      ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+     # FILTER regex(str(?rijksmonumentnummer),  "^[0-9]{1,4}$") # one through four digits (runs in one go)
+     # FILTER regex(str(?rijksmonumentnummer),  "^[0-9]{5}$") # five digits (runs in one go)
+    #  FILTER regex(str(?rijksmonumentnummer), "^3[0-9]{5}$") # six digits, first digit is a three (runs in one go)
+     # FILTER regex(str(?rijksmonumentnummer), "^4[0-9]{5}$") # six digits, first digit is a four (runs in one go)
+       FILTER regex(str(?rijksmonumentnummer), "^5[0123][0-9]{4}$") # six digits, first digit is a five, second digit 0, 1, 2, or 3 (numbers dont go higher than that) use with LIMIT 10000
+    # FILTER(REGEX(?rijksmonumentnummer, "510039"))
+      ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+
+      bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_uri)
+
+
+      optional {
+        ?cho ceo:heeftNaam/ceo:naam ?naam.
+      }
+
+      ?cho ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br.
+        ?br ceo:volledigAdres ?adres.
+        ?br ceo:postcode ?postcode_.
+        ?br ceo:woonplaatsnaam ?woonplaats.
+        bind(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
+      }
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gemeente_.
+      }
+
+      optional {
+        ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie_.
+      }
+
+      optional {
+        ?cho ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functieNaam.
+        ?functieNaam skos:prefLabel ?functies .
+         bind(replace(?functies, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
+      }
+
+      optional {
+        ?cho ceo:heeftOmschrijving ?omschrijving_ .
+        ?omschrijving_ ceo:omschrijving ?omschrijving .
+        ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .
+      }
+    }
+
+    graph graph:owms {
+      optional {
+        ?gemeente_ skos:prefLabel ?gemeente.
+      }
+      optional {
+        ?provincie_ skos:prefLabel ?provincie.
+      }
+    }
+  }
+#  OFFSET 50000
+limit 10000

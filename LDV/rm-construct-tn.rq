@@ -1,0 +1,60 @@
+#+ name: rm-construct-tn
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceosp: <https://linkeddata.cultureelerfgoed.nl/def/ceosp/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix schema: <https://schema.org/>
+
+CONSTRUCT {
+
+    ?monument_uri a schema:LandmarksOrHistoricalBuildings ;
+       schema:name ?naam ;
+       schema:identifier ?rijksmonumentnummer ;
+       schema:category ?monumentaard ;
+       schema:address ?adres ;
+       schema:additionalType ?functie ;
+       schema:addressLocality ?woonplaats ;           
+       schema:description ?omschrijving_label ;
+       schema:sameAs ?monument_url .
+} 
+  
+  
+  WHERE {
+    
+    ?monument_uri a ceo:Rijksmonument .
+    ?monument_uri ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?monument_uri ceo:heeftMonumentAard/skos:prefLabel ?monumentaard.
+    
+    FILTER regex(str(?rijksmonumentnummer),  "^[0-9]{1,4}$") # one through four digits (runs in one go)
+     # FILTER regex(str(?rijksmonumentnummer),  "^[0-9]{5}$") # five digits (runs in one go)
+    #  FILTER regex(str(?rijksmonumentnummer), "^3[0-9]{5}$") # six digits, first digit is a three (runs in one go)
+     # FILTER regex(str(?rijksmonumentnummer), "^4[0-9]{5}$") # six digits, first digit is a four (runs in one go)
+     #  FILTER regex(str(?rijksmonumentnummer), "^5[0123][0-9]{4}$") # six digits, first digit is a five, second digit 0, 1, 2, or 3 (numbers dont go higher than that) use with LIMIT 10000
+    # FILTER(REGEX(?rijksmonumentnummer, "510039"))
+    
+    OPTIONAL { ?monument_uri ceo:heeftNaam/ceo:naam ?naam } .
+    OPTIONAL { ?monument_uri ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie }
+    OPTIONAL { ?monument_uri ceo:heeftOmschrijving ?omschrijving_ .
+      ?omschrijving_ ceo:omschrijving ?omschrijving_label .
+    ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .}
+    OPTIONAL { ?monument_uri ceo:isOnderdeelVanComplex/ceo:heeftHoofdobject/ceo:rijksmonumentnummer ?rijksmonumentnummer_hoofdobject }
+    
+    
+ bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_url)
+
+ optional {
+        ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br.
+        ?br ceo:volledigAdres ?adres.
+       # ?br ceo:postcode ?postcode_.
+        ?br ceo:woonplaatsnaam ?woonplaats.
+       # bind(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
+      }
+      
+    
+  }
+ # OFFSET 50000
+ # LIMIT 50000
