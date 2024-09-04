@@ -1,0 +1,29 @@
+#+ name: RM-adres
+#+ description: Adres opvragen van een rijksmonument
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT ?rijksmonumentnummer ?status ?naam ?adres ?provincie ?woonplaatsnaam ?postcode ?functie ?datumInschrijving 
+
+WHERE 
+{
+  GRAPH graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    OPTIONAL {?rijksmonument ceo:heeftJuridischeStatus ?juridischeStatus. ?juridischeStatus skos:prefLabel ?status .}
+    OPTIONAL {?rijksmonument ceo:heeftNaam/ceo:naam ?naam.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.}
+    OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.}
+    OPTIONAL {?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
+    ?functienaam skos:prefLabel ?functie .}
+    OPTIONAL {?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.}
+}
+}
