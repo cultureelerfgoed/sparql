@@ -1,0 +1,76 @@
+#+ name: Query-1
+#+ description: substitute filter(contains) with text indexing
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/IvaDimitrova/cho-development/services/cho-development/sparql
+
+#! cache: false
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix text: <http://jena.apache.org/text#>
+
+
+construct {
+  ?uri a skos:Concept ;
+       skos:prefLabel ?prefLabel ;
+       skos:altLabel ?altLabel ;
+       skos:hiddenLabel ?hiddenLabel ;
+       skos:scopeNote ?scopeNote ;
+       skos:broader ?broader_uri ;
+       skos:narrower ?narrower_uri ;
+       skos:related ?related_uri ;
+       skos:exactMatch ?exactMatch_uri .
+  ?broader_uri skos:prefLabel ?broader_prefLabel .
+  ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+  ?related_uri skos:prefLabel ?related_prefLabel .
+  ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel .
+}
+  where {
+
+    ?uri text:query (?predicate ?query).
+    ?uri a skos:Concept;
+         skos:prefLabel ?label.
+
+    values ?predicate {
+    skos:prefLabel skos:altLabel
+  }
+    optional {
+      ?uri skos:prefLabel ?prefLabel .
+      filter(lang(?prefLabel) = "nl")
+    }
+    optional {
+      ?uri skos:altLabel ?altLabel .
+      filter(lang(?altLabel) = "nl")
+    }
+    optional {
+      ?uri skos:hiddenLabel ?hiddenLabel .
+      filter(lang(?hiddenLabel) = "nl")
+    }
+    optional {
+      ?uri skos:scopeNote ?scopeNote .
+      filter(lang(?scopeNote) = "nl")
+    }
+    optional {
+      ?uri skos:broader ?broader_uri .
+      ?broader_uri skos:prefLabel ?broader_prefLabel .
+      filter(lang(?broader_prefLabel) = "nl")
+    }
+    optional {
+      ?uri skos:narrower ?narrower_uri .
+      ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+      filter(lang(?narrower_prefLabel) = "nl")
+    }
+    optional {
+      ?uri skos:related ?related_uri .
+      ?related_uri skos:prefLabel ?related_prefLabel .
+      filter(lang(?related_prefLabel) = "nl")
+    }
+    optional {
+      ?uri skos:exactMatch ?exactMatch_uri .
+      filter(!strstarts(str(?exactMatch_uri), "https://data.cultureelerfgoed.nl/term/id/rn"))
+      filter(!strstarts(str(?exactMatch_uri), "https://data.cultureelerfgoed.nl/semnet"))
+      optional {
+        ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel .
+        filter(lang(?exactMatch_prefLabel) = "nl")
+      }
+    }
+  }
+  limit 5
