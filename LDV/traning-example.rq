@@ -1,0 +1,36 @@
+#+ name: traning-example
+#+ description: Use Case Problem: Look up a Term in the CHT Thesaurus Dataset
+#- 
+#- Problem Description:
+#- The goal is to search for a specific term within the CHT (Cultural Heritage Terminology) thesaurus dataset, an RDF dataset containing cultural heritage concepts. Each term is categorized with metadata, including relationships like broader/narrower terms.
+#- 
+#- Approach:
+#- 
+#- Dataset: The CHT dataset is preloaded in RDF format, organized with terms and their relationships (broader, narrower, related, etc.).
+#- 
+#- User Input: The user provides a term (e.g., "kompas"), and the system searches for matching concepts.
+#- 
+#- Search Criteria: The system retrieves entries where the term is an exact or partial match in the label or definition.
+#- 
+#- Additional Information: The query returns related data, such as broader/narrower terms and synonyms.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+
+#! cache: false
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix text: <http://jena.apache.org/text#>
+
+select * where
+{
+  ?uri text:query (?predicate ?query).
+  filter not exists {
+    ?uri skos:inScheme <https://data.niod.nl/WO2_Thesaurus/11183>
+  }
+
+  ?uri ?predicate ?label.
+  ?uri a skos:Concept.
+
+  values ?predicate {
+  skos:prefLabel skos:altLabel
+
+}
+}
