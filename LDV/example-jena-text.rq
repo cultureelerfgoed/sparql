@@ -1,0 +1,12 @@
+#+ name: example-jena-text
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+
+prefix  skos: <http://www.w3.org/2004/02/skos/core#>
+prefix text: <http://jena.apache.org/text#>
+select *
+where {
+  ?s text:query (skos:prefLabel 'kompas') ;
+     a skos:Concept ;
+     skos:prefLabel ?lbl.
+}
+LIMIT 3

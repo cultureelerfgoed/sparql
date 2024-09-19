@@ -1,0 +1,14 @@
+#+ name: radboud-random-dataset
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/ruben-schalk/datacite-radboud/services/datacite-radboud/sparql
+
+PREFIX schema: <http://schema.org/>
+SELECT DISTINCT ?p ?o WHERE {
+  {
+    SELECT ?randomDataset WHERE {
+      ?randomDataset a schema:Dataset .
+    }
+    ORDER BY RAND()
+    LIMIT 1
+  }
+  ?randomDataset ?p ?o .
+}
