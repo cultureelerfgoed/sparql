@@ -1,7 +1,10 @@
-#+ name: cht-original
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/IvaDimitrova/cho-development/services/cho-development-1/sparql
+#+ name: Query-1-20
+#+ description: substitute filter(contains) with text indexing
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/IvaDimitrova/cho-development/services/cho-development/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix text: <http://jena.apache.org/text#>
+
 
 construct {
   ?uri a skos:Concept ;
@@ -19,12 +22,14 @@ construct {
   ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel .
 }
   where {
-    ?uri ?predicate ?label .
+
+    ?uri text:query (?predicate ?query).
+    ?uri a skos:Concept;
+         skos:prefLabel ?label.
+
     values ?predicate {
     skos:prefLabel skos:altLabel
   }
-    filter(lang(?label) = "nl")
-    filter(contains(lcase(?label), lcase(?query)))
     optional {
       ?uri skos:prefLabel ?prefLabel .
       filter(lang(?prefLabel) = "nl")

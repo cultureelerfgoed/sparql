@@ -1,0 +1,10 @@
+#+ name: Exercise-5-score-and-literal-and-graph
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+
+prefix text: <http://jena.apache.org/text#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select *
+where {
+  (?s ?score ?literal ?g) text:query (skos:prefLabel 'kompas' 'lang:nl') .
+}

@@ -15,22 +15,16 @@
 #- Additional Information: The query returns related data, such as broader/narrower terms and synonyms.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
 
-#! cache: false
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix text: <http://jena.apache.org/text#>
 
 select * where
 {
-  ?uri text:query (?predicate ?query).
-  filter not exists {
-    ?uri skos:inScheme <https://data.niod.nl/WO2_Thesaurus/11183>
-  }
-
-  ?uri ?predicate ?label.
-  ?uri a skos:Concept.
+  ?uri text:query (?predicate ?query 'lang:nl').
+  ?uri a skos:Concept;
+       ?predicate ?label.
 
   values ?predicate {
   skos:prefLabel skos:altLabel
-
 }
-}
+} limit 5

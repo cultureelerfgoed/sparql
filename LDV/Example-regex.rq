@@ -1,0 +1,11 @@
+#+ name: Example-regex
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+select *
+where {
+  ?s a skos:Concept;
+     skos:prefLabel ?o.
+  filter(regex(?o, 'kompas', "i"))
+}
+

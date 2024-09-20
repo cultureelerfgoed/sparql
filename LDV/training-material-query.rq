@@ -1,4 +1,4 @@
-#+ name: training-wo2-query
+#+ name: training-material-query
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
@@ -7,12 +7,10 @@ prefix text: <http://jena.apache.org/text#>
 select * where
 {
   ?uri text:query (?predicate ?query).
-  filter not exists {
-    ?uri skos:inScheme <https://data.niod.nl/WO2_Thesaurus/11183>
-  }
-
   ?uri ?predicate ?label.
   ?uri a skos:Concept.
+  ?uri skos:broader+ <https://data.cultureelerfgoed.nl/term/id/cht/aa872ce6-a74c-4f81-96ec-6ee0e717f92a> .
+
 
   values ?predicate {
   skos:prefLabel skos:altLabel

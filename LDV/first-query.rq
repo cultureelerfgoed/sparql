@@ -1,0 +1,9 @@
+#+ name: first-query
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+
+prefix text: <http://jena.apache.org/text#>
+
+select *
+where {
+  ?s text:query 'kompas'.
+}
