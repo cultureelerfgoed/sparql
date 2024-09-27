@@ -6,6 +6,7 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix vbo: <https://data.kkg.kadaster.nl/id/verblijfsobject/>
 select distinct ?wkt ?wktColor ?wktLabel {
   ?rijksmonument
     a ceo:Rijksmonument;
@@ -13,7 +14,7 @@ select distinct ?wkt ?wktColor ?wktLabel {
     ceo:heeftGeometrie/geo:asWKT ?wkt;
     ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam.
   optional { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl. }
-  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
+  bind(iri(concat(str(vbo:),?vboId)) as ?vbo)
   service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
     ?vbo sor:maaktDeelUitVan/sor:oorspronkelijkBouwjaar ?bouwjaar.
   }

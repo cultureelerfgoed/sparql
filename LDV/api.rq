@@ -167,4 +167,4 @@ where {
   bind(strdt(str(?self),xsd:anyURI) as ?selfUri)
 
   bind(iri(concat(str(ceo:),'link_',?cultuurhistorischObjectnummer)) as ?link)
-}
+} limit 100
