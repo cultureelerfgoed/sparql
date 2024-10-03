@@ -39,7 +39,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
                rnce:beginningOfValidity ?beginValidatiedatum . MINUS { ?artefactUri rnce:hasConceptStatus <https://data.cultureelerfgoed.nl/term/id/abr/d9995dd3-9198-4229-8700-65330be1cbfd> }.
   
   FILTER (LANG(?artefact) = "nl") .
-  FILTER (?beginValidatiedatum = "2024-07-11"^^xsd:date)
+  FILTER (?beginValidatiedatum = "2024-07-01"^^xsd:date)
     }
   }
   UNION

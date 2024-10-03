@@ -11,7 +11,7 @@ WHERE {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ; 
                  rnce:beginningOfValidity ?beginValidatiedatum .
-    FILTER ( ?beginValidatiedatum = "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
+    FILTER ( ?beginValidatiedatum = "2024-07-01"^^xsd:date && LANG(?artefact) = "nl")
     BIND("nieuw" AS ?geldigheidArtefact) 
   } }
   UNION
@@ -20,7 +20,7 @@ WHERE {
     ?artefactUri skos:prefLabel ?artefact ; 
                  rnce:beginningOfValidity ?beginValidatiedatum .
     
-    FILTER ( ?beginValidatiedatum < "2024-07-11"^^xsd:date && LANG(?artefact) = "nl")
+    FILTER ( ?beginValidatiedatum < "2024-07-01"^^xsd:date && LANG(?artefact) = "nl")
     BIND("bestaand" AS ?geldigheidArtefact) 
   } }
 }
