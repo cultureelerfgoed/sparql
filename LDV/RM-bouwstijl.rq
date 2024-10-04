@@ -1,0 +1,28 @@
+#+ name: RM-bouwstijl
+#+ description: De bouwstijl(en) bij een rijksmonument opvragen.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+select ?rijksmonumentnummer ?bouwstijl ?bouwstijlLabel ?bouwstijlUri ?zuiverheid
+
+where
+{
+  graph graph:instanties-rce {
+    minus {
+      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>
+    }
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+    ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
+    ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
+    ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
+  }
+}

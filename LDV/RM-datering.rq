@@ -1,39 +1,36 @@
 #+ name: RM-datering
-#+ description: Rijksmonument datering
+#+ description: Datering van een Rijksmonument.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-SELECT ?rijksmonumentnummer ?naam ?woonplaatsnaam ?beginDatum ?eindDatum
-       (GROUP_CONCAT(DISTINCT ?adres; SEPARATOR=" ::: ") AS ?adressen)
+select ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid
 
-WHERE 
+where
 {
-  GRAPH graph:instanties-rce {
+  graph graph:instanties-rce {
     ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    MINUS { ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> }
-    OPTIONAL { ?rijksmonument ceo:heeftNaam/ceo:naam ?naam. }
-    OPTIONAL { ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres. }
-    OPTIONAL { ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam. }
-    OPTIONAL { 
-      ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-      ?gebeurtenis ceo:heeftDatering ?datering.
-      OPTIONAL {
-        ?datering ceo:heeftBeginDatering ?beginDatering.
-        ?beginDatering ceo:datum ?beginDatum.
-      }
-      OPTIONAL {
-        ?datering ceo:heeftEindDatering ?eindDatering.
-        ?eindDatering ceo:datum ?eindDatum.
-      }
+    minus {
+      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>
+    }
+    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+    ?gebeurtenis ceo:heeftDatering ?datering.
+    ?rijksmonument ceo:heeftGebeurtenis/ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+    optional { ?gebeurtenis ceo:heeftDatering/ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid. }
+    optional {
+      ?datering ceo:heeftBeginDatering ?beginDatering.
+      ?beginDatering ceo:datum ?beginDatum.
+    }
+    optional {
+      ?datering ceo:heeftEindDatering ?eindDatering.
+      ?eindDatering ceo:datum ?eindDatum.
     }
   }
 }
-GROUP BY ?rijksmonumentnummer ?naam ?woonplaatsnaam ?beginDatum ?eindDatum
-LIMIT 50
+limit 500
