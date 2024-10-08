@@ -74,7 +74,7 @@ where {
 }
 group by ?grafmonumentID ?grafmonument 
   }
-  Bind(concat('Start vervaardiging: ', str(?vervaardigingsJaar), ' | ' , str(?omschrijving), " | Bijgezette: ", str(?bijgezetteNaam), " | ", "Vervaardiger: ", str(?vervaardigerNaam), " | ", "Opdrachtgever(s): ", str(?opdrachtgeverNaam)) as ?beschrijvingGrafmonument)
+  Bind(concat('Start vervaardiging: ', str(?vervaardigingsJaar), ' | ' , str(?omschrijving), " | Bijgezet: ", str(?bijgezetteNaam), " | ", "Vervaardiger: ", str(?vervaardigerNaam), " | ", "Opdrachtgever(s): ", str(?opdrachtgeverNaam)) as ?beschrijvingGrafmonument)
 bind(concat(str(?grafmonumentID)) AS ?grafmonumentNr)
 }
 order by ?grafmonumentID

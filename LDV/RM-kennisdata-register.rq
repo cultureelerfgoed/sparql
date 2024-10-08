@@ -1,0 +1,68 @@
+#+ name: RM-kennisdata-register
+#+ description: Inhoudelijke data (kennis) in het rijksmonumentenregister: kopjes Bouwactiviteiten, Bouwstijlen, Ambachten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+select distinct ?rijksmonument ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid ?bouwstijl ?bouwstijlLabel ?bouwstijlUri ?zuiverheid ?actorLabel ?rol ?plaatsActor ?link
+where {
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    
+    # Uitsluiten van specifieke juridische status
+    minus {
+      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
+    }
+
+    # Gebeurtenissen en datering
+    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+    
+    # Datering en gebeurtenis details
+    optional {
+      ?gebeurtenis ceo:heeftDatering ?datering.
+      ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
+  
+      optional {
+        ?datering ceo:heeftBeginDatering ?beginDatering.
+        ?beginDatering ceo:datum ?beginDatum.
+      }
+  
+      optional {
+        ?datering ceo:heeftEindDatering ?eindDatering.
+        ?eindDatering ceo:datum ?eindDatum.
+      }
+    }
+
+    # Bouwstijl en cultuur
+    optional {
+      ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+      ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
+      ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
+      optional {
+        ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
+      }
+    }
+
+    # Actoren en rollen binnen dezelfde gebeurtenis
+    optional {
+      ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+                      graph graph:actorenrol {
+      ?actorenrol ceo:heeftActor ?actor.
+
+      ?actor rdfs:label ?actorLabel.
+
+      optional { ?actor skos:exactMatch ?link. }
+      optional { ?actor ceo:plaatsActor ?plaatsActor. }
+      optional { ?actorenrol ceo:heeftRol/skos:prefLabel ?rol. }}
+    }
+  }
+}
+limit 500

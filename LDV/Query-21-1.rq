@@ -1,0 +1,12 @@
+#+ name: Query-21-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+select * where {
+  GRAPH graph:instanties-rce {
+  ?s a ceo:Rijksmonument.
+  ?s ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  ?s ceo:heeftKennisregistratie/ceo:kennisregistratieToelichting ?toelichting
+} 
+  }
