@@ -1,6 +1,6 @@
 #+ name: Query-36
 #+ description: Deze query haalt informatie op over rijksmonumenten en de bijbehorende afbeeldingen van cultureel erfgoedobjecten, en creëert HTML-widgets met links naar de Beeldbank en het Monumentenregister voor weergave. Het resultaat is beperkt tot 100 rijen.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen/services/Afbeeldingen/sparql
 
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>

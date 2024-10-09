@@ -1,5 +1,5 @@
 #+ name: Query-1-11
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen/services/Afbeeldingen/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
