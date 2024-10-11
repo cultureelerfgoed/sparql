@@ -10,7 +10,7 @@ prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-select ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid
+select ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid ?toelichting
 
 where
 {
@@ -21,8 +21,9 @@ where
     }
     ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
     ?gebeurtenis ceo:heeftDatering ?datering.
-    ?rijksmonument ceo:heeftGebeurtenis/ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
     optional { ?gebeurtenis ceo:heeftDatering/ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid. }
+    optional { ?gebeurtenis ceo:kennisregistratieToelichting ?toelichting. }
     optional {
       ?datering ceo:heeftBeginDatering ?beginDatering.
       ?beginDatering ceo:datum ?beginDatum.
