@@ -11,7 +11,7 @@ prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-select distinct ?rijksmonument ?rijksmonumentnummer ?toelichting ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid ?bouwstijl ?bouwstijlLabel ?bouwstijlUri ?zuiverheid ?actorLabel ?rol ?plaatsActor ?link
+select distinct ?rijksmonument ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid ?bouwstijl ?bouwstijlLabel ?bouwstijlUri ?zuiverheid ?actorLabel ?rol ?plaatsActor ?link
 where {
   graph graph:instanties-rce {
     ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
@@ -20,9 +20,6 @@ where {
     minus {
       ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
     }
-
-    # Toelichting toevoegen indien aanwezig
-    optional {?rijksmonument ceo:heeftKennisregistratie/ceo:kennisregistratieToelichting ?toelichting. }
 
     # Gebeurtenissen en datering
     ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
@@ -68,3 +65,4 @@ where {
     }
   }
 }
+limit 500
