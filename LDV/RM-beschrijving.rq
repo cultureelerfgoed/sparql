@@ -1,7 +1,5 @@
 #+ name: RM-beschrijving
 #+ description: Rijksmonumenten met naam, adres, functie, beschrijving
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

@@ -1,7 +1,5 @@
 #+ name: Query-5-5
 #+ description: Voorbeeld voor Dian
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

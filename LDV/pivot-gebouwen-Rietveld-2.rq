@@ -1,7 +1,5 @@
 #+ name: pivot-gebouwen-Rietveld-2
 #+ description: Gallerij met aantal voorbeelden van gebouwen vervaardigd door Gerrit Th. Rietveld.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>

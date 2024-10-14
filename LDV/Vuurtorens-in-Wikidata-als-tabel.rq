@@ -1,7 +1,5 @@
 #+ name: Vuurtorens-in-Wikidata-als-tabel
 #+ description: Of als tabel
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

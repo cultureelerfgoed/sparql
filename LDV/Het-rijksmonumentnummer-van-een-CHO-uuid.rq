@@ -1,8 +1,6 @@
 #+ name: Het-rijksmonumentnummer-van-een-CHO-uuid
 #+ description: Query om bij een CHO objectnummer het rijksmonumentnummer te vinden. Maar ook om bij en rijksmonumentnummer een CHO objectnummer te zoeken.
 #- Een zogenaamd "Fransje".
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>

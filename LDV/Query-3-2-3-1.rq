@@ -1,7 +1,5 @@
 #+ name: Query-3-2-3-1
 #+ description: SELECT ?rmn ?plaatsnaam (GROUP_CONCAT(?eventLabel; SEPARATOR = ", ") AS ?eventLabels)
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX schema: <http://schema.org/>

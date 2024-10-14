@@ -1,7 +1,5 @@
 #+ name: Query-13
 #+ description: Wikidata toegevoegd aan LDV
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

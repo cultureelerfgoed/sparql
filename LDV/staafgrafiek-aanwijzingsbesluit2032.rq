@@ -1,6 +1,4 @@
 #+ name: staafgrafiek-aanwijzingsbesluit2032
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX schema: <https://schema.org/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>

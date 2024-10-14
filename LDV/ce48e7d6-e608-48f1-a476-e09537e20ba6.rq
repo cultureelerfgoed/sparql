@@ -1,7 +1,5 @@
 #+ name: ce48e7d6-e608-48f1-a476-e09537e20ba6
 #+ description: Zoeken op functie
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

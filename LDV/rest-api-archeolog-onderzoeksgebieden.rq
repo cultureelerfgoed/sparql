@@ -1,7 +1,5 @@
 #+ name: rest-api-archeolog-onderzoeksgebieden
 #+ description: REST API query for the path archeologische-onderzoeksgebieden.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {

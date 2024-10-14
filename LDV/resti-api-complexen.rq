@@ -10,8 +10,6 @@
 #- </p>
 #- Date: dd. 2024-03-05</br>
 #- Version: 1.0
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 # PREFIX Declarations: Define namespace prefixes for the query.
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
