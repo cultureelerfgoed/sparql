@@ -1,4 +1,6 @@
 #+ name: stinsrm-bb-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -1,5 +1,7 @@
 #+ name: Ophalen-van-de-Eerste-10-Triples
 #+ description: Deze eenvoudige SPARQL-query haalt de eerste 10 triples (bestaande uit een subject, predicaat en object) op van de endpoint `https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql`. De query is zeer algemeen en zal alle soorten triples matchen zonder specifieke beperkingen.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -1,4 +1,6 @@
 #+ name: Query-34-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

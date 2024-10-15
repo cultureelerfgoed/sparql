@@ -1,4 +1,6 @@
 #+ name: Query-3-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix bif: <http://www.openlinksw.com/schemas/bif#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>

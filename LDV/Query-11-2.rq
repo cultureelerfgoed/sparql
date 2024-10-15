@@ -1,4 +1,6 @@
 #+ name: Query-11-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>

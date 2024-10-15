@@ -1,5 +1,7 @@
 #+ name: rijksmonument-3d-1-1
 #+ description: De query begint met het selecteren van unieke ?cho,  geometrie en labels. Vervolgens wordt een subquery gebruikt om informatie te verzamelen over elk ?cho-object. Binnen deze subquery worden twee services gebruikt: één voor het Cultureel Erfgoed Object en één voor BAG-gerelateerde informatie. De informatie uit beide services wordt samengevoegd en geretourneerd als resultaat.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>

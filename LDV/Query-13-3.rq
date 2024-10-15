@@ -1,4 +1,6 @@
 #+ name: Query-13-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>

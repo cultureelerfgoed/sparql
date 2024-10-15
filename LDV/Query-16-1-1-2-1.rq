@@ -1,6 +1,8 @@
 #+ name: Query-16-1-1-2-1
 #+ description: Query waarbij in de gezocht wordt op functie "Winkels" en alles wat er onder hangt
 #- Dataset vs graph koppelen aan wikidata en kadaster pandIdentificatie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

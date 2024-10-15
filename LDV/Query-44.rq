@@ -1,4 +1,6 @@
 #+ name: Query-44
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 
 SELECT  ?s ?rm

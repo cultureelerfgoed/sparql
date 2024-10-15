@@ -13,6 +13,8 @@
 #- }
 #- group by ?CHO_X ?eigenschap ?CHO_Y
 #- order by ?eigenschap ?CHO_X ?CHO_Y
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 select ?CHO_X ?eigenschap ?CHO_Y (count(*) as ?aantal) {
   ?x a ?CHO_X.

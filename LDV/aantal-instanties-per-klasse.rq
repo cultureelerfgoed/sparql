@@ -1,5 +1,7 @@
 #+ name: aantal-instanties-per-klasse
 #+ description: Deze query berekent het aantal instanties per klasse, waarbij de duizendtallen worden weergegeven met een komma voor leesbaarheid. Het maakt gebruik van de prefixes ceo en rdfs om de namespaces te definiëren. De resultaten worden gegroepeerd per klasse en geordend op klasse.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>  # Definieert het prefix "ceo" voor de namespace URI.
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>  # Definieert het prefix "rdfs" voor de namespace URI.

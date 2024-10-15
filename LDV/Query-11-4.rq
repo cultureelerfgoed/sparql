@@ -1,4 +1,6 @@
 #+ name: Query-11-4
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

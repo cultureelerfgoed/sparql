@@ -1,5 +1,7 @@
 #+ name: Query-16-3-2
 #+ description: Monumenten zoeken binnen kader
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>

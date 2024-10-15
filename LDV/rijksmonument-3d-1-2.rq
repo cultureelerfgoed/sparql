@@ -1,4 +1,6 @@
 #+ name: rijksmonument-3d-1-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix bag:  <http://bag.basisregistraties.overheid.nl/def/bag#>
 prefix bgt:  <http://bgt.basisregistraties.overheid.nl/def/bgt#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
