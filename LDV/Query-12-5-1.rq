@@ -4,16 +4,16 @@
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?classOrProperty ?count20241015 ?count20241016 (?count20241015 - ?count20241016 AS ?verschil)
+SELECT ?classOrProperty ?count20241016 ?count20241017 (?count20241016 - ?count20241017 AS ?verschil)
 
 WHERE {
   # Haal het aantal instanties per class/property uit de eerste graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-15T16-11-41> {
-    ?classOrProperty ceo:aantalInstanties ?count20241015 .
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-16T08-46-53> {
+    ?classOrProperty ceo:aantalInstanties ?count20241016 .
   }
   # Haal het aantal instanties per class/property uit de tweede graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-16T08-46-53> 
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-17T09-16-15> 
  {
-    ?classOrProperty ceo:aantalInstanties ?count20241016 . 
+    ?classOrProperty ceo:aantalInstanties ?count20241017 . 
   }
 }
