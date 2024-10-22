@@ -1,19 +1,19 @@
 #+ name: Query-12-5-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?classOrProperty ?count20241016 ?count20241017 (?count20241016 - ?count20241017 AS ?verschil)
+select ?classOrProperty ?count20241017 ?count20241021 (?count20241017 - ?count20241021 as ?verschil)
 
-WHERE {
+where {
   # Haal het aantal instanties per class/property uit de eerste graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-16T08-46-53> {
-    ?classOrProperty ceo:aantalInstanties ?count20241016 .
+  graph <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-17T09-16-15> {
+    ?classOrProperty ceo:aantalInstanties ?count20241017 .
   }
   # Haal het aantal instanties per class/property uit de tweede graph
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-17T09-16-15> 
- {
-    ?classOrProperty ceo:aantalInstanties ?count20241017 . 
+  graph <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce/count2024-10-21T15-48-35>
+  {
+    ?classOrProperty ceo:aantalInstanties ?count20241021 .
   }
 }
