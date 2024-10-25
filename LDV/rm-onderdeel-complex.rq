@@ -1,0 +1,42 @@
+#+ name: rm-onderdeel-complex
+#+ description: Enkel opvragen van welk complex het onderdeel is
+#- 
+#- - 531019 Complex
+#- - 531015 Hoofdobject Complex
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+# Definieer prefixen
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix units: <https://eulersharp.sourceforge.net/2003/03swap/units#>
+prefix uom: <http://www.opengis.net/def/uom/OGC/1.0/>
+
+# Selecteer de gewenste variabelen
+select ?rijksmonument ?rijksmonumentnummer ?complex ?complexnummer  ?type
+
+where {
+  # Specificeer de grafiek waarin gezocht wordt
+  graph graph:instanties-rce {
+    # Definieer een rijksmonument en zijn eigenschappen
+    ?rijksmonument a ceo:Rijksmonument ;
+                   ceo:rijksmonumentnummer ?rijksmonumentnummer  .
+
+    # Optioneel blok voor hoofdobject
+    optional {
+      ?complex ceo:heeftHoofdobject ?rijksmonument ;
+               ceo:complexnummer ?complexnummer .
+      bind("Hoofdobject" as ?type)
+    }
+
+    # Optioneel blok voor complex met rijksmonument
+    optional {
+      ?complex ceo:heeftRijksmonument ?rijksmonument ;
+               ceo:complexnummer ?complexnummer .
+      bind("Rijksmonument" as ?type)
+    }
+}
+}
+limit 50
