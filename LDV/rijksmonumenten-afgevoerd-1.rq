@@ -1,0 +1,66 @@
+#+ name: rijksmonumenten-afgevoerd-1
+#+ description: Data over afgevoerde rijksmonumenten.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select distinct  ?geometrie (group_concat(?functie; separator="; ") as ?functies)
+
+  (strdt(concat(
+    '<h2><a href="',?afgevoerd_rijksmonument,'">','</a></h2>',
+    '<h3>',?rijksmonumentnummer ,'</h3>',
+    '<h3>',?naam,'</h3>',
+    '<dl>',
+    '<dt>Datum inschrijving</dt><dd>',?datumInschrijving,' </dd>',
+    '<dt>Datum afgevoerd</dt><dd>',?afgevoerd,'</dd>',
+    '<dt>Woonplaats</dt><dd>',?woonplaats,'</dd>',
+    '<dt>',if(strlen(?omschrijving)>250, concat('<dt>Omschrijving</dt><dd>',substr(str(?omschrijving),1,150),'</dd>'),''),
+    '<dt>Functies</dt><dd>',?functies,'</dd>',
+    '</dl>'),rdf:HTML) as ?geometrieLabel)
+
+
+
+
+where
+{
+  graph graph:instanties-rce {
+    ?afgevoerd_rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
+    ?afgevoerd_rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+
+    optional {
+      ?afgevoerd_rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    }
+    optional {
+      ?afgevoerd_rijksmonument ceo:registratiedatum ?afgevoerd.
+    }
+    optional {
+      ?afgevoerd_rijksmonument ceo:heeftGeometrie/geo:asWKT ?geometrie
+    }
+
+    optional {
+      ?afgevoerd_rijksmonument ceo:heeftNaam/ceo:naam ?naam.
+    }
+    optional {
+      ?afgevoerd_rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaats.
+    }
+    optional {
+      ?afgevoerd_rijksmonument ceo:heeftOmschrijving ?omschrijving_ .
+      ?omschrijving_ ceo:omschrijving ?omschrijving ;
+                     ceo:formeelStandpunt "1"^^xsd:boolean.
+    }
+    optional {
+      ?afgevoerd_rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
+      ?functienaam skos:prefLabel ?functie_ .
+      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+    }
+  }
+}
+group by ?afgevoerd_rijksmonument ?rijksmonumentnummer ?datumInschrijving ?functies ?afgevoerd ?naam ?woonplaats ?omschrijving ?geometrie ?geometrieLabel
