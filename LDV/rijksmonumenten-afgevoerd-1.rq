@@ -22,9 +22,12 @@ select distinct  ?geometrie (group_concat(?functie; separator="; ") as ?functies
     '<dt>Datum inschrijving</dt><dd>',?datumInschrijving,' </dd>',
     '<dt>Datum afgevoerd</dt><dd>',?afgevoerd,'</dd>',
     '<dt>Woonplaats</dt><dd>',?woonplaats,'</dd>',
-    '<dt>',if(strlen(?omschrijving)>250, concat('<dt>Omschrijving</dt><dd>',substr(str(?omschrijving),1,150),'</dd>'),''),
+   # '<dt>',if(strlen(?omschrijving)>250, concat('<dt>Omschrijving</dt><dd>',substr(str(?omschrijving),1,150),'</dd>'),''),
+   # '<dt>',if(strlen(?omschrijving)>250, concat('<dt><dd>',substr(str(?omschrijving),1,150),'</dd>'),''),
     '<dt>Functies</dt><dd>',?functies,'</dd>',
-    '</dl>'),rdf:HTML) as ?geometrieLabel)
+    '</dl>',
+    '<div>', if(strlen(?omschrijving)>250, substr(str(?omschrijving), 1, 250), ?omschrijving), '</div>'
+), rdf:HTML) as ?geometrieLabel)
 
 
 
