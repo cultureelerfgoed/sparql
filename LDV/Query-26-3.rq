@@ -1,0 +1,23 @@
+#+ name: Query-26-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+SELECT ?class ?graph (COUNT(?s) AS ?tripleCount)
+WHERE {
+  {
+    GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce-old> {
+      ?s a ?class .
+      FILTER(STRSTARTS(STR(?class), "https://linkeddata.cultureelerfgoed.nl/def/ceo#"))
+    }
+    BIND("instanties-rce-old" AS ?graph)
+  }
+  UNION
+  {
+    GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {
+      ?s a ?class .
+      FILTER(STRSTARTS(STR(?class), "https://linkeddata.cultureelerfgoed.nl/def/ceo#"))
+    }
+    BIND("instanties-rce" AS ?graph)
+  }
+}
+GROUP BY ?class ?graph
+ORDER BY ?graph DESC(?tripleCount)

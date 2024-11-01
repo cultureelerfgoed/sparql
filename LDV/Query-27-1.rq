@@ -1,0 +1,289 @@
+#+ name: Query-27-1
+#+ description: Test om de CEO archeologie om te zetten naar schema.org
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX schema: <http://schema.org/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+# Construct CEO Archeo naar schema.org
+CONSTRUCT {
+  # Archeologisch complex
+  ?archeo_complex a ceo:ArcheologischComplex ;
+                  rdfs:subClassOf schema:Thing ;
+                  schema:identifier ?choi_ac ;
+                  schema:additionalType ?type_ac ;
+                  schema:containedInPlace ?ligtIn_ac ;
+                  schema:event ?gebeurtenis_ac .
+  ?gebeurtenis_ac a schema:Event ;
+                  schema:name "gebeurtenis"@nl ;
+                  schema:identifier ?gebeurtenisnaam_ac ;
+                  schema:temporalCoverage ?datering_ac .
+  ?datering_ac schema:name "datering"@nl ;
+               schema:temporalCoverage ?begindatering_ac ;
+               schema:temporalCoverage ?einddatering_ac .
+  ?begindatering_ac schema:name "begin datering"@nl ;
+                    schema:identifier ?periode_ac .
+  ?einddatering_ac schema:name "eind datering"@nl ;
+                   schema:identifier ?periode_ac .
+  ?type_ac schema:name "type object"@nl ;
+           schema:identifier ?typenaam_ac .
+                 
+  # Vondstlocatie            
+  ?vondstlocatie a ceo:Vondstlocatie ;
+                 rdfs:subClassOf schema:Thing ;
+                 schema:identifier ?choi_vl ;
+                 schema:additionalType ?verwerving_vl ;
+                 schema:additionalType ?bagrelatie_vl ;
+                 schema:containedInPlace ?ligtIn_vl ;
+                 schema:containsPlace ?bevatobject_vl .
+  ?bagrelatie_vl schema:name "basisregistratie adressen en gebouwen"@nl ;
+                 schema:location ?woonplaatsnaam_vl .
+
+  # Archeologisch terrein
+  ?archeo_terrein a ceo:ArcheologischTerrein ;
+                  rdfs:subClassOf schema:Thing ;
+                  schema:identifier ?choi_at ;
+                  schema:additionalType ?archeo_waardering_at, ?locatieaanduiding_at, ?bagrelatie_at ;
+                  schema:containsPlace ?bevatobject_at ;
+                  schema:containedInPlace ?ligtIn_at .                      
+  ?bagrelatie_at schema:name "basisregistratie adressen en gebouwen"@nl ;
+                 schema:location ?woonplaatsnaam_at .
+  ?locatieaanduiding_at schema:name "locatieaanduiding"@nl ;
+                        schema:location ?locatienaam_at .
+
+  # Archeologisch onderzoeksgebied
+  ?archeo_onderzoeksgebied a ceo:ArcheologischOnderzoeksgebied ;
+                           rdfs:subClassOf schema:Thing ;
+                           schema:identifier ?choi_ao ;
+                           schema:additionalType ?bagrelatie_ao, ?vertrouwelijkheid_ao ;
+                           schema:geo ?geo_ao .
+  ?bagrelatie_ao schema:name "basisregistratie adressen en gebouwen"@nl ;
+                 schema:location ?woonplaatsnaam_ao .
+  ?geo_ao a schema:Place ;
+            schema:name "geometrie"@nl ; 
+            schema:polygon ?wkt, ?wktrd .
+  
+  # Vondsten
+  ?vondsten a ceo:Vondsten ;
+            rdfs:subClassOf schema:Thing ;
+            schema:identifier ?choi_v ;
+            schema:quantity ?quantity_v ;
+            schema:event ?gebeurtenis_v ;
+            schema:material ?materiaal_v ;
+            schema:isPartOf ?ligtIn_v ;
+            schema:additionalType ?type_v, ?heeftomschrijving_v .
+  ?quantity_v a schema:QuantitativeValue ;
+            schema:value ?aantalVondsten ;
+            schema:unitText "aantal vondsten"@nl . 
+  ?heeftomschrijving_v schema:name "omschrijving"@nl ;
+                      schema:identifier ?omschrijvingstype_v ;
+                      schema:description ?omschrijving_v .
+  ?gebeurtenis_v  a schema:Event ;
+                  schema:name "gebeurtenis"@nl ;
+                  schema:identifier ?gebeurtenisnaam_v ;
+                  schema:temporalCoverage ?datering_v .
+  ?datering_v schema:name "datering"@nl ;
+            schema:temporalCoverage ?begindatering_v ;
+            schema:temporalCoverage ?einddatering_v .
+  ?begindatering_v schema:name "begin datering"@nl ;
+                   schema:identifier ?periode_v .
+  ?einddatering_v schema:name "eind datering"@nl ;
+                  schema:identifier ?periode_v .  
+  ?type_v schema:name "type object"@nl ;
+          schema:identifier ?typenaam_v .
+  ?materiaal_v schema:name "materiaal"@nl ;
+          schema:identifier ?materiaalnaam_v .
+
+  # Grondsporen
+  ?grondsporen a ceo:Grondsporen ;
+               rdfs:subClassOf schema:Thing ;
+               schema:identifier ?choi_g ;
+               schema:quantity ?quantity_g ;
+               schema:event ?gebeurtenis_g ;
+               schema:additionalType ?heeftomschrijving_g, ?type_g, ?vertrouwelijkheid_g ;
+               schema:isPartOf ?ligtIn_g .
+  ?quantity_g a schema:QuantitativeValue ;
+            schema:value ?aantalGrondsporen ;
+            schema:unitText "aantal grondsporen"@nl . 
+  ?gebeurtenis_g a schema:Event ;
+                 schema:name "gebeurtenis"@nl ;
+                 schema:identifier ?gebeurtenisnaam_g ;
+                 schema:temporalCoverage ?datering_g .
+  ?datering_g schema:name "datering"@nl ;
+            schema:temporalCoverage ?begindatering_g ;
+            schema:temporalCoverage ?einddatering_g .
+  ?begindatering_g schema:name "begin datering"@nl ;
+                   schema:identifier ?periode_g .
+  ?einddatering_g schema:name "eind datering"@nl ;
+                  schema:identifier ?periode_g .
+  ?heeftomschrijving_g schema:name "omschrijving"@nl ;
+                       schema:identifier ?omschrijvingstype_g ;
+                       schema:description ?omschrijving_g .
+  ?type_g schema:name "type object"@nl ;
+          schema:identifier ?typenaam_g ;
+          schema:category ?typekenmerk_g .
+
+}
+
+WHERE {
+  # Archeologisch Complex
+  ?archeo_complex a ceo:ArcheologischComplex ;
+                  ceo:cultuurhistorischObjectnummer ?choi_ac .
+  
+  OPTIONAL {
+    ?archeo_complex ceo:heeftType ?type_ac .
+    OPTIONAL { ?type_ac ceo:heeftTypeNaam ?typenaam_ac }
+  }
+  
+  OPTIONAL { ?archeo_complex ceo:ligtInObject ?ligtIn_ac }
+  
+  OPTIONAL {
+    ?archeo_complex ceo:heeftGebeurtenis ?gebeurtenis_ac .
+    OPTIONAL {
+      ?gebeurtenis_ac ceo:heeftGebeurtenisNaam ?gebeurtenisnaam_ac ;
+                      ceo:heeftDatering ?datering_ac .
+      OPTIONAL {
+        ?datering_ac ceo:heeftBeginDatering ?begindatering_ac ;
+                     ceo:heeftEindDatering ?einddatering_ac .
+        OPTIONAL { ?begindatering_ac ceo:heeftPeriode ?periode_ac }
+        OPTIONAL { ?einddatering_ac ceo:heeftPeriode ?periode_ac }
+      }
+    }
+  }
+
+  # Vondstlocatie
+  ?vondstlocatie a ceo:Vondstlocatie ;
+                 ceo:cultuurhistorischObjectnummer ?choi_vl .
+
+  OPTIONAL { ?vondstlocatie ceo:heeftVerwerving ?verwerving_vl }
+  
+  OPTIONAL {
+    ?vondstlocatie ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie_vl .
+    OPTIONAL { ?bagrelatie_vl ceo:woonplaatsnaam ?woonplaatsnaam_vl }
+  }
+  
+  OPTIONAL { ?vondstlocatie ceo:ligtInObject ?ligtIn_vl }
+  OPTIONAL { ?vondstlocatie ceo:bevatObject ?bevatobject_vl }
+
+  # Archeologisch Terrein
+  ?archeo_terrein a ceo:ArcheologischTerrein ;
+                  ceo:cultuurhistorischObjectnummer ?choi_at .
+  
+  OPTIONAL { ?archeo_terrein ceo:heeftArcheologischeWaardering ?archeo_waardering_at }
+  
+  OPTIONAL {
+    ?archeo_terrein ceo:heeftLocatieAanduiding ?locatieaanduiding_at .
+    OPTIONAL { ?locatieaanduiding_at ceo:locatienaam ?locatienaam_at }
+  }
+  
+  OPTIONAL {
+    ?archeo_terrein ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie_at .
+    OPTIONAL { ?bagrelatie_at ceo:woonplaatsnaam ?woonplaatsnaam_at }
+  }
+  
+  OPTIONAL { ?archeo_terrein ceo:bevatObject ?bevatobject_at }
+  OPTIONAL { ?archeo_terrein ceo:ligtInObject ?ligtIn_at }
+
+  # Archeologisch Onderzoeksgebied
+  ?archeo_onderzoeksgebied a ceo:ArcheologischOnderzoeksgebied ;
+                           ceo:cultuurhistorischObjectnummer ?choi_ao .
+  
+  OPTIONAL {
+    ?archeo_onderzoeksgebied ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie_ao .
+    OPTIONAL { ?bagrelatie_ao ceo:woonplaatsnaam ?woonplaatsnaam_ao }
+  }
+  
+  OPTIONAL { ?archeo_onderzoeksgebied ceo:heeftVertrouwelijkAanduiding ?vertrouwelijkheid_ao }
+  
+  OPTIONAL {
+    ?archeo_onderzoeksgebied ceo:heeftGeometrie ?geo_ao .
+    OPTIONAL { 
+      ?geo_ao geo:asWKT ?wkt ;
+              ceo:asWKT-RD ?wktrd 
+    }
+  }
+
+  # Vondsten
+  ?vondsten a ceo:Vondsten ;
+            ceo:cultuurhistorischObjectnummer ?choi_v .
+  BIND(UUID() AS ?uuid_v) 
+BIND(IRI(CONCAT("https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/vondstaantal/", REPLACE(STR(?uuid_v), "urn:uuid:", ""))) AS ?quantity_v)
+
+  ?vondsten  ceo:aantalVondsten ?aantalVondsten .
+  
+  OPTIONAL { 
+    ?vondsten ceo:heeftMateriaal ?materiaal_v .
+    OPTIONAL { ?materiaal_v ceo:heeftMateriaalNaam ?materiaalnaam_v } 
+  }
+  
+  OPTIONAL {
+    ?vondsten ceo:heeftType ?type_v .
+    OPTIONAL { ?type_v ceo:heeftTypeNaam ?typenaam_v }
+  }
+  
+  OPTIONAL {
+    ?vondsten ceo:heeftOmschrijving ?heeftomschrijving_v .
+    OPTIONAL { 
+      ?heeftomschrijving_v ceo:heeftOmschrijvingType ?omschrijvingstype_v ;
+                           ceo:heeftOmschrijving ?omschrijving_v 
+    }
+  }
+  
+  OPTIONAL {
+    ?vondsten ceo:heeftGebeurtenis ?gebeurtenis_v .
+    OPTIONAL {
+      ?gebeurtenis_v ceo:heeftGebeurtenisNaam ?gebeurtenisnaam_v ;
+                     ceo:heeftDatering ?datering_v .
+      OPTIONAL {
+        ?datering_v ceo:heeftBeginDatering ?begindatering_v ;
+                    ceo:heeftEindDatering ?einddatering_v .
+        OPTIONAL { ?begindatering_v ceo:heeftPeriode ?periode_v } 
+        OPTIONAL { ?einddatering_v ceo:heeftPeriode ?periode_v }
+        OPTIONAL { ?vondsten ceo:ligtInObject ?ligtIn_v }
+      }
+    }
+  }
+
+  # Grondsporen
+  ?grondsporen a ceo:Grondsporen ;
+  BIND(UUID() AS ?uuid_g) 
+  BIND(IRI(CONCAT("https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/grondspooraantal/", REPLACE(STR(?uuid_g), "urn:uuid:", ""))) AS ?quantity_g)
+
+  OPTIONAL { ?grondsporen ceo:aantalGrondsporen ?aantalGrondsporen }
+  
+  OPTIONAL {
+    ?grondsporen ceo:heeftGebeurtenis ?gebeurtenis_g .
+    OPTIONAL {
+      ?gebeurtenis_g ceo:heeftDatering ?datering_g .
+      OPTIONAL {
+        ?datering_g ceo:heeftBeginDatering ?begindatering_g ;
+                    ceo:heeftEindDatering ?einddatering_g 
+      }
+    }
+  }
+
+  OPTIONAL {
+    ?grondsporen ceo:heeftOmschrijving ?heeftomschrijving_g .
+    OPTIONAL { 
+      ?heeftomschrijving_g ceo:heeftOmschrijvingType ?omschrijvingstype_g ;
+                           ceo:heeftOmschrijving ?omschrijving_g 
+    }
+  }
+  
+  OPTIONAL {
+    ?grondsporen ceo:heeftType ?type_g .
+    OPTIONAL { ?type_g ceo:heeftTypeNaam ?typenaam_g }
+    OPTIONAL { ?type_g ceo:heeftTypekenmerk ?typekenmerk_g }
+  }
+  
+  OPTIONAL { ?grondsporen ceo:heeftVertrouwelijkAanduiding ?vertrouwelijkheid_g }
+  OPTIONAL { ?grondsporen ceo:ligtInObject ?ligtIn_g }
+
+}
+LIMIT 10000
