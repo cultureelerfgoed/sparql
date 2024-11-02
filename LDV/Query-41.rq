@@ -1,11 +1,6 @@
 #+ name: Query-41
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/archeozoologische-ontologie---azo/sparql
 
-PREFIX rnce: <https://digitaalerfgoed-test.poolparty.biz/def/rnce/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT ?deventervormcode ?deventerbakselcode 
-WHERE {
-  <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri . 
-  ?artefactUri skos:prefLabel ?artefact ; rnce:hasDeventerObjectCode/skos:prefLabel ?deventerObjectCode .  bind(str(?deventerObjectCode) as ?deventervormcode) .}
+select * where {
+  ?s ?p ?o.
+} limit 10
