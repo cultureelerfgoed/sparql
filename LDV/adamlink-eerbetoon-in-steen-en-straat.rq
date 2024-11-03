@@ -1,0 +1,34 @@
+#+ name: adamlink-eerbetoon-in-steen-en-straat
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+#Adamlink attributen
+construct {
+    ?straatURI a schema:Place ;
+             schema:relatedLink ?adamlink ; 
+               rdfs:label ?wikiID .
+  ?adamlink schema:sameAS ?bagStraatURI .
+  ?bagStraatURI rdfs:label ?bagID .
+             
+            
+
+
+}
+
+  where
+  {
+    service<https://api.druid.datalegend.net/datasets/AdamNet/Heritage/services/Heritage/sparql>{
+      ?adamlink a <http://rdf.histograph.io/Street>;
+              owl:sameAs ?sameAs .
+      bind(strafter(str(?sameAs), "http://www.wikidata.org/entity/") as ?wikiID)
+      bind(if(contains(str(?sameAs), "wikidata"),?sameAs, "") as ?straatURI)
+       bind(if(contains(str(?sameAs), "basisregistraties"),?sameAs, "") as ?bagStraatURI)
+       bind(strafter(str(?sameAs), "http://bag.basisregistraties.overheid.nl/bag/id/openbare-ruimte/") as ?bagID)
+
+    }
+  }
+

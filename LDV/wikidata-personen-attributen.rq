@@ -1,0 +1,44 @@
+#+ name: wikidata-personen-attributen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+
+#Straten vernoemd naar een persoon
+construct {
+  ?straatURI a schema:Place ;
+             schema:honorificFor ?persoon .
+
+  ?persoon a schema:Person ;
+           schema:name ?persoonNaam ;
+           schema:geslacht ?geslachtLabel ;
+           schema:hasOccupation ?beroep .
+  ?beroep rdfs:label ?beroepLabel .
+
+}
+  where
+  {
+    service<https://query.wikidata.org/sparql>{
+
+      ?straatURI wdt:P31 wd:Q79007 ;
+                 wdt:P973 ?adamlink.
+      ?straatURI wdt:P138 ?persoon .
+      ?persoon wdt:P31 wd:Q5 ;
+               wdt:P21 ?geslacht ;
+               wdt:P106 ?beroep ;
+               rdfs:label ?persoonNaam .
+      ?geslacht rdfs:label ?geslachtLabel .
+
+
+      filter(lang(?persoonNaam) = 'en' )
+      filter(lang(?geslachtLabel) = 'nl')
+      ?beroep rdfs:label ?beroepLabel .
+      filter(lang(?beroepLabel) = 'nl')
+
+
+
+    }
+  }
+

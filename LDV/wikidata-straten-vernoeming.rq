@@ -1,0 +1,39 @@
+#+ name: wikidata-straten-vernoeming
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/bibliotheek/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+#Straten vernoemd naar een persoon
+construct {
+  ?straatURI a schema:Place ;
+             schema:name ?straatNaam ;
+             schema:relatedLink ?adamlink ;
+             geo:hasGeometry[ a geo:Geometry ;
+                                geo:asWKT ?coordinaten ];
+             schema:honorificFor ?persoon .
+
+  ?persoon a schema:Person ;
+           schema:name ?persoonNaam .
+}
+  where{
+    service<https://query.wikidata.org/sparql>{
+
+      ?wikidataURI wdt:P31 wd:Q79007 ;
+                   wdt:P973 ?adamlink;
+                   wdt:P625 ?coordinaten .
+      ?wikidataURI rdfs:label ?straatNaam .
+      filter(lang(?straatNaam) = 'nl')
+      ?wikidataURI (wdt:P138) ?persoon .
+      ?persoon wdt:P31 wd:Q5 ;
+               rdfs:label ?persoonNaam .
+
+      filter(lang(?persoonNaam) = 'en' )
+      filter(lang(?straatNaam) = 'nl')
+
+      bind(?wikidataURI as ?straatURI)
+    }
+  }

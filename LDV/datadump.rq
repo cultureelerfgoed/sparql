@@ -1,0 +1,55 @@
+#+ name: datadump
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+select ?geo ?geoLabel ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
+       ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel ?beroepURI ?beroepLabel
+where {
+  
+  {
+    select distinct ?geo 
+           ?wikiStraatURI ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
+           ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel (max(?beroepenURI) as ?beroepURI) (max(?beroepNaam) as ?beroepLabel)
+    where {
+      ?wikiStraatURI geo:hasGeometry ?x ;
+                     geo:hasGeometry/geo:asWKT ?geo;
+                     rdfs:label ?wikiStraatID;
+                     schema:name ?wikiStraatNaam;
+                     schema:honorificFor ?vernoemdNaarPersoonURI;
+                     schema:relatedLink ?adamlinkURI.
+
+      ### Persoon ###
+      ?vernoemdNaarPersoonURI schema:name ?vernoemdNaarPersoonNaam;
+                              schema:geslacht ?geslachtLabel;
+                              schema:hasOccupation ?beroepenURI.
+
+      ### beroep ###
+      ?beroepenURI rdfs:label ?beroepNaam.
+
+      ### bag/relatedlink ###
+      ?adamlinkURI schema:sameAS ?bagURI.
+      ?bagURI rdfs:label ?bagLabel.
+    }
+    group by ?geo ?wikiStraatURI ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
+             ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel 
+  }
+
+  bind(
+    concat(
+      "<ul>",
+      "<li>Straat naam: <a href='", ?adamlinkURI, "' target='_blank'>", str(?wikiStraatNaam), "</a></li>",
+      "<li>Vernoemd naar: <a href='", ?vernoemdNaarPersoonURI, "' target='_blank'>", str(?vernoemdNaarPersoonNaam), "</a></li>",
+      "<li>Hoofdberoep van beroemde persoon: <a href='", ?beroepURI, "' target='_blank'>", str(?beroepLabel), "</a></li>",
+      "<li>geslacht: ", ?geslachtLabel, "</li>",
+      "<li>Wikidata ID: <a href='", ?wikiStraatURI, "' target='_blank'>", str(?wikiStraatID), "</a></li>",
+      "<li>Bag ID : <a href='", ?bagURI, "' target='_blank'>", str(?bagLabel), "</a></li>",
+      "</ul>"
+    ) as ?htmlString
+  )
+ bind(strdt(?htmlString, rdf:HTML) as ?geoLabel)
+  
+}
