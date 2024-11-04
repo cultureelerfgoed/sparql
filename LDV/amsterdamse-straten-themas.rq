@@ -1,0 +1,27 @@
+#+ name: amsterdamse-straten-themas
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+
+select distinct ?beroepNaam ?vernoemdNaarPersoonURI ?geslachtLabel
+  #(COUNT(?vernoemdNaarPersoonURI) AS ?aantalPersonen) (count(?vrouw) as ?aantalVrouwen) (count(?man) as ?aantalMannen)
+where {
+  ?wikiStraatURI schema:honorificFor ?vernoemdNaarPersoonURI.
+
+  ### Persoon ###
+  ?vernoemdNaarPersoonURI schema:name ?vernoemdNaarPersoonNaam;
+                          schema:geslacht ?geslachtLabel;
+                          schema:hasOccupation ?beroepenURI.
+
+  Bind(if(contains(?geslachtLabel, 'vrouw'), ?geslachtLabel, "" ) as ?vrouw)
+   Bind(if(contains(?geslachtLabel, 'man'), ?geslachtLabel, "" ) as ?man)
+
+  ### beroep ###
+  ?beroepenURI rdfs:label ?beroepNaam.
+}
+# group by ?beroepNaam
+# order by desc(?aantalPersonen)

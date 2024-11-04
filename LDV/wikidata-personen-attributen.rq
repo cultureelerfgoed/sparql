@@ -36,6 +36,7 @@ construct {
       filter(lang(?geslachtLabel) = 'nl')
       ?beroep rdfs:label ?beroepLabel .
       filter(lang(?beroepLabel) = 'nl')
+      filter(contains(str(?adamlink), "adamlink"))
 
 
 

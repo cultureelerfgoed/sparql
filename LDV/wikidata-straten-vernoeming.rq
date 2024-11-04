@@ -11,6 +11,8 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 construct {
   ?straatURI a schema:Place ;
              schema:name ?straatNaam ;
+             schema:longitude ?longitude ;
+             schema:latitude ?latitude ;
              schema:relatedLink ?adamlink ;
              geo:hasGeometry[ a geo:Geometry ;
                                 geo:asWKT ?coordinaten ];
@@ -19,6 +21,7 @@ construct {
   ?persoon a schema:Person ;
            schema:name ?persoonNaam .
 }
+
   where{
     service<https://query.wikidata.org/sparql>{
 
@@ -31,8 +34,12 @@ construct {
       ?persoon wdt:P31 wd:Q5 ;
                rdfs:label ?persoonNaam .
 
+       BIND(STRBEFORE(STRAFTER(str(?coordinaten), "Point("), " ") AS ?longitude)
+      BIND(STRAFTER(STRBEFORE(str(?coordinaten), ")"), " ") AS ?latitude)
+
       filter(lang(?persoonNaam) = 'en' )
       filter(lang(?straatNaam) = 'nl')
+      filter(contains(str(?adamlink), "adamlink"))
 
       bind(?wikidataURI as ?straatURI)
     }

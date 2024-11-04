@@ -1,0 +1,26 @@
+#+ name: leaflet-lat-long
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix schema: <https://schema.org/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+construct {
+?straatURI a schema:Place ;
+           schema:longitude ?longitude ;
+           schema:latitude ?latitude .
+
+  
+}
+
+where {
+  ?straatURI
+    geo:hasGeometry/geo:asWKT ?asWKT .
+
+    BIND(STRBEFORE(STRAFTER(str(?asWKT), "POINT("), " ") AS ?longitude)
+  
+ 
+  BIND(STRAFTER(STRbefore(str(?asWKT), ")"), " ") AS ?latitude)
+
+
+}
