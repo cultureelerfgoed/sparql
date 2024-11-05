@@ -1,0 +1,6 @@
+#+ name: knowledgegraph-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/services/RCE-Knowledge-Graph/sparql
+
+select * where {
+  ?s ?p ?o.
+} limit 10

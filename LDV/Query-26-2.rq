@@ -1,6 +1,6 @@
 #+ name: Query-26-2
 #+ description: n.a.v. Ruben om oud en nieuwe aanlever sets te vergelijken
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 SELECT ?class ?count_old ?count_new (?count_new - ?count_old AS ?verschil_new_old)
 WHERE {
