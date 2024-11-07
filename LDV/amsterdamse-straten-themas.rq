@@ -14,7 +14,7 @@ where {
 
   ### Persoon ###
   ?vernoemdNaarPersoonURI schema:name ?vernoemdNaarPersoonNaam;
-                          schema:geslacht ?geslachtLabel;
+                          schema:gender ?geslachtLabel;
                           schema:hasOccupation ?beroepenURI.
 
   Bind(if(contains(?geslachtLabel, 'vrouw'), ?geslachtLabel, "" ) as ?vrouw)

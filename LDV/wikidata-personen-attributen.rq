@@ -6,28 +6,32 @@ prefix wdt: <http://www.wikidata.org/prop/direct/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix schema: <https://schema.org/>
 
-#Straten vernoemd naar een persoon
+# Straten vernoemd naar een persoon
 construct {
   ?straatURI a schema:Place ;
              schema:honorificFor ?persoon .
 
   ?persoon a schema:Person ;
            schema:name ?persoonNaam ;
-           schema:geslacht ?geslachtLabel ;
+           schema:gender ?geslachtLabel ;
+           schema:image ?image ;
            schema:hasOccupation ?beroep .
-  ?beroep rdfs:label ?beroepLabel .
+  ?beroep a schema:Occupation ;
+          rdfs:label ?beroepLabel .
 
 }
-  where
+
   {
     service<https://query.wikidata.org/sparql>{
-
+select distinct ?straatURI ?persoon ?geslacht ?beroep ?beroepLabel ?geslachtLabel ?persoonNaam (MAX(?images) as ?image)
+  where{
       ?straatURI wdt:P31 wd:Q79007 ;
                  wdt:P973 ?adamlink.
       ?straatURI wdt:P138 ?persoon .
       ?persoon wdt:P31 wd:Q5 ;
                wdt:P21 ?geslacht ;
                wdt:P106 ?beroep ;
+               wdt:P18 ?images ;
                rdfs:label ?persoonNaam .
       ?geslacht rdfs:label ?geslachtLabel .
 
@@ -38,7 +42,8 @@ construct {
       filter(lang(?beroepLabel) = 'nl')
       filter(contains(str(?adamlink), "adamlink"))
 
-
+}
+      group by ?straatURI ?persoon ?geslacht ?beroep ?geslachtLabel ?persoonNaam ?beroepLabel
 
     }
   }

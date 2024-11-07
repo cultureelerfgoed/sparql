@@ -1,4 +1,4 @@
-#+ name: datadump
+#+ name: datadump-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
 
 prefix geo: <http://www.opengis.net/ont/geosparql#>
@@ -6,12 +6,12 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix schema: <https://schema.org/>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-select ?geo ?image ?geoLabel ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
+select ?geo ?geoLabel ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
        ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel ?beroepURI ?beroepLabel
 where {
   
   {
-    select distinct ?geo ?image
+    select distinct ?geo 
            ?wikiStraatURI ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
            ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel (max(?beroepenURI) as ?beroepURI) (max(?beroepNaam) as ?beroepLabel)
     where {
@@ -23,9 +23,8 @@ where {
                      schema:relatedLink ?adamlinkURI.
 
       ### Persoon ###
-      ?vernoemdNaarPersoonURI schema:name ?vernoemdNaarPersoonNaam ; 
-                              schema:gender ?geslachtLabel ;
-                              schema:image ?image ;
+      ?vernoemdNaarPersoonURI schema:name ?vernoemdNaarPersoonNaam;
+                              schema:geslacht ?geslachtLabel;
                               schema:hasOccupation ?beroepenURI.
 
       ### beroep ###
@@ -36,14 +35,12 @@ where {
       ?bagURI rdfs:label ?bagLabel.
     }
     group by ?geo ?wikiStraatURI ?wikiStraatID ?wikiStraatNaam ?vernoemdNaarPersoonNaam ?vernoemdNaarPersoonURI
-             ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel ?image
+             ?adamlinkURI ?bagURI ?bagLabel ?geslachtLabel 
   }
 
   bind(
     concat(
-      "<img src='", ?image, "' alt='Image of ", "' style='width:300px;height:auto;'>",
       "<ul>",
-      
       "<li>Straat naam: <a href='", ?adamlinkURI, "' target='_blank'>", str(?wikiStraatNaam), "</a></li>",
       "<li>Vernoemd naar: <a href='", ?vernoemdNaarPersoonURI, "' target='_blank'>", str(?vernoemdNaarPersoonNaam), "</a></li>",
       "<li>Hoofdberoep van beroemde persoon: <a href='", ?beroepURI, "' target='_blank'>", str(?beroepLabel), "</a></li>",
