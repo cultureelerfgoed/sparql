@@ -37,9 +37,9 @@ select distinct ?straatURI ?persoon ?geslacht ?beroep ?beroepLabel ?geslachtLabe
 
 
       filter(lang(?persoonNaam) = 'en' )
-      filter(lang(?geslachtLabel) = 'nl')
+      filter(lang(?geslachtLabel) = 'en')
       ?beroep rdfs:label ?beroepLabel .
-      filter(lang(?beroepLabel) = 'nl')
+      filter(lang(?beroepLabel) = 'en')
       filter(contains(str(?adamlink), "adamlink"))
 
 }

@@ -11,19 +11,21 @@ construct {
     ?straatURI a schema:Place ;
              schema:relatedLink ?adamlink ; 
                rdfs:label ?wikiID .
-  ?adamlink schema:sameAS ?bagStraatURI .
+  ?adamlink schema:sameAS ?bagStraatURI ;
+            geo:hasGeometry[ a geo:Geometry ;
+                                geo:asWKT ?multiLines ] .
+  
   ?bagStraatURI rdfs:label ?bagID .
              
             
-
-
 }
 
   where
   {
     service<https://api.druid.datalegend.net/datasets/AdamNet/Heritage/services/Heritage/sparql>{
       ?adamlink a <http://rdf.histograph.io/Street>;
-              owl:sameAs ?sameAs .
+              owl:sameAs ?sameAs ;
+                geo:hasGeometry/geo:asWKT ?multiLines .
       bind(strafter(str(?sameAs), "http://www.wikidata.org/entity/") as ?wikiID)
       bind(if(contains(str(?sameAs), "wikidata"),?sameAs, "") as ?straatURI)
        bind(if(contains(str(?sameAs), "basisregistraties"),?sameAs, "") as ?bagStraatURI)

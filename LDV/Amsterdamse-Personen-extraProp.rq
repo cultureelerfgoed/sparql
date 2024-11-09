@@ -1,0 +1,47 @@
+#+ name: Amsterdamse-Personen-extraProp
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Straten vernoemd naar een persoon
+construct {
+
+
+  ?persoon a schema:Person ;
+           schema:birthDate ?birthDate ;
+           schema:deathDate ?deathDate .
+  ?birthDate a schema:Date .
+  ?deathDate a schema:Date .
+
+}
+
+  {
+    service<https://query.wikidata.org/sparql>{
+select distinct ?straatURI ?persoon (xsd:date(?birth) as ?birthDate) (xsd:date(?death) as ?deathDate)
+  where{
+      ?straatURI wdt:P31 wd:Q79007 ;
+                 wdt:P973 ?adamlink.
+      ?straatURI wdt:P138 ?persoon .
+      ?persoon wdt:P31 wd:Q5 ;
+               rdfs:label ?persoonNaam .
+    ?persoon wdt:P569 ?birth ;
+             wdt:P570 ?death .
+
+
+
+      filter(lang(?persoonNaam) = 'en' )
+    
+
+
+      filter(contains(str(?adamlink), "adamlink"))
+
+}
+      group by ?straatURI ?persoon?persoonNaam ?birth ?death
+
+    }
+  }
+
