@@ -1,0 +1,28 @@
+#+ name: Amsterdamse-straten-afbeeldingen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+#Straten vernoemd naar een persoon
+construct {
+  ?straatURI schema:image ?imageStreet .
+
+}
+
+  where{
+    service<https://query.wikidata.org/sparql>{
+
+      ?wikidataURI wdt:P31 wd:Q79007 ;
+                   wdt:P973 ?adamlink;
+                   wdt:P18 ?imageStreet .
+                   
+
+      filter(contains(str(?adamlink), "adamlink"))
+
+      bind(?wikidataURI as ?straatURI)
+    }
+  }

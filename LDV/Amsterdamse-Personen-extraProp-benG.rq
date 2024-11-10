@@ -1,0 +1,42 @@
+#+ name: Amsterdamse-Personen-extraProp-benG
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+# Straten vernoemd naar een persoon
+construct {
+
+
+  ?straatURI schema:owns ?notableWork .
+       
+
+
+}
+
+  {
+    service<https://query.wikidata.org/sparql>{
+select distinct ?straatURI (max(?work) as ?notableWork)
+  where{
+      ?straatURI wdt:P31 wd:Q79007 ;
+                 wdt:P973 ?adamlink.
+    
+      ?straatURI wdt:P138 ?persoon .
+      ?persoon wdt:P31 wd:Q5 ;
+               wdt:P800/(wdt:P18 | wdt:P:51) ?work .
+       
+    
+
+
+      filter(contains(str(?adamlink), "adamlink"))
+
+}
+      group by ?straatURI 
+
+    }
+  }
+

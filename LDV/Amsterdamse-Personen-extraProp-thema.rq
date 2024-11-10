@@ -1,0 +1,46 @@
+#+ name: Amsterdamse-Personen-extraProp-thema
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/Amsterdamse-Eerbetoon-in-Steen-en-Straat/services/Amsterdamse-Eerbetoon-in-Steen-en-Stra-1/sparql
+
+prefix wd: <http://www.wikidata.org/entity/>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema: <https://schema.org/>
+
+# Straten vernoemd naar een persoon
+construct {
+  ?straatURI a schema:Place ;
+             schema:honorificFor ?persoon .
+
+  ?persoon a schema:Person ;
+           schema:name ?persoonNaam ;
+           schema:gender ?geslachtLabel ;
+           schema:image ?image ;
+           schema:hasOccupation ?beroep .
+  ?beroep a schema:Occupation ;
+          rdfs:label ?beroepLabel .
+
+}
+
+  {
+    service<https://query.wikidata.org/sparql>{
+select distinct ?straatURI ?persoon ?geslacht ?beroep ?beroepLabel ?geslachtLabel ?persoonNaam (MAX(?images) as ?image)
+  where{
+      ?straatURI wdt:P31 wd:Q79007 ;
+                 wdt:P973 ?adamlink.
+      ?straatURI wdt:P138 ?persoon .
+      ?persoon wdt:P31 wd:Q5 ;
+               x ?geslacht ;
+
+
+      filter(lang(?persoonNaam) = 'en' )
+      filter(lang(?geslachtLabel) = 'en')
+      ?beroep rdfs:label ?beroepLabel .
+      filter(lang(?beroepLabel) = 'en')
+      filter(contains(str(?adamlink), "adamlink"))
+
+}
+      group by ?straatURI ?persoon ?geslacht ?beroep ?geslachtLabel ?persoonNaam ?beroepLabel
+
+    }
+  }
+
