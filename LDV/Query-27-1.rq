@@ -1,6 +1,6 @@
 #+ name: Query-27-1
 #+ description: Test om de CEO archeologie om te zetten naar schema.org
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 PREFIX schema: <http://schema.org/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
@@ -21,17 +21,17 @@ CONSTRUCT {
                   schema:containedInPlace ?ligtIn_ac ;
                   schema:event ?gebeurtenis_ac .
   ?gebeurtenis_ac a schema:Event ;
-                  schema:name "gebeurtenis"@nl ;
+                  schema:name "gebeurtenis" ;
                   schema:identifier ?gebeurtenisnaam_ac ;
                   schema:temporalCoverage ?datering_ac .
-  ?datering_ac schema:name "datering"@nl ;
+  ?datering_ac schema:name "datering" ;
                schema:temporalCoverage ?begindatering_ac ;
                schema:temporalCoverage ?einddatering_ac .
-  ?begindatering_ac schema:name "begin datering"@nl ;
+  ?begindatering_ac schema:name "begin datering" ;
                     schema:identifier ?periode_ac .
-  ?einddatering_ac schema:name "eind datering"@nl ;
+  ?einddatering_ac schema:name "eind datering" ;
                    schema:identifier ?periode_ac .
-  ?type_ac schema:name "type object"@nl ;
+  ?type_ac schema:name "type object" ;
            schema:identifier ?typenaam_ac .
                  
   # Vondstlocatie            
@@ -42,7 +42,7 @@ CONSTRUCT {
                  schema:additionalType ?bagrelatie_vl ;
                  schema:containedInPlace ?ligtIn_vl ;
                  schema:containsPlace ?bevatobject_vl .
-  ?bagrelatie_vl schema:name "basisregistratie adressen en gebouwen"@nl ;
+  ?bagrelatie_vl schema:name "basisregistratie adressen en gebouwen" ;
                  schema:location ?woonplaatsnaam_vl .
 
   # Archeologisch terrein
@@ -52,9 +52,9 @@ CONSTRUCT {
                   schema:additionalType ?archeo_waardering_at, ?locatieaanduiding_at, ?bagrelatie_at ;
                   schema:containsPlace ?bevatobject_at ;
                   schema:containedInPlace ?ligtIn_at .                      
-  ?bagrelatie_at schema:name "basisregistratie adressen en gebouwen"@nl ;
+  ?bagrelatie_at schema:name "basisregistratie adressen en gebouwen" ;
                  schema:location ?woonplaatsnaam_at .
-  ?locatieaanduiding_at schema:name "locatieaanduiding"@nl ;
+  ?locatieaanduiding_at schema:name "locatieaanduiding" ;
                         schema:location ?locatienaam_at .
 
   # Archeologisch onderzoeksgebied
@@ -63,10 +63,10 @@ CONSTRUCT {
                            schema:identifier ?choi_ao ;
                            schema:additionalType ?bagrelatie_ao, ?vertrouwelijkheid_ao ;
                            schema:geo ?geo_ao .
-  ?bagrelatie_ao schema:name "basisregistratie adressen en gebouwen"@nl ;
+  ?bagrelatie_ao schema:name "basisregistratie adressen en gebouwen" ;
                  schema:location ?woonplaatsnaam_ao .
   ?geo_ao a schema:Place ;
-            schema:name "geometrie"@nl ; 
+            schema:name "geometrie" ; 
             schema:polygon ?wkt, ?wktrd .
   
   # Vondsten
@@ -80,24 +80,24 @@ CONSTRUCT {
             schema:additionalType ?type_v, ?heeftomschrijving_v .
   ?quantity_v a schema:QuantitativeValue ;
             schema:value ?aantalVondsten ;
-            schema:unitText "aantal vondsten"@nl . 
-  ?heeftomschrijving_v schema:name "omschrijving"@nl ;
+            schema:unitText "aantal vondsten" . 
+  ?heeftomschrijving_v schema:name "omschrijving" ;
                       schema:identifier ?omschrijvingstype_v ;
                       schema:description ?omschrijving_v .
   ?gebeurtenis_v  a schema:Event ;
-                  schema:name "gebeurtenis"@nl ;
+                  schema:name "gebeurtenis" ;
                   schema:identifier ?gebeurtenisnaam_v ;
                   schema:temporalCoverage ?datering_v .
-  ?datering_v schema:name "datering"@nl ;
+  ?datering_v schema:name "datering" ;
             schema:temporalCoverage ?begindatering_v ;
             schema:temporalCoverage ?einddatering_v .
-  ?begindatering_v schema:name "begin datering"@nl ;
+  ?begindatering_v schema:name "begin datering" ;
                    schema:identifier ?periode_v .
-  ?einddatering_v schema:name "eind datering"@nl ;
+  ?einddatering_v schema:name "eind datering" ;
                   schema:identifier ?periode_v .  
-  ?type_v schema:name "type object"@nl ;
+  ?type_v schema:name "type object" ;
           schema:identifier ?typenaam_v .
-  ?materiaal_v schema:name "materiaal"@nl ;
+  ?materiaal_v schema:name "materiaal" ;
           schema:identifier ?materiaalnaam_v .
 
   # Grondsporen
@@ -110,22 +110,22 @@ CONSTRUCT {
                schema:isPartOf ?ligtIn_g .
   ?quantity_g a schema:QuantitativeValue ;
             schema:value ?aantalGrondsporen ;
-            schema:unitText "aantal grondsporen"@nl . 
+            schema:unitText "aantal grondsporen" . 
   ?gebeurtenis_g a schema:Event ;
-                 schema:name "gebeurtenis"@nl ;
+                 schema:name "gebeurtenis" ;
                  schema:identifier ?gebeurtenisnaam_g ;
                  schema:temporalCoverage ?datering_g .
-  ?datering_g schema:name "datering"@nl ;
+  ?datering_g schema:name "datering" ;
             schema:temporalCoverage ?begindatering_g ;
             schema:temporalCoverage ?einddatering_g .
-  ?begindatering_g schema:name "begin datering"@nl ;
+  ?begindatering_g schema:name "begin datering" ;
                    schema:identifier ?periode_g .
-  ?einddatering_g schema:name "eind datering"@nl ;
+  ?einddatering_g schema:name "eind datering" ;
                   schema:identifier ?periode_g .
-  ?heeftomschrijving_g schema:name "omschrijving"@nl ;
+  ?heeftomschrijving_g schema:name "omschrijving" ;
                        schema:identifier ?omschrijvingstype_g ;
                        schema:description ?omschrijving_g .
-  ?type_g schema:name "type object"@nl ;
+  ?type_g schema:name "type object" ;
           schema:identifier ?typenaam_g ;
           schema:category ?typekenmerk_g .
 
@@ -204,8 +204,7 @@ WHERE {
   OPTIONAL {
     ?archeo_onderzoeksgebied ceo:heeftGeometrie ?geo_ao .
     OPTIONAL { 
-      ?geo_ao geo:asWKT ?wkt ;
-              ceo:asWKT-RD ?wktrd 
+      ?geo_ao geo:asWKT ?wkt 
     }
   }
 
