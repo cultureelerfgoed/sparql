@@ -281,8 +281,8 @@ BIND(IRI(CONCAT("https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/vondstaant
     OPTIONAL { ?type_g ceo:heeftTypekenmerk ?typekenmerk_g }
   }
   
-  OPTIONAL { ?grondsporen ceo:heeftVertrouwelijkAanduiding ?vertrouwelijkheid_g }
+ # OPTIONAL { ?grondsporen ceo:heeftVertrouwelijkAanduiding ?vertrouwelijkheid_g }
   OPTIONAL { ?grondsporen ceo:ligtInObject ?ligtIn_g }
 
 }
-LIMIT 10000
+#LIMIT 10000
