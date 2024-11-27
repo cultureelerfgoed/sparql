@@ -1,0 +1,19 @@
+#+ name: pand-en-verblijfsobject-rm
+#+ description: Zoek pand en verblijfsobjectnummer van een rijksmonument.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+select ?rijksmonument ?adres ?pand ?verblijfsobject ?monumentenregister where {
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basregrelatie.
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?basregrelatie ceo:heeftBAGRelatie ?bagrelatie.
+    ?bagrelatie ceo:volledigAdres ?adres.
+    ?bagrelatie ceo:heeftPand ?pand.
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+  }
+}
+order by ?adres
+limit 1000
