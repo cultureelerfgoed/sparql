@@ -4,16 +4,47 @@
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-select ?rijksmonument ?adres ?pand ?verblijfsobject ?monumentenregister where {
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select distinct ?monumentenregister ?pandId ?pand ?verblijfsobjectRCE ?adresRCE ?verblijfsobjectBAG
+where {
   graph graph:instanties-rce {
-    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basregrelatie.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie ?BasisregistratieRelatie.
     ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?basregrelatie ceo:heeftBAGRelatie ?bagrelatie.
-    ?bagrelatie ceo:volledigAdres ?adres.
+    ?BasisregistratieRelatie ceo:heeftBAGRelatie ?bagrelatie.
+    ?bagrelatie ceo:volledigAdres ?adresRCE.
     ?bagrelatie ceo:heeftPand ?pand.
-    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobjectRCE.
+    ?bagrelatie ceo:pandIdentificatie ?pandId.
     bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
   }
+
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+    ?verblijfsobjectBAG
+        a sor:Verblijfsobject ;
+        sor:maaktDeelUitVan ?gebouw ;
+        sor:hoofdadres ?nummeraanduiding .
+    ?gebouw
+        a sor:Gebouw ;
+        sor:geregistreerdMet ?registratie .
+    ?registratie
+        rdfs:isDefinedBy bag: ;
+        nen3610:identificatie ?pandId .
+    ?nummeraanduiding
+        sor:postcode ?postcode ;
+        sor:huisnummer ?huisnummer ;
+        sor:ligtAan/skos:prefLabel ?straatnaam .
+    optional {
+        ?nummeraanduiding sor:huisletter ?huisletter
+    }
+    optional {
+        ?nummeraanduiding sor:huisnummertoevoeging ?huisnummertoevoeging
+    }
+  }
 }
-order by ?adres
-limit 1000
+GROUP BY ?monumentenregister ?pandId  ?pand ?verblijfsobjectRCE ?adresRCE ?verblijfsobjectBAG
