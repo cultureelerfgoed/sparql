@@ -1,0 +1,55 @@
+#+ name: Query-3-11-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/Closed-Linked-Data/adviseurs/sparql
+
+PREFIX schema: <https://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+
+# Definieer de prefixen die worden gebruikt voor termen in de query, om de leesbaarheid te verbeteren en lange URI's te vermijden.
+
+SELECT ?gemeenteNaam ?vakgebiedNaam ?adviseurNaam ?rijksmonumentnummer
+# Selecteer de variabelen die we als output willen zien: de naam van de gemeente, het vakgebied, de adviseur en het rijksmonumentnummer.
+
+WHERE {
+  # Het WHERE-gedeelte definieert de triple patterns die aan elkaar moeten voldoen om resultaten op te leveren.
+
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/adviseurs> {
+    # Gebruik de graph "adviseurs" om informatie over adviseurs op te halen.
+
+    # Haal de adviseur op: een adviseur is een `schema:Person`.
+    # Deze persoon heeft een label (naam) en werkt voor een gemeente.
+    ?adviseur a schema:Person ;
+              rdfs:label ?adviseurNaam ;
+              schema:worksFor ?gemeenteUri ;
+              dcterms:subject ?vakgebied .
+
+    # Haal de naam van de gemeente op: de gemeente waar de adviseur voor werkt.
+    # De URI van de gemeente (`?gemeenteUri`) wordt gekoppeld aan een naam via `rdfs:label`.
+    ?gemeenteUri rdfs:label ?gemeenteNaam .
+
+    # Haal de naam van het vakgebied op: het vakgebied waar de adviseur bij betrokken is.
+    # Het vakgebied heeft een `skos:prefLabel` om de naam van het vakgebied op te halen.
+    ?vakgebied skos:prefLabel ?vakgebiedNaam .
+  }
+  
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/Closed-Linked-Data/adviseurs/graphs/rijksmonumenten> {
+    # Gebruik de graph "rijksmonumenten" om informatie over rijksmonumenten op te halen.
+
+    # Haal de rijksmonumenten op: selecteer objecten die van het type `ceo:Rijksmonument` zijn.
+    # Haal ook het monumentnummer op, dat is verbonden via `ceo:rijksmonumentnummer`.
+    # Elk rijksmonument heeft een relatie naar een basisregistratie (`ceo:heeftBasisregistratieRelatie`).
+    ?rijksmonument a ceo:Rijksmonument ;
+                   ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                   ceo:heeftBasisregistratieRelatie ?basisregistratierelatie .
+
+    # Link de rijksmonumenten aan gemeenten: gebruik de URI van de gemeente (`?gemeenteUri`) die aan het rijksmonument gekoppeld is.
+    ?rijksmonument ceo:heeftGemeente ?gemeenteUri .
+  }
+}
+# Sorteer de resultaten op gemeenteNaam, vakgebiedNaam en adviseurNaam.
+ORDER BY ?gemeenteNaam ?vakgebiedNaam ?adviseurNaam
+
+# Beperk het aantal resultaten tot 1000.
+LIMIT 1000

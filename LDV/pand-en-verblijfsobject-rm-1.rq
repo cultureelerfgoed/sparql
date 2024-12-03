@@ -1,6 +1,6 @@
 #+ name: pand-en-verblijfsobject-rm-1
 #+ description: Zoek pand en verblijfsobjectnummer van een rijksmonument.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
@@ -21,26 +21,26 @@ select distinct * where {
     ?bagrelatie ceo:pandIdentificatie ?id.
     ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
     bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-
+}
   #  service <https://api.labs.kadaster.nl/datasets/dst/datascience-gevangenissen/sparql>
-    #    service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql>
-#   service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql>
-#     {
-#       select distinct * {
-#         ?verblijfsobject
-#           a sor:Verblijfsobject ;
-#           sor:maaktDeelUitVan ?gebouw ;
-#           sor:hoofdadres ?nummeraanduiding .
-#         ?gebouw
-#           a sor:Gebouw ;
-#           sor:geregistreerdMet ?registratie .
-#         ?registratie
-#           rdfs:isDefinedBy bag: ;
-#           nen3610:identificatie ?id .
-#         ?nummeraanduiding
-#           sor:postcode ?postcode ;
-#           sor:huisnummer ?huisnummer ;
-#           sor:ligtAan/skos:prefLabel ?straatnaam .
+      #  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/sparql>
+  # #service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql>
+      {
+     #   select distinct * {
+     #     ?verblijfsobject
+     #       a sor:Verblijfsobject ;
+     #       sor:maaktDeelUitVan ?gebouw ;
+  #         sor:hoofdadres ?nummeraanduiding .
+  #       ?gebouw
+  #         a sor:Gebouw ;
+  #         sor:geregistreerdMet ?registratie .
+  #       ?registratie
+  #         rdfs:isDefinedBy bag: ;
+  #         nen3610:identificatie ?id .
+  #       ?nummeraanduiding
+  #         sor:postcode ?postcode ;
+  #         sor:huisnummer ?huisnummer ;
+  #         sor:ligtAan/skos:prefLabel ?straatnaam .
 #         optional {
 #           ?nummeraanduiding sor:huisletter ?huisletter
 #         }
@@ -57,9 +57,9 @@ select distinct * where {
 #   coalesce(str(?postcode), '')
 # ) as ?adresBag)
 
-#       }
-#     }
-  }
+       }
+     }
+   }
 }
 #order by ?adres
 limit 1000
