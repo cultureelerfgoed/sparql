@@ -1,5 +1,5 @@
 #+ name: Query-11-2-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
@@ -11,7 +11,8 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select ?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?verblijfsobjectIdentificatie ?bagstraat ?baghuisnummer ?bagpostcode ?bagwoonplaatsnaam ?cho ?pandURI  ?verblijfsobjectURI
+select *
+  #?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?pandId ?verblijfsobjectIdentificatie ?bagstraat ?baghuisnummer ?bagpostcode ?bagwoonplaatsnaam ?cho ?pandURI ?maaktdeeluitvanvbo ?verblijfsobjectURI
 where {
   graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument.
@@ -22,11 +23,13 @@ where {
 
     ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
     ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
-    ?bagrelatie ceo:heeftPand ?pand.
-    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+  #  ?bagrelatie ceo:heeftPand ?pand .
+    ?bagrelatie ceo:pandIdentificatie ?pandId .
+ #   ?bagrelatie ceo:heeftPand ?pand.
+  #  ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
     ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
-    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pand)) as ?pandURI)
-    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)) as ?verblijfsobjectURI)
+    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pandId)) as ?pandURI)
+  #  bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)) as ?verblijfsobjectURI)
 
     optional {
       ?bagrelatie ceo:openbareRuimte ?straatnaam.
@@ -43,6 +46,12 @@ where {
     ?hoofdadres bag:huisnummer ?baghuisnummer .
     ?hoofdadres bag:postcode ?bagpostcode .
     ?hoofdadres bag:ligtAan/bag:ligtIn/skos:prefLabel ?bagwoonplaatsnaam.
+     ?gebouw sor:hoortBij ?verblijfsobject .
+      ?verblijfsobject
+    sor:hoofdadres ?nummeraanduiding; 
+  
+    sor:maaktDeelUitVan ?pandUri.
+
   }
 }
 

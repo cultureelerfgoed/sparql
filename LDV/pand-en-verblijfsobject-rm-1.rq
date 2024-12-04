@@ -2,64 +2,61 @@
 #+ description: Zoek pand en verblijfsobjectnummer van een rijksmonument.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
-prefix geo: <http://www.opengis.net/ont/geosparql#>
-prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-select distinct * where {
-  graph graph:instanties-rce {
-    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basregrelatie.
-    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?basregrelatie ceo:heeftBAGRelatie ?bagrelatie.
-    ?bagrelatie ceo:volledigAdres ?adresRCE.
-    ?bagrelatie ceo:heeftPand ?pand.
-    ?bagrelatie ceo:pandIdentificatie ?id.
-    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
-    bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+SELECT DISTINCT * WHERE {
+  GRAPH graph:instanties-rce {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basregrelatie .
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?basregrelatie ceo:heeftBAGRelatie ?bagrelatie .
+    ?bagrelatie ceo:volledigAdres ?adresRCE .
+    ?bagrelatie ceo:heeftPand ?pand .
+    ?bagrelatie ceo:pandIdentificatie ?idr .
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject .
+    BIND(REPLACE(STR(?verblijfsobject), "^https://", "http://") AS ?verblijfsobjectHttp)
+
+    BIND(URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+
+    SERVICE <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
+      SELECT DISTINCT * {
+        ?verblijfsobjectHttp
+          a sor:Verblijfsobject ;
+          sor:maaktDeelUitVan ?gebouw ;
+          sor:hoofdadres ?nummeraanduiding .
+        ?gebouw
+          a sor:Gebouw ;
+          sor:geregistreerdMet ?registratie .
+        ?registratie
+          rdfs:isDefinedBy bag: ;
+          nen3610:identificatie ?id .
+        ?nummeraanduiding
+          sor:postcode ?postcode ;
+          sor:huisnummer ?huisnummer ;
+          sor:ligtAan/skos:prefLabel ?straatnaam .
+        OPTIONAL {
+          ?nummeraanduiding sor:huisletter ?huisletter
+        }
+        OPTIONAL {
+          ?nummeraanduiding sor:huisnummertoevoeging ?huisnummertoevoeging
+        }
+        BIND(CONCAT(
+          COALESCE(STR(?straatnaam), ''), ' ', 
+          COALESCE(STR(?huisnummer), ''),
+          IF(BOUND(?huisletter), CONCAT(' ', STR(?huisletter)), ''),
+          IF(BOUND(?huisnummertoevoeging), CONCAT('-', STR(?huisnummertoevoeging)), ''),
+          ', ',
+          COALESCE(STR(?postcode), '')
+        ) AS ?adresBag)
+      }
+    }
+  }
 }
-  #  service <https://api.labs.kadaster.nl/datasets/dst/datascience-gevangenissen/sparql>
-      #  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/sparql>
-  # #service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql>
-      {
-     #   select distinct * {
-     #     ?verblijfsobject
-     #       a sor:Verblijfsobject ;
-     #       sor:maaktDeelUitVan ?gebouw ;
-  #         sor:hoofdadres ?nummeraanduiding .
-  #       ?gebouw
-  #         a sor:Gebouw ;
-  #         sor:geregistreerdMet ?registratie .
-  #       ?registratie
-  #         rdfs:isDefinedBy bag: ;
-  #         nen3610:identificatie ?id .
-  #       ?nummeraanduiding
-  #         sor:postcode ?postcode ;
-  #         sor:huisnummer ?huisnummer ;
-  #         sor:ligtAan/skos:prefLabel ?straatnaam .
-#         optional {
-#           ?nummeraanduiding sor:huisletter ?huisletter
-#         }
-#         optional {
-#           ?nummeraanduiding sor:huisnummertoevoeging ?huisnummertoevoeging
-#         }
-
-# bind(concat(
-#   coalesce(str(?straatnaam), ''), ' ', 
-#   coalesce(str(?huisnummer), ''),
-#   if(bound(?huisletter), concat(' ', str(?huisletter)), ''),
-#   if(bound(?huisnummertoevoeging), concat('-', str(?huisnummertoevoeging)), ''),
-#   ', ',
-#   coalesce(str(?postcode), '')
-# ) as ?adresBag)
-
-       }
-     }
-   }
-}
-#order by ?adres
-limit 1000
+#ORDER BY ?adres
+LIMIT 1000
