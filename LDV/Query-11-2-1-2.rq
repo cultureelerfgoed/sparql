@@ -1,0 +1,63 @@
+#+ name: Query-11-2-1-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt: <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select *
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
+    ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
+    ?bagrelatie ceo:pandIdentificatie ?pandId.
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+    
+    bind(iri(concat("https://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pandId)) as ?pandURI)
+    
+    ?bagrelatie ceo:openbareRuimte ?straatnaam.
+    ?bagrelatie ceo:huisnummer ?huisnummer.
+    ?bagrelatie ceo:postcode ?postcode.
+    ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
+  }
+
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+    ?verblijfsobjectBAG 
+      a sor:Verblijfsobject ;
+      sor:maaktDeelUitVan ?gebouw ;
+      sor:hoofdadres ?nummeraanduiding . 
+    
+    ?gebouw
+      a sor:Gebouw ;
+      sor:geregistreerdMet ?registratie .
+    
+    ?registratie 
+      rdfs:isDefinedBy bag: ;
+      nen3610:identificatie ?gebouwId .
+    
+    ?nummeraanduiding
+      sor:postcode ?kkgPostcode ;
+      sor:huisnummer ?kkgHuisnummer ;
+      sor:ligtAan/skos:prefLabel ?kkgStraatnaam .
+    
+    optional { ?nummeraanduiding sor:huisletter ?huisletter }
+    optional { ?nummeraanduiding sor:huisnummertoevoeging ?huisnummertoevoeging }
+    
+    bind(concat(str(?kkgStraatnaam), ' ', str(?kkgHuisnummer), 
+                if(bound(?huisletter), concat(str(?huisletter)), ''),
+                if(bound(?huisnummertoevoeging), concat('-', str(?huisnummertoevoeging)), ''), 
+                ', ', str(?kkgPostcode)) as ?adres )
+    
+    # Filter to ensure ?gebouwId matches ?pandId from the graph
+    filter(?gebouwId = ?pandId)
+  }
+}

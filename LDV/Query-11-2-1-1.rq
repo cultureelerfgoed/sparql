@@ -1,0 +1,35 @@
+#+ name: Query-11-2-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt: <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select ?cho ?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?pandId ?pandURI ?verblijfsobjectIdentificatie
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
+    ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
+    ?bagrelatie ceo:pandIdentificatie ?pandId .
+    ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
+    ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+    bind(iri(concat("https://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pandId)) as ?pandURI)
+    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)) as ?verblijfsobjectURI)
+    bind(iri(concat("https://data.kkg.kadaster.nl/id/gebouw/", ?pandId)) as ?pandKADuri)
+
+    ?bagrelatie ceo:openbareRuimte ?straatnaam.
+    ?bagrelatie ceo:huisnummer ?huisnummer.
+    ?bagrelatie ceo:postcode ?postcode.
+    ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
+
+  }
+}
+ORDER BY ?straatnaam ?huisnummer
