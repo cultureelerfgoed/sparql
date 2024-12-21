@@ -1,4 +1,4 @@
-#+ name: cht-original
+#+ name: cht-original-1
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
 construct {

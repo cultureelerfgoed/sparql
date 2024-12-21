@@ -1,6 +1,4 @@
 #+ name: wo2thesaurus
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/IvaDimitrova/cho-development/services/cho-development/sparql
-
 #! cache: false
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
