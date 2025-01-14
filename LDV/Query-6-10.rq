@@ -1,4 +1,5 @@
 #+ name: Query-6-10
+#+ description: Gemaakt voor Leon om te zoeken op lengte van omschrijvingen
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
@@ -31,7 +32,7 @@ WHERE
     ?functie ceo:heeftFunctieNaam ?uri.
     ?uri skos:prefLabel ?kerk .
      # We voegen een filter toe op de skos:prefLabel van de uri waarin "kerk" voorkomt.
-    FILTER(regex(STR(?kerk), "kerk", "i" ))
+ #   FILTER(regex(STR(?kerk), "kerk", "i" ))
 
     # We voegen een filter toe op basis van de lengte van de omschrijving.
     FILTER(STRLEN(?omschrijvingen) >= ?min && STRLEN(?omschrijvingen) <= ?max)
@@ -65,7 +66,7 @@ WHERE
 
   # We berekenen het jaar van inschrijving en filteren op een bepaalde periode.
   BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
-  FILTER (?jaarInschrijving >= "1964"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <= "2023"^^<http://www.w3.org/2001/XMLSchema#integer>)
+  FILTER (?jaarInschrijving >= "1964"^^<http://www.w3.org/2001/XMLSchema#integer> && ?jaarInschrijving <= "2024"^^<http://www.w3.org/2001/XMLSchema#integer>)
   BIND(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
 } 
 
