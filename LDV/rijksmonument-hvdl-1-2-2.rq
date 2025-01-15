@@ -38,8 +38,10 @@ where {
         }
         optional {
           ?cho ceo:heeftGeometrie/geo:asWKT ?geometrieAsWKT .
-          bind(replace(?geometrieAsWKT, "^.*\\(\\(", "") as ?coordinates1)
-          bind(replace(?coordinates1, "\\)\\)$", "") as ?coordinates2)
+          #    bind(replace(?geometrieAsWKT, "^.*\\(\\(", "") as ?coordinates1)
+          #   bind(replace(?coordinates1, "\\)\\)$", "") as ?coordinates2)
+          bind(replace(?geometrieAsWKT, "^.*\\(\\(\\(?", "") as ?coordinates1)
+          bind(replace(?coordinates1, "\\)\\)\\)?$", "") as ?coordinates2)
           bind(replace(?coordinates2, ",", "],[") as ?coordinates3)
           bind(replace(?coordinates3, " ", ", ") as ?coordinates4)
           bind(concat("[[[", ?coordinates4, "]]]") as ?coordinates)

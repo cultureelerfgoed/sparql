@@ -30,7 +30,7 @@ where {
     ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
   }
 
-  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
     ?verblijfsobjectBAG 
       a sor:Verblijfsobject ;
       sor:maaktDeelUitVan ?gebouw ;

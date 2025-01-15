@@ -45,7 +45,38 @@ where {
       ?geometrie ceo:oppervlakteInVierkanteMeters ?oppervlakteinvierkantemeters.
     }
 
+    # Process the geometry into a valid JSON object
+    bind(replace(?geometrie_WGS84, "^MULTIPOLYGON\\(\\(\\(", "[[[") as ?cleanGeom1)
+    bind(replace(?cleanGeom1, "\\)\\)\\)$", "]]]") as ?cleanGeom2)
+    bind(replace(?cleanGeom2, "\\)\\s*,\\s*\\(", "]],[[") as ?cleanGeom3)
+    bind(replace(?cleanGeom3, ",\\s*", "],[") as ?cleanGeom4)
+    bind(replace(?cleanGeom4, "\\s+", ",") as ?cleanGeom5)
+
+    # Handle empty geometries
+    bind(if(?cleanGeom5 = "", "[[]]", concat("[", ?cleanGeom5, "]")) as ?coordinates)
+
     # Generate GeoJSON feature for each result
-     BIND(CONCAT('{ "type": "Feature", "properties": { "werelderfgoed": "', STR(?werelderfgoed), '", "cultuurhistorischObjectnummer": "', STR(?cultuurhistorischObjectnummer), '", "werelderfgoedstatus": "', STR(?werelderfgoedstatus), '", "werelderfgoedtype": "', STR(?werelderfgoedtype), '", "werelderfgoednummer": "', STR(?werelderfgoednummer), '", "registratiedatum": "', STR(?registratiedatum), '", "jaarvaninschrijving": "', STR(?jaarvaninschrijving), '", "heeftNaam": "', STR(?heeftNaam), '", "huidigeNaam": "', STR(?huidigeNaam), '", "registratiedatum_naam": "', STR(?registratiedatum_naam), '", "formeelStandpunt": "', STR(?formeelStandpunt), '", "url": "', STR(?url), '", "geometrietype": "', STR(?geometrietype), '", "geometriekwaliteit": "', STR(?geometriekwaliteit), '", "geometrie": "', STR(?geometrie_WGS84), '" }') AS ?feature)
+    bind(
+      concat(
+        '{ "type": "Feature", "properties": { ',
+        '"werelderfgoed": "', str(?werelderfgoed), '", ',
+        '"cultuurhistorischObjectnummer": "', str(?cultuurhistorischObjectnummer), '", ',
+        '"werelderfgoedstatus": "', str(?werelderfgoedstatus), '", ',
+        '"werelderfgoedtype": "', str(?werelderfgoedtype), '", ',
+        '"werelderfgoednummer": "', str(?werelderfgoednummer), '", ',
+        '"registratiedatum": "', str(?registratiedatum), '", ',
+        '"jaarvaninschrijving": "', str(?jaarvaninschrijving), '", ',
+        '"heeftNaam": "', str(?heeftNaam), '", ',
+        '"huidigeNaam": "', str(?huidigeNaam), '", ',
+        '"registratiedatum_naam": "', str(?registratiedatum_naam), '", ',
+        '"formeelStandpunt": "', str(?formeelStandpunt), '", ',
+        '"url": "', str(?url), '", ',
+        '"geometrietype": "', str(?geometrietype), '", ',
+        '"geometriekwaliteit": "', str(?geometriekwaliteit), '" }, ',
+        '"geometry": { "type": "MultiPolygon", "coordinates": ', ?coordinates, ' }',
+        ' }'
+      ) 
+      as ?feature
+    )
   }
 }
