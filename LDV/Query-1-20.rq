@@ -1,6 +1,6 @@
 #+ name: Query-1-20
 #+ description: substitute filter(contains) with text indexing
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesaurus-inprogress/services/thesaurus-inprogress/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesauri/services/thesauri/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix text: <http://jena.apache.org/text#>
