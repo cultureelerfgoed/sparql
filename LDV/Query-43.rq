@@ -1,41 +1,75 @@
 #+ name: Query-43
-#+ description: Query die koppeling aangeeft tussen ABR en Archis data, specifiek de omschrijving vindplaats.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/services/Archeologisch-Informatie-Systeem---thesa/sparql
+#+ description: niet verwijderen. test voor archis mrs
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix dct: <http://purl.org/dc/terms/>
+prefix rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
-SELECT ?vindplaats ?muntsoort ?locatieomschrijving
+select ?narrowerConcept ?narrowerLabel (group_concat(?altLabel; separator=", ") as ?altLabelsConcatenated)
+  ?scopeNote ?hiddenLabel ?notation ?codeAbr ?sortperiod
+  ?broaderConcept ?broaderLabel ?topConcept ?topConceptLabel ?conceptLabel ?status ?statusLabel
+where {
+  graph <https://data.cultureelerfgoed.nl/term/id/rn/2/thesaurus> {
 
-WHERE { 
-  <https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/ffe203d7-f94f-47db-bf83-8ce66f658ab7> skos:narrower ?artefactUri_facet1 .
-  ?artefactUri_facet1 skos:prefLabel ?artefact_facet1 .
-  
-  ?artefactUri_facet1 skos:narrower ?artefactUri_facet2 .
-  ?artefactUri_facet2 skos:prefLabel ?munttype .
+    # Stap 1: Start bij de topconcepten
+    values ?topConcept {
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/1eeb48df-adbb-44b2-bcf1-33e3fe902413>
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/e9546020-4b28-4819-b0c2-29e7c864c5c0>
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/9b688754-1315-484b-9c89-8817e87c1e84>
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/22cbb070-6542-48f0-8afe-7d98d398cc0b>
+  }
 
-  ?artefactUri_facet2 skos:narrower ?artefactUri_facet3 .
-  ?artefactUri_facet3 skos:prefLabel ?muntsoort .
-  
+    # Stap 2: Filter op conceptstatus
+    values ?status {
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/aad68581-3960-4faf-9758-8ff6d65810d3>  # definitief
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/c58475d5-0795-4623-b4be-ea1524f4b4fb>  # kandidaat
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/a166e634-a679-42ae-8362-d9d9c69177f9> #vervallen
+  }
+    # Haal het label van de topconcepten op
+    ?status skos:prefLabel ?statusLabel .
 
-  BIND(IRI(REPLACE(STR(?artefactUri_facet2), "https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/", "https://data.cultureelerfgoed.nl/term/id/rn/")) AS ?typeNaamUri_facet2)
-  BIND(IRI(REPLACE(STR(?artefactUri_facet3), "https://digitaalerfgoed-test.poolparty.biz/term/id/pre/rn/", "https://data.cultureelerfgoed.nl/term/id/rn/")) AS ?typeNaamUri_facet3)
-  
-  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
-    {
-      ?vondst a ceo:Vondsten ; ceo:ligtInObject ?ligtInUri . ?ligtInUri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?vindplaats ;
-             ceo:heeftOmschrijving/ceo:omschrijving ?locatieomschrijving .
-      ?vondst ceo:heeftType/ceo:heeftTypeNaam ?typeNaamUri_facet2 .
-      
-    } UNION {
-      ?vondst a ceo:Vondsten ; ceo:ligtInObject ?ligtInUri . ?ligtInUri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?vindplaats ;
-             ceo:heeftOmschrijving/ceo:omschrijving ?locatieomschrijving .
-      ?vondst ceo:heeftType/ceo:heeftTypeNaam ?typeNaamUri_facet3 .
-      
-    } 
-  } BIND(CONCAT("vondstlocatie:", STRAFTER(STR(?ligtInUri), "vondstlocatie/")) AS ?ligtIn)
-}   
-GROUP BY ?vindplaats ?muntsoort ?locatieomschrijving
-ORDER BY ?vindplaats
+    # Haal het label van de topconcepten op
+    ?topConcept skos:prefLabel ?topConceptLabel .
+
+    # Stap 3: Zoek alle narrower concepten
+    ?topConcept skos:narrower+ ?narrowerConcept .
+    ?narrowerConcept skos:prefLabel ?narrowerLabel .
+
+    # Stap 4: Haal verplichte status op en filter direct
+    ?narrowerConcept rnce:hasConceptStatus ?status .
+    optional {
+      ?narrowerConcept rnce:sortPeriod ?sortperiod .
+    }
+
+    # Stap 5: Haal optionele gegevens op
+    optional {
+      ?narrowerConcept skos:altLabel ?altLabel .
+    }
+    optional {
+      ?narrowerConcept skos:scopeNote ?scopeNote .
+    }
+    optional {
+      ?narrowerConcept skos:hiddenLabel ?hiddenLabel .
+    }
+    optional {
+      ?narrowerConcept skos:notation ?notation .
+    }
+    optional {
+      ?narrowerConcept rnce:codeAbr ?codeAbr .
+    }
+
+    # Stap 6: Zoek de directe broader van het gevonden narrower concept
+    optional {
+      ?narrowerConcept skos:broader ?broaderConcept .
+      ?broaderConcept skos:prefLabel ?broaderLabel .
+    }
+  }
+}
+group by ?narrowerConcept ?narrowerLabel ?scopeNote ?hiddenLabel ?notation ?codeAbr ?sortperiod
+?broaderConcept ?broaderLabel ?topConcept ?topConceptLabel ?conceptLabel ?status ?statusLabel
+
+order by ?sortperiod ?narrowerLabel
+
+
+

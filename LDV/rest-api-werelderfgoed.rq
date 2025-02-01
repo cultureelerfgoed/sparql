@@ -24,7 +24,7 @@ CONSTRUCT {
   ?o3 ?p4 ?o4.
   ?o4 ?p5 ?o5.
   ?o5 ?p6 ?o6.
-  ?o6 ?p7 ?o7.
+ # ?o6 ?p7 ?o7.
 } WHERE {
   GRAPH graph:instanties-rce {
     {
@@ -69,10 +69,10 @@ CONSTRUCT {
             ?o4 ?p5 ?o5.
             OPTIONAL {
               ?o5 ?p6 ?o6.
-              OPTIONAL {
-                ?o6 ?p7 ?o7.
-              }
-            }
+            #   OPTIONAL {
+            #     ?o6 ?p7 ?o7.
+            #   }
+             }
           }
         }
       }

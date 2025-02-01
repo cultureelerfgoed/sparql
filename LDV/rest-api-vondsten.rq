@@ -22,8 +22,8 @@ CONSTRUCT {
   ?o2 ?p3 ?o3.
   ?o3 ?p4 ?o4.
   ?o4 ?p5 ?o5.
-  ?o5 ?p6 ?o6.
-  ?o6 ?p7 ?o7.
+ ?o5 ?p6 ?o6.
+ # ?o6 ?p7 ?o7.
 } WHERE {
   # The GRAPH clause specifies the named graph where the data is retrieved from.
   GRAPH graph:instanties-rce {
