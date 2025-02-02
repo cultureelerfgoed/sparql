@@ -1,0 +1,54 @@
+#+ name: missingscopenote10
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT
+  ?prefLabelLaag10
+  ?prefLabelLaag11
+  ?mistEigenScopeNote
+  (COALESCE(?aantalNarrowerScopeNote, 0) AS ?aantalNarrowerZonderScopeNote)
+  (IF(COALESCE(?aantalNarrowerScopeNote, 0) > 0, "ja ->", "") AS ?uitklappen)
+WHERE {
+  {
+    SELECT DISTINCT
+      ?prefLabelLaag10
+      ?prefLabelLaag11
+      (IF(BOUND(?object9ScopeNote), "nee"@nl, "ja, mist scopeNote"@nl) AS ?mistEigenScopeNote)
+      (COUNT(DISTINCT ?narrowerTermNoScope) AS ?aantalNarrowerScopeNote)
+    WHERE {
+      SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/cht> {
+        # Triple path to reach the Layer 6 concept:
+        <https://data.cultureelerfgoed.nl/term/id/cht/bece25a6-eb64-46e8-85a8-2a7991f02a2c>
+          skos:narrower/skos:narrower/skos:narrower/skos:narrower/skos:narrower/skos:narrower/skos:narrower/skos:narrower/skos:narrower ?object8 .
+
+        ?object8 skos:prefLabel ?prefLabelLaag10 .
+        FILTER(LANG(?prefLabelLaag10) = "nl")
+
+        ?object8 skos:narrower ?object9 .
+
+        ?object9 skos:prefLabel ?prefLabelLaag11 .
+        FILTER(LANG(?prefLabelLaag11) = "nl")
+
+        # Optional: Get the scopeNote for the Layer 6 term:
+        OPTIONAL {
+          ?object9 skos:scopeNote ?object9ScopeNote .
+          FILTER(LANG(?object9ScopeNote) = "nl")
+        }
+
+        # Retrieve all descendant terms of ?object4 (using skos:narrower+) 
+        # that do NOT have a Dutch scopeNote:
+        OPTIONAL {
+          ?object9 skos:narrower+ ?narrowerTerm .
+          FILTER NOT EXISTS {
+            ?narrowerTerm skos:scopeNote ?narrowerTermScopeNote .
+            FILTER(LANG(?narrowerTermScopeNote) = "nl")
+          }
+          BIND(?narrowerTerm AS ?narrowerTermNoScope)
+        }
+      }
+    }
+    GROUP BY ?prefLabelLaag10 ?prefLabelLaag11 ?object9ScopeNote
+    ORDER BY DESC(?aantalNarrowerScopeNote)
+  }
+}

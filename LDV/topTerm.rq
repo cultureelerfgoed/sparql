@@ -1,0 +1,34 @@
+#+ name: topTerm
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+#query van Joop
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?topTermLabel (COUNT(?concept) AS ?countWithoutScopeNote) WHERE {
+  SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/cht> {
+  # Zoek de topTerm van het concept
+  ?concept a skos:Concept.
+  ?concept skos:prefLabel ?prefLabel.
+  ?concept skos:broader* ?topTerm.
+  FILTER(?topTerm = <https://data.cultureelerfgoed.nl/term/id/cht/bece25a6-eb64-46e8-85a8-2a7991f02a2c>)
+
+  # Filter om alleen Nederlandse prefLabels te krijgen
+  FILTER(LANG(?prefLabel) = "nl")
+  
+  # Filter om alleen concepten zonder scopeNote op te halen
+  FILTER NOT EXISTS {
+    ?concept skos:scopeNote ?scopeNote.
+  }
+
+  # Haal het label van de topTerm op
+  ?topTerm skos:prefLabel ?topTermLabel.
+  FILTER(LANG(?topTermLabel) = "nl")
+
+  # Filter om alleen topTerms te selecteren (geen bredere term)
+  FILTER NOT EXISTS {
+    ?topTerm skos:broader ?broaderTerm.
+  }
+} 
+  }
+GROUP BY ?topTermLabel
+ORDER BY DESC(?countWithoutScopeNote)

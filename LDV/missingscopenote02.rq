@@ -1,0 +1,51 @@
+#+ name: missingscopenote02
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT
+  ?prefLabelLaag2
+  ?prefLabelLaag3
+  ?mistEigenScopeNote
+  (COALESCE(?aantalNarrowerScopeNote, 0) AS ?aantalNarrowerZonderScopeNote)  
+  (IF(COALESCE(?aantalNarrowerScopeNote, 0) > 0, "ja ->", "") AS ?uitklappen)  
+WHERE {
+  {
+    SELECT DISTINCT
+      ?prefLabelLaag2
+      ?prefLabelLaag3
+      (IF(BOUND(?object1ScopeNote), "nee"@nl, "ja, mist scopeNote"@nl) AS ?mistEigenScopeNote) 
+      (COUNT(DISTINCT ?narrowerTermNoScope) AS ?aantalNarrowerScopeNote)
+    WHERE {
+      SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/cht> {
+        # Triple path to reach Layer 2 and Layer 3:
+        <https://data.cultureelerfgoed.nl/term/id/cht/bece25a6-eb64-46e8-85a8-2a7991f02a2c>
+          skos:narrower ?object .
+        ?object skos:prefLabel ?prefLabelLaag2 .
+        FILTER(LANG(?prefLabelLaag2) = "nl")
+          
+        ?object skos:narrower ?object1 .
+        ?object1 skos:prefLabel ?prefLabelLaag3 .
+        FILTER(LANG(?prefLabelLaag3) = "nl")
+          
+        # Optional scopeNote on the Layer 3 term:
+        OPTIONAL {
+          ?object1 skos:scopeNote ?object1ScopeNote .
+          FILTER(LANG(?object1ScopeNote) = "nl")
+        }
+          
+        # Use skos:narrower+ to get all descendant terms of ?object1 and only bind those without a Dutch scopeNote:
+        OPTIONAL {
+          ?object1 skos:narrower+ ?narrowerTerm .
+          FILTER NOT EXISTS {
+            ?narrowerTerm skos:scopeNote ?narrowerTermScopeNote .
+            FILTER(LANG(?narrowerTermScopeNote) = "nl")
+          }
+          BIND(?narrowerTerm AS ?narrowerTermNoScope)
+        }
+      }
+    }
+    GROUP BY ?prefLabelLaag2 ?prefLabelLaag3 ?object1ScopeNote
+    ORDER BY DESC(?aantalNarrowerScopeNote)
+  }
+}

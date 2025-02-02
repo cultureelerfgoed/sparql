@@ -1,0 +1,56 @@
+#+ name: missingscopenote04
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT
+  ?prefLabelLaag4
+  ?prefLabelLaag5
+  ?mistEigenScopeNote 
+  (COALESCE(?aantalNarrowerScopeNote, 0) AS ?aantalNarrowerZonderScopeNote)  # 0 if no results
+  (IF(COALESCE(?aantalNarrowerScopeNote, 0) > 0, "ja ->", "") AS ?uitklappen)  
+WHERE {
+  {
+    SELECT DISTINCT
+      ?prefLabelLaag4
+      ?prefLabelLaag5
+      (IF(BOUND(?object3ScopeNote), "nee"@nl, "ja, mist scopeNote"@nl) AS ?mistEigenScopeNote) 
+      (COUNT(DISTINCT ?narrowerTermNoScope) AS ?aantalNarrowerScopeNote)
+    WHERE {
+      SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/cht> {
+        # Triple path to reach the Layer 4 concept:
+        <https://data.cultureelerfgoed.nl/term/id/cht/bece25a6-eb64-46e8-85a8-2a7991f02a2c>
+          skos:narrower/skos:narrower/skos:narrower ?object2 .
+  
+        ?object2 skos:prefLabel ?prefLabelLaag4 .
+        FILTER(LANG(?prefLabelLaag4) = "nl")
+  
+        # Get the Layer 5 term:
+        ?object2 skos:narrower ?object3 .
+        ?object3 skos:prefLabel ?prefLabelLaag5 .
+        FILTER(LANG(?prefLabelLaag5) = "nl")
+  
+        # Optionally get the scopeNote at Layer 5:
+        OPTIONAL {
+          ?object3 skos:scopeNote ?object3ScopeNote .
+          FILTER(LANG(?object3ScopeNote) = "nl")
+        }
+  
+        # Retrieve all descendant terms (using skos:narrower+) of ?object3 that do NOT have a Dutch scopeNote:
+        OPTIONAL {
+          ?object3 skos:narrower+ ?narrowerTerm .
+          FILTER NOT EXISTS {
+            ?narrowerTerm skos:scopeNote ?anyScopeNote .
+            FILTER(LANG(?anyScopeNote) = "nl")
+          }
+          BIND(?narrowerTerm AS ?narrowerTermNoScope)
+        }
+      }
+    }
+    GROUP BY
+      ?prefLabelLaag4
+      ?prefLabelLaag5
+      ?object3ScopeNote
+    ORDER BY DESC(?aantalNarrowerScopeNote)
+  }
+}
