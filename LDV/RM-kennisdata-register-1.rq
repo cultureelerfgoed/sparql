@@ -1,0 +1,119 @@
+#+ name: RM-kennisdata-register-1
+#+ description: Inhoudelijke data (kennis) in het rijksmonumentenregister: kopjes Bouwactiviteiten, Bouwstijlen, Ambachten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+construct {
+  ?rijksmonument a ceo:Rijksmonument;
+    ceo:rijksmonumentnummer ?rijksmonumentnummer;
+    ceo:heeftGebeurtenis ?gebeurtenis;
+    ceo:heeftKennisregistratie ?kennisregistratie;
+    ceo:kennisregistratieToelichting ?toelichting.
+
+  ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisNaam;
+    ceo:heeftDatering ?datering;
+    ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
+
+  ?datering ceo:heeftIndicatieNauwkeurigheid ?indicatienauwkeurigheid;
+    ceo:heeftBeginDatering ?beginDatering;
+    ceo:heeftEindDatering ?eindDatering.
+
+  ?beginDatering ceo:datum ?beginDatum.
+  ?eindDatering ceo:datum ?eindDatum.
+
+  ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+  ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlLabel;
+    ceo:heeftStijlEnCultuurNaam ?bouwstijlUri;
+    ceo:heeftZuiverheid ?zuiverheid.
+
+  # Zorg ervoor dat meerdere actoren per gebeurtenis correct worden gekoppeld
+  ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+  ?actorenrol ceo:heeftActor ?actor;
+    ceo:heeftRol ?rol.
+
+  ?actor rdfs:label ?actorLabel;
+    skos:exactMatch ?link;
+    ceo:plaatsActor ?plaatsActor.
+
+  # Toegevoegde construct-regels voor de originele functie
+  ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
+  ?functies_ ceo:heeftFunctieNaam ?functies;
+    ceo:formeelStandpunt "1"^^xsd:boolean.
+  ?functies skos:prefLabel ?functie.
+}
+where {
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+
+    minus {
+      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
+    }
+
+    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+
+    optional {
+      ?gebeurtenis ceo:heeftDatering ?datering.
+      ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
+
+      optional {
+        ?datering ceo:heeftBeginDatering ?beginDatering.
+        ?beginDatering ceo:datum ?beginDatum.
+      }
+
+      optional {
+        ?datering ceo:heeftEindDatering ?eindDatering.
+        ?eindDatering ceo:datum ?eindDatum.
+      }
+    }
+
+    optional {
+      ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+      ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
+      ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
+
+      optional {
+        ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
+      }
+    }
+
+    # Toegevoegde gebeurtenis-toelichting
+    optional {
+      ?gebeurtenis ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
+    }
+
+    # ** Fix: Meerdere actoren per gebeurtenis correct ophalen **
+    optional {
+      ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+      ?actorenrol ceo:heeftActor ?actor.
+      optional { ?actor rdfs:label ?actorLabel. }
+      optional { ?actor skos:exactMatch ?link. }
+      optional { ?actor ceo:plaatsActor ?plaatsActor. }
+      optional { ?actorenrol ceo:heeftRol/skos:prefLabel ?rol. }
+    }
+
+    # Optionele blok voor originele functie
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
+      ?functies_ ceo:heeftFunctieNaam ?functies;
+        ceo:formeelStandpunt "1"^^xsd:boolean.
+      ?functies skos:prefLabel ?functie_.
+      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+    }
+
+    # Toegevoegde optionele kennisregistratie en toelichting
+    optional {
+      ?rijksmonument ceo:heeftKennisregistratie ?kennisregistratie.
+      ?kennisregistratie ceo:kennisregistratieToelichting ?toelichting.
+    }
+  }
+}
+limit 500

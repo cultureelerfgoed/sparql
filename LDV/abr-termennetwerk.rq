@@ -1,0 +1,46 @@
+#+ name: abr-termennetwerk
+#+ description: NTest voor foutieve ABR
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?prefLabel (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR=", ") AS ?altLabels)
+       ?hiddenLabel ?scopeNote
+       ?broader_uri ?broader_prefLabel
+       ?narrower_uri ?narrower_prefLabel
+       ?related_uri ?related_prefLabel
+       ?exactMatch_uri ?exactMatch_prefLabel
+WHERE {
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/thesaurus> {
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/b402446a-0a00-4fee-a9cd-1a7f307d651e> .
+    
+    OPTIONAL { ?concept skos:prefLabel ?prefLabel . }
+    OPTIONAL { ?concept skos:altLabel ?altLabel . }
+    OPTIONAL { ?concept skos:hiddenLabel ?hiddenLabel . }
+    OPTIONAL { ?concept skos:scopeNote ?scopeNote . }
+    
+    OPTIONAL { 
+      ?concept skos:broader ?broader_uri .
+      OPTIONAL { ?broader_uri skos:prefLabel ?broader_prefLabel . }
+    }
+    
+    OPTIONAL { 
+      ?concept skos:narrower ?narrower_uri .
+      OPTIONAL { ?narrower_uri skos:prefLabel ?narrower_prefLabel . }
+    }
+    
+    OPTIONAL { 
+      ?concept skos:related ?related_uri .
+      OPTIONAL { ?related_uri skos:prefLabel ?related_prefLabel . }
+    }
+    
+    OPTIONAL { 
+      ?concept skos:exactMatch ?exactMatch_uri .
+      OPTIONAL { ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel . }
+    }
+  }
+}
+GROUP BY ?concept ?prefLabel ?hiddenLabel ?scopeNote ?broader_uri ?broader_prefLabel
+         ?narrower_uri ?narrower_prefLabel ?related_uri ?related_prefLabel
+         ?exactMatch_uri ?exactMatch_prefLabel
+ORDER BY ?prefLabel
