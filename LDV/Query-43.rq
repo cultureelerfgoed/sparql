@@ -1,6 +1,6 @@
 #+ name: Query-43
 #+ description: niet verwijderen. test voor archis mrs
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix dct: <http://purl.org/dc/terms/>

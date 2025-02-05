@@ -1,5 +1,5 @@
 #+ name: Query-29
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
 #+ This query searches a dataset using the Simple Knowledge Organization System (SKOS) vocabulary, and retrieves information about a specific concept based on its preferred label (prefLabel), alternative labels (altLabel), scope notes (scopeNote), as well as broader and narrower terms (broader and narrower).
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql

@@ -2,7 +2,7 @@
 #+ description: Query om alle `skos:Concept` uit de CHT op te halen die een scopeNote hebben, samen met labels, broader en narrower.
 #- 
 #- **DO NOT DELETE**
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -1,5 +1,5 @@
 #+ name: example-query
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/thesauri/services/thesauri/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/thesauri/services/thesauri/sparql
 
 prefix text: <http://jena.apache.org/text#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
