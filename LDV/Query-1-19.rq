@@ -1,5 +1,5 @@
 #+ name: Query-1-19
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/patrick-mout/Archeologisch-Basis-Register/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Archeologisch-Basis-Register/sparql
 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>

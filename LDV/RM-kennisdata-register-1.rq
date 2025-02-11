@@ -97,7 +97,7 @@ where {
       optional { ?actor rdfs:label ?actorLabel. }
       optional { ?actor skos:exactMatch ?link. }
       optional { ?actor ceo:plaatsActor ?plaatsActor. }
-      optional { ?actorenrol ceo:heeftRol/skos:prefLabel ?rol. }
+      optional { ?actorenrol ceo:heeftRol ?rol. }
     }
 
     # Optionele blok voor originele functie
