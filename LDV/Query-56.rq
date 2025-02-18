@@ -1,0 +1,67 @@
+#+ name: Query-56
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+SELECT DISTINCT *
+
+
+WHERE {
+  ?rijksmonument a ceo:Rijksmonument;
+                 ceo:cultuurhistorischObjectnummer ?choNummer;
+                 ceo:heeftJuridischeStatus/skos:prefLabel ?juridischeStatus;
+                 ceo:heeftMonumentAard/skos:prefLabel ?monumentAard;
+                 ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving;
+                 ceo:rijksmonumentnummer ?rijksmonumentnummer.
+OPTIONAL {
+    ?rijksmonument ceo:heeftBebouwdeKomType/skos:prefLabel ?bebouwdeKomType.
+  }
+OPTIONAL {
+    ?rijksmonument  ceo:heeftNaam/ceo:naam ?naam.
+  }
+OPTIONAL {
+    ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type.
+  }
+OPTIONAL {
+    
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?oorspronkelijkeFunctie . 
+  }
+     OPTIONAL {
+    ?rijksmonument ceo:isOnderdeelVanComplex/ceo:heeftNaam/ceo:naam ?naam.
+  }
+OPTIONAL {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basisregistratieRelatie .
+  ?basisregistratieRelatie ceo:heeftGemeente ?gemeentecode
+  ; ceo:heeftProvincie ?provincie
+              }
+              
+OPTIONAL {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?BAGRelatie .
+  ?BAGRelatie ceo:heeftPand ?pand 
+  ; ceo:heeftVerblijfsobject ?verblijfsobject 
+  ; ceo:openbareRuimte ?straat 
+  ; ceo:huisnummer ?huisnummer
+  ; ceo:volledigAdres ?volledigArdres
+  ; ceo:postcode ?postcode
+  ; ceo:woonplaatsnaam  ?woonplaatsnaam
+                          
+}
+              OPTIONAL {
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie ?BRKRelatie .
+  ?BRKRelatie ceo:gemeentenaam ?gemeentenaam 
+  ; ceo:gemeentecode ?gemeentecode
+  ; ceo:perceelnummer ?perceelnummer
+  ; ceo:provinciecode ?provinciecode
+  ; ceo:sectie ?sectie
+}
+
+  
+  BIND(xsd:integer(?rijksmonumentnummer) AS ?rmnr_sort)
+
+}
+ORDER BY ?rmnr_sort
