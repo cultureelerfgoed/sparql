@@ -28,8 +28,8 @@ WHERE {
             VALUES ?predicate { skos:prefLabel skos:altLabel skos:hiddenLabel skos:scopeNote }
             
             FILTER(LANG(?label) = "nl")
-          #FILTER(CONTAINS(LCASE(?label), LCASE(?query))) #origineel
-            FILTER(CONTAINS(LCASE(?label), "goud"))
+          FILTER(CONTAINS(LCASE(?label), LCASE(?query))) #origineel
+         #   FILTER(CONTAINS(LCASE(?label), "goud"))
         }
         #LIMIT#
     }
@@ -50,7 +50,7 @@ WHERE {
         FILTER(LANG(?scopeNote) = "nl")
     }
     OPTIONAL {
-        ?uri skos:definition ?scopeNote .
+        ?uri skos:definition ?definition .
         FILTER(LANG(?scopeNote) = "nl")
     }
     OPTIONAL {
@@ -67,7 +67,7 @@ WHERE {
         ?uri skos:related ?related_uri .
         ?related_uri skos:prefLabel ?related_prefLabel .
         FILTER(LANG(?related_prefLabel) = "nl")
-   }
+    }
     OPTIONAL {
         ?uri skos:exactMatch ?exactMatch_uri .
         OPTIONAL {

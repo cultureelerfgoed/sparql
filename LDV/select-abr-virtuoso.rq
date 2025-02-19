@@ -19,9 +19,10 @@ WHERE {
         }
         #LIMIT#
     }
+  OPTIONAL {
        ?uri skos:prefLabel ?prefLabel .
         FILTER(LANG(?prefLabel) = "nl")
-    
+    }
     OPTIONAL {
         ?uri skos:altLabel ?altLabel .
         FILTER(LANG(?altLabel) = "nl")

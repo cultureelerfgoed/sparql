@@ -22,7 +22,8 @@ CONSTRUCT {
 WHERE {
     {
         SELECT DISTINCT ?uri WHERE {
-            ?uri text:query (?predicate "goud*").
+        SELECT DISTINCT ?uri WHERE {
+            ?uri text:query (?predicate ?zoekvraag).
             ?uri a skos:Concept ;
                 skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
                 ?predicate ?label .
@@ -33,9 +34,9 @@ WHERE {
         }
         #LIMIT#
     }
-    
+    }
     #  Ophalen van alle relevante labels
-    OPTIONAL { ?uri skos:prefLabel ?prefLabel . FILTER(LANG(?prefLabel) = "nl") }
+    OPTIONAL {?uri skos:prefLabel ?prefLabel . FILTER(LANG(?prefLabel) = "nl")}
     OPTIONAL { ?uri skos:altLabel ?altLabel . FILTER(LANG(?altLabel) = "nl") }
     OPTIONAL { ?uri skos:hiddenLabel ?hiddenLabel . FILTER(LANG(?hiddenLabel) = "nl") }
     OPTIONAL { ?uri skos:scopeNote ?scopeNote . FILTER(LANG(?scopeNote) = "nl") }

@@ -28,8 +28,8 @@ WHERE {
             VALUES ?predicate { skos:prefLabel skos:altLabel skos:hiddenLabel skos:scopeNote }
             
             FILTER(LANG(?label) = "nl")
-          #FILTER(CONTAINS(LCASE(?label), LCASE(?query))) #origineel
-            FILTER(CONTAINS(LCASE(?label), "goud"))
+          FILTER(CONTAINS(LCASE(?label), LCASE(?query))) #origineel
+           # FILTER(CONTAINS(LCASE(?label), "goud"))
         }
         #LIMIT#
     }
