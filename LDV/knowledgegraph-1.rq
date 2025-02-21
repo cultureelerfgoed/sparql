@@ -1,5 +1,5 @@
 #+ name: knowledgegraph-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/services/RCE-Knowledge-Graph/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

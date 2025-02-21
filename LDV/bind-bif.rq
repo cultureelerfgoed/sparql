@@ -1,3 +1,56 @@
 #+ name: bind-bif
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Archeologisch-Basis-Register/services/Archeologisch-Basis-Register/sparql
 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+
+SELECT DISTINCT ?uri ?prefLabel ?altLabel ?hiddenLabel ?scopeNote ?broader_uri ?broader_prefLabel
+                ?narrower_uri ?narrower_prefLabel ?related_uri ?related_prefLabel ?exactMatch_uri ?exactMatch_prefLabel
+WHERE {
+    {
+        SELECT DISTINCT ?uri WHERE {
+            # Correcte formattering voor bif:contains
+            BIND(CONCAT('"', ?zoekvraag, '"') AS ?zoekterm)
+
+            ?uri a skos:Concept ;
+                skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+                ?predicate ?label .
+
+            VALUES ?predicate { skos:prefLabel skos:altLabel skos:hiddenLabel skos:scopeNote }
+            
+            FILTER (bif:contains(?label, ?zoekterm))
+            FILTER (LANG(?label) = "nl")
+        }
+        #LIMIT#
+    }
+    
+    # Ophalen van alle relevante labels
+    ?uri skos:prefLabel ?prefLabel . FILTER(LANG(?prefLabel) = "nl")
+    OPTIONAL { ?uri skos:altLabel ?altLabel . FILTER(LANG(?altLabel) = "nl") }
+    OPTIONAL { ?uri skos:hiddenLabel ?hiddenLabel . FILTER(LANG(?hiddenLabel) = "nl") }
+    OPTIONAL { ?uri skos:scopeNote ?scopeNote . FILTER(LANG(?scopeNote) = "nl") }
+
+    # Ophalen van bredere, nauwere en gerelateerde termen
+    OPTIONAL {
+        ?uri skos:broader ?broader_uri .
+        ?broader_uri skos:prefLabel ?broader_prefLabel .
+        FILTER(LANG(?broader_prefLabel) = "nl")
+    }
+    OPTIONAL {
+        ?uri skos:narrower ?narrower_uri .
+        ?narrower_uri skos:prefLabel ?narrower_prefLabel .
+        FILTER(LANG(?narrower_prefLabel) = "nl")
+    }
+    OPTIONAL {
+        ?uri skos:related ?related_uri .
+        ?related_uri skos:prefLabel ?related_prefLabel .
+        FILTER(LANG(?related_prefLabel) = "nl")
+    }
+    OPTIONAL {
+        ?uri skos:exactMatch ?exactMatch_uri .
+        OPTIONAL {
+            ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel .
+            FILTER(LANG(?exactMatch_prefLabel) = "nl")
+        }
+    }
+}
