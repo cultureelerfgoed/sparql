@@ -15,7 +15,7 @@ SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept ?scopeNote
   (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
   (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
   (GROUP_CONCAT(DISTINCT ?relatedTerm; SEPARATOR = ", ") AS ?relatedTerms)
-  (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+  (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583") AS ?finalImage)
 WHERE {
 BIND (CONCAT("*", ?term, "*") AS ?searchTerm)  
   SERVICE <https://cultureelerfgoed-graphdb.poolparty.biz/repositories/cht> {

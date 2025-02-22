@@ -1,0 +1,77 @@
+#+ name: Query-11-1-1
+#+ description: Met Jena
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-1/sparql
+
+prefix text: <http://jena.apache.org/text#>
+prefix schema: <https://schema.org/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select distinct ?choi ?rijksmonumentnummer ?naam ?adres ?provincie ?functies ?naam_ ?literal ?plaats ?monumentaard
+
+  (sample(?beeldbank) as ?enkele_beeldbank)
+  (sample(?afbeelding) as ?originele_afbeelding)
+  (sample(?afbeelding) as ?enkele_afbeelding)
+  (str(coalesce(sample(?afbeelding), "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583")) as ?image)
+
+  # Widget aanmaken, met COALESCE() voor lege velden
+  (str(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="', coalesce(?image, "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583"), '" style="max-width: 150px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', coalesce(str(?rijksmonumentnummer), "-"), '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
+    '      <li>Naam: ', coalesce(str(?naam_), "-"), '</li>',
+    '      <li>In: <a href="', coalesce(str(?enkele_beeldbank), "#"), '" target="_blank">Beeldbank</a></li>',
+    '      <li>Monumentaard: ', coalesce(str(?monumentaard), "-"), '</li>',
+    '      <li>Functie: ', coalesce(str(?functies), "-"), '</li>',
+    '      <li>Adres: ', coalesce(str(?adres), "-"), '</li>',
+    '      <li>Plaats: ', coalesce(str(?plaats), "-"), '</li>',
+    '      <li>Provincie: ', coalesce(str(?provincie), "-"), '</li>',
+    '      <li>Gevonden woorden in omschrijving:</br>- ', coalesce(str(?literal), "-"), '</li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  )) as ?widget)
+
+where {
+  (?choi ?sc ?literal) text:query (schema:description '(Jood OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees)'
+                                   'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
+  (?choi) text:query (schema:addressRegion ?provincie).
+
+  ?choi schema:description ?omschrijving.
+  ?choi schema:identifier ?rijksmonumentnummer.
+  ?choi schema:addressLocality ?plaats.
+  ?choi schema:category ?monumentaard.
+  ?choi schema:additionalType ?functie.
+  ?choi schema:sameAs ?cho.
+  bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
+  optional {
+    ?choi schema:address ?adres.
+  }
+  optional {
+    ?choi schema:name ?naam.
+  }
+  bind(coalesce(str(?naam), " -") as ?naam_)
+
+  filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+
+  # Afbeelding is optioneel
+  optional {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+      graph <https://linkeddata.cultureelerfgoed.nl/graph/image> {
+        ?afb a schema:ImageObject .
+        optional {
+          ?afb schema:about ?choi.
+        }
+        ?afb schema:contentUrl ?afbeelding.
+        ?afb edm:isShownAt ?beeldbank.
+      }
+    }
+  }
+}
+group by ?choi ?rijksmonumentnummer ?provincie ?functies ?literal ?naam ?plaats ?monumentaard ?adres ?naam_
+limit 100

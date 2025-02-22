@@ -1,0 +1,61 @@
+#+ name: Query-11-5
+#+ description: met jena, zonder afbeeldingen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/joop-van-der-heiden/test-rm-omschrijvingen/services/test-rm-omschrijvingen/sparql
+
+PREFIX text: <http://jena.apache.org/text#>
+PREFIX schema: <https://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+
+SELECT DISTINCT (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+    ?provincie
+    ?functies
+    ?adres
+    ?literal
+    ?widget
+    ?naam
+    ?plaats
+    ?monumentaard
+WHERE {
+    (?choi ?sc ?literal) text:query (
+        schema:description '(Jood OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees)'
+        'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
+     (?choi) text:query (schema:addressRegion ?provincie).
+
+    ?choi schema:description ?omschrijving.
+    ?choi schema:identifier ?rijksmonumentnummer.
+
+    OPTIONAL {
+        ?choi schema:additionalType ?functie.
+        BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+    }
+
+    OPTIONAL {
+        ?choi schema:address ?adres.
+    }
+
+    ?choi schema:addressLocality ?plaats.
+    ?choi schema:category ?monumentaard.
+
+    OPTIONAL {
+        ?choi schema:name ?naam.
+    }
+
+    FILTER(!REGEX(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+
+    BIND('''
+        <p>{{monumentenregister}}</p>
+        <p>monumentaard: {{monumentaard}}</p>
+        <p>naam: {{naam}}</p>
+        <p>functie: {{functies}}</p>
+        <p>adres: {{adres}}</p>
+        <p>plaats: {{plaats}}</p>
+        <p>provincie: {{provincie}}</p>
+        <p>gevonden woorden in omschrijving:</br>- {{literal}}</p>
+    '''^^rdf:HTML AS ?widget)
+}
+
+LIMIT 100
