@@ -1,4 +1,4 @@
-#+ name: Query-48-1-1
+#+ name: rijksmonument-joods-erfgoed--tabel
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
@@ -8,35 +8,12 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-select distinct
-  (strdt(concat(
-    '<table>',
-    '<tr>',
-    '<td><b>Rijksmonumenten met Joods erfgoed</b></td>',
-    '</tr>',
-    '<tr>',
-    '<td><b>Monument: </b>', str(?rijksmonumentnummer), '</td>',
-    '</tr>',
-    '<tr>',
-    '<td><b>Functie: </b>', group_concat(distinct str(?functiel); separator='; '), '</td>',
-    '</tr>',
-    '<tr>',
-    '<td><b>Gevonden termen: </b>', (group_concat(distinct ?joodsGerelateerd; separator="; ") ), '</td>',
-    '</tr>',
-    '<tr>',
-    '<td><b>Omschrijving: </b>',
-    if(strlen(str(?omschrijving)) > 250,
-    concat(substr(str(?omschrijving), 1, 250), "... <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rijksmonumentnummer), "' target='_blank'>lees hier verder</a>"),
-    str(?omschrijving)),
-    '</td>',
-    '</tr>',
-    '<td><b>Register: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
-    '</table>'), rdf:HTML) as ?geometrieLabel)
-  ?geometrie ?provincie
-
+select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) 
+?provincie ?functie ?categorieenfunctie 
+(group_concat(distinct ?joodsGerelateerd) as ?gevondenTermen) ?omschrijving
 where {
   graph graph:instanties-rce {
-    ?choi rdf:type ceo:Rijksmonument.
+    ?choi a ceo:Rijksmonument.
     ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
@@ -44,7 +21,6 @@ where {
     ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
     bind(replace(replace(?omschrijving_, "\r", " "), "\n", " ") as ?omschrijving)
 
-    # Zoektermen
     bind(if(regex(?omschrijving, "\\b(Jood)\\b", "i"), "Jood", "") as ?matchLabel1)
     bind(if(regex(?omschrijving, "\\b(Joods)\\b", "i"), "Joods", "") as ?matchLabel2)
     bind(if(regex(?omschrijving, "\\b(Joodse)\\b", "i"), "Joodse", "") as ?matchLabel3)
@@ -68,7 +44,7 @@ where {
     bind(if(regex(?omschrijving, "\\b(Davidster)\\b", "i"), "Davidster", "") as ?matchLabel21)
     bind(if(regex(?omschrijving, "\\b(Davidsster)\\b", "i"), "Davidsster", "") as ?matchLabel22)
     bind(if(regex(?omschrijving, "\\b(Isr.)\\b", "i"), "Isr.", "") as ?matchLabel23)
-
+    
     bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
                 if(?matchLabel2 != "", " ", ""), ?matchLabel2,
                 if(?matchLabel3 != "", " ", ""), ?matchLabel3,
@@ -93,7 +69,7 @@ where {
                 if(?matchLabel22 != "", " ", ""), ?matchLabel22,
                 if(?matchLabel23 != "", " ", ""), ?matchLabel23) as ?joodsGerelateerd)
   }
-
+  
   filter(?joodsGerelateerd != "")
   filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
 
@@ -101,19 +77,38 @@ where {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
     ?functies_ ceo:heeftFunctieNaam ?functies .
     ?functies skos:prefLabel ?functie .
-    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
-  }
+      #  bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiesl)
+    ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
 
+    graph graph:bebouwdeomgeving {
+      optional {
+        ?functies skos:broader ?broader1 .
+        ?broader1 skos:prefLabel ?functie1 .
+        filter(?functie1 != "bebouwde omgeving")
+        optional {
+          ?broader1 skos:broader ?broader2 .
+          ?broader2 skos:prefLabel ?functie2 .
+          filter(?functie2 != "bebouwde omgeving")
+          optional {
+            ?broader2 skos:broader ?broader3 .
+            ?broader3 skos:prefLabel ?functie3 .
+            filter(?functie3 != "bebouwde omgeving")
+          }
+        }
+      }
+    }
+    bind(concat(
+      if(bound(?functie1), concat("", ?functie1), ""),
+      if(bound(?functie2), concat(" | ", ?functie2), ""),
+      if(bound(?functie3), concat(" | ", ?functie3), "")
+    ) as ?categorieenfunctie)
+  }
+  
   ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
   graph graph:owms {
     ?prov skos:prefLabel ?provincie.
   }
 
-  graph graph:punten {
-    optional {
-      ?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.
-    }
-  }
-
 }
-group by ?choi ?provincie ?omschrijving ?rijksmonumentnummer ?geometrie ?geometrieLabel
+group by ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie ?categorieenfunctie
+order by ?provincie ?functie ?rijksmonumentnummer
