@@ -1,0 +1,120 @@
+#+ name: rijksmonument-joods-erfgoed--geo
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select distinct
+  (strdt(concat(
+    '<table>',
+    '<tr>',
+    '<td><b>Rijksmonumenten met Joods erfgoed</b></td>',
+    '</tr>',
+    '<tr>',
+    '<td><b>Monument: </b>', str(?rijksmonumentnummer), '</td>',
+    '</tr>',
+    '<tr>',
+    '<td><b>Functie: </b>', group_concat(distinct str(?functiel); separator='; '), '</td>',
+    '</tr>',
+    '<tr>',
+    '<td><b>Gevonden termen: </b>', (group_concat(distinct ?joodsGerelateerd; separator="; ") ), '</td>',
+    '</tr>',
+    '<tr>',
+    '<td><b>Omschrijving: </b>',
+    if(strlen(str(?omschrijving)) > 250,
+    concat(substr(str(?omschrijving), 1, 250), "... <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rijksmonumentnummer), "' target='_blank'>lees hier verder</a>"),
+    str(?omschrijving)),
+    '</td>',
+    '</tr>',
+    '<td><b>Register: </b>','<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td>',
+    '</table>'), rdf:HTML) as ?geometrieLabel)
+  ?geometrie ?provincie  ?rijksmonumentnummer
+
+where {
+  graph graph:instanties-rce {
+    ?choi rdf:type ceo:Rijksmonument.
+    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
+    ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.
+    ?standpunt_omschrijving ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+    bind(replace(replace(?omschrijving_, "\r", " "), "\n", " ") as ?omschrijving)
+
+    # Zoektermen
+    bind(if(regex(?omschrijving, "\\b(Jood)\\b", "i"), "Jood", "") as ?matchLabel1)
+    bind(if(regex(?omschrijving, "\\b(Joods)\\b", "i"), "Joods", "") as ?matchLabel2)
+    bind(if(regex(?omschrijving, "\\b(Joodse)\\b", "i"), "Joodse", "") as ?matchLabel3)
+    bind(if(regex(?omschrijving, "\\b(Joden)\\b", "i"), "Joden", "") as ?matchLabel4)
+    bind(if(regex(?omschrijving, "\\b(Israëlitisch)\\b", "i"), "Israëlitisch", "") as ?matchLabel5)
+    bind(if(regex(?omschrijving, "\\b(Hebreeuws)\\b", "i"), "Hebreeuws", "") as ?matchLabel6)
+    bind(if(regex(?omschrijving, "\\b(Jiddisch)\\b", "i"), "Jiddisch", "") as ?matchLabel7)
+    bind(if(regex(?omschrijving, "\\b(Kosher)\\b", "i"), "Kosher", "") as ?matchLabel8)
+    bind(if(regex(?omschrijving, "\\b(Koosjer)\\b", "i"), "Koosjer", "") as ?matchLabel9)
+    bind(if(regex(?omschrijving, "\\b(Sjabbat)\\b", "i"), "Sjabbat", "") as ?matchLabel10)
+    bind(if(regex(?omschrijving, "\\b(Kille)\\b", "i"), "Kille", "") as ?matchLabel11)
+    bind(if(regex(?omschrijving, "\\b(Mikwe)\\b", "i"), "Mikwe", "") as ?matchLabel12)
+    bind(if(regex(?omschrijving, "\\b(Sjoel)\\b", "i"), "Sjoel", "") as ?matchLabel13)
+    bind(if(regex(?omschrijving, "\\b(Hoogduits)\\b", "i"), "Hoogduits", "") as ?matchLabel14)
+    bind(if(regex(?omschrijving, "\\b(Asjkenazisch)\\b", "i"), "Asjkenazisch", "") as ?matchLabel15)
+    bind(if(regex(?omschrijving, "\\b(Portugees)\\b", "i"), "Portugees", "") as ?matchLabel16)
+    bind(if(regex(?omschrijving, "\\b(Sabat)\\b", "i"), "Sabat", "") as ?matchLabel17)
+    bind(if(regex(?omschrijving, "\\b(Synagoge)\\b", "i"), "Synagoge", "") as ?matchLabel18)
+    bind(if(regex(?omschrijving, "\\b(Serfadisch)\\b", "i"), "Serfadisch", "") as ?matchLabel19)
+    bind(if(regex(?omschrijving, "\\b(Rabbijn)\\b", "i"), "Rabbijn", "") as ?matchLabel20)
+    bind(if(regex(?omschrijving, "\\b(Davidster)\\b", "i"), "Davidster", "") as ?matchLabel21)
+    bind(if(regex(?omschrijving, "\\b(Davidsster)\\b", "i"), "Davidsster", "") as ?matchLabel22)
+    bind(if(regex(?omschrijving, "\\b(Isr.)\\b", "i"), "Isr.", "") as ?matchLabel23)
+
+    bind(concat(if(?matchLabel1 != "", " ", ""), ?matchLabel1,
+                if(?matchLabel2 != "", " ", ""), ?matchLabel2,
+                if(?matchLabel3 != "", " ", ""), ?matchLabel3,
+                if(?matchLabel4 != "", " ", ""), ?matchLabel4,
+                if(?matchLabel5 != "", " ", ""), ?matchLabel5,
+                if(?matchLabel6 != "", " ", ""), ?matchLabel6,
+                if(?matchLabel7 != "", " ", ""), ?matchLabel7,
+                if(?matchLabel8 != "", " ", ""), ?matchLabel8,
+                if(?matchLabel9 != "", " ", ""), ?matchLabel9,
+                if(?matchLabel10 != "", " ", ""), ?matchLabel10,
+                if(?matchLabel11 != "", " ", ""), ?matchLabel11,
+                if(?matchLabel12 != "", " ", ""), ?matchLabel12,
+                if(?matchLabel13 != "", " ", ""), ?matchLabel13,
+                if(?matchLabel14 != "", " ", ""), ?matchLabel14,
+                if(?matchLabel15 != "", " ", ""), ?matchLabel15,
+                if(?matchLabel16 != "", " ", ""), ?matchLabel16,
+                if(?matchLabel17 != "", " ", ""), ?matchLabel17,
+                if(?matchLabel18 != "", " ", ""), ?matchLabel18,
+                if(?matchLabel19 != "", " ", ""), ?matchLabel19,
+                if(?matchLabel20 != "", " ", ""), ?matchLabel20,
+                if(?matchLabel21 != "", " ", ""), ?matchLabel21,
+                if(?matchLabel22 != "", " ", ""), ?matchLabel22,
+                if(?matchLabel23 != "", " ", ""), ?matchLabel23) as ?joodsGerelateerd)
+  }
+
+  filter(?joodsGerelateerd != "")
+  filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+
+  optional {
+    ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
+    ?functies_ ceo:heeftFunctieNaam ?functies .
+    ?functies skos:prefLabel ?functie .
+    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
+  }
+
+  ?choi ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+  graph graph:owms {
+    ?prov skos:prefLabel ?provincie.
+  }
+
+  graph graph:punten {
+    optional {
+      ?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.
+    }
+  }
+
+}
+group by ?provincie ?omschrijving ?rijksmonumentnummer ?monumentenregister ?functie ?categorieenfunctie ?geometrie
+#?provincie ?omschrijving ?rijksmonumentnummer ?geometrie ?geometrieLabel

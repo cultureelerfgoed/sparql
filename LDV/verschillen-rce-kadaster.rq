@@ -1,0 +1,25 @@
+#+ name: verschillen-rce-kadaster
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix ext: <https://modellen.kkg.kadaster.nl/def/imxgeo-ext#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix imx: <http://modellen.geostandaarden.nl/def/imx-geo#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix vbo: <https://bag.basisregistraties.overheid.nl/id/verblijfsobject/>
+select ?wktKkg ('blue' as ?wktKkgColor) ('Kadaster' as ?wktKkgLabel) ?wktRce ('yellow' as ?wktRceColor) ('RCE' as ?wktRceLabel) {
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    select * {
+      [] ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
+         ceo:heeftGeometrie/geo:asWKT ?wktRce.
+      filter(!strstarts(str(?wktRce),'Point'))
+    }
+    limit 100
+  }
+  bind(iri(concat(str(vbo:),?vboId)) as ?vbo)
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/sparql> {
+    ?vbo ^prov:wasDerivedFrom/imx:isAdresVanGebouw/ext:bovenaanzichtgeometrie/geo:asWKT ?wktKkg.
+  }
+}
+offset 1
+limit 1

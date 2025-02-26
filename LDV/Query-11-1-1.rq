@@ -20,7 +20,8 @@ select distinct ?choi ?rijksmonumentnummer ?naam ?adres ?provincie ?functies ?na
 
   # Widget aanmaken, met COALESCE() voor lege velden
   (str(concat(
-    '<div style="background-color:rgba(0,0,0,.2);">',
+     '<div style="margin-top:5mm;">',  
+    '   <div style="background-color:rgba(0,0,0,.2); padding-top:5mm;">', 
     '   <center><img src="', coalesce(?image, "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583"), '" style="max-width: 150px;"></center>',
     '   <ul>',
     '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', coalesce(str(?rijksmonumentnummer), "-"), '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',

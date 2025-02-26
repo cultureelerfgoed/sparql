@@ -2,60 +2,68 @@
 #+ description: met jena, zonder afbeeldingen
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-1/sparql
 
-PREFIX text: <http://jena.apache.org/text#>
-PREFIX schema: <https://schema.org/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX edm: <http://www.europeana.eu/schemas/edm/>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
+prefix text: <http://jena.apache.org/text#>
+prefix schema: <https://schema.org/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
 
-SELECT DISTINCT (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
-    ?provincie
-    ?functies
-    ?adres
-    ?literal
-    ?widget
-    ?naam
-    ?plaats
-    ?monumentaard
-WHERE {
-    (?choi ?sc ?literal) text:query (
-        schema:description '(Jood OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees OR Synagoge OR Sefardisch OR Isr. OR Rabbijn OR Davidster OR Davidsster)'
-        'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
-     (?choi) text:query (schema:addressRegion ?provincie).
+select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+  ?provincie
+  ?functies
+  ?adres
+  ?literal
+  ?widget
+  ?naam
+  ?plaats
+  ?monumentaard
+where {
+  (?choi ?sc ?literal) text:query (
+    schema:description '(Jood OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees OR Synagoge OR Sefardisch OR Isr. OR Rabbijn OR Davidster OR Davidsster)'
+    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
+  (?choi) text:query (schema:addressRegion ?provincie).
 
-    ?choi schema:description ?omschrijving.
-    ?choi schema:identifier ?rijksmonumentnummer.
+  ?choi schema:description ?omschrijving.
+  ?choi schema:identifier ?rijksmonumentnummer.
 
-    OPTIONAL {
-        ?choi schema:additionalType ?functie.
-        BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
-    }
+  optional {
+    ?choi schema:additionalType ?functie.
+    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
+  }
 
-    OPTIONAL {
-        ?choi schema:address ?adres.
-    }
+  optional {
+    ?choi schema:address ?adres.
+  }
 
-    ?choi schema:addressLocality ?plaats.
-    ?choi schema:category ?monumentaard.
+  ?choi schema:addressLocality ?plaats.
+  ?choi schema:category ?monumentaard.
 
-    OPTIONAL {
-        ?choi schema:name ?naam.
-    }
+  optional {
+    ?choi schema:name ?naam.
+  }
 
-    FILTER(!REGEX(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+  filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
 
-    BIND('''
-        <p>{{monumentenregister}}</p>
-        <p>monumentaard: {{monumentaard}}</p>
-        <p>naam: {{naam}}</p>
-        <p>functie: {{functies}}</p>
-        <p>adres: {{adres}}</p>
-        <p>plaats: {{plaats}}</p>
-        <p>provincie: {{provincie}}</p>
-        <p>gevonden woorden in omschrijving:</br>- {{literal}}</p>
-    '''^^rdf:HTML AS ?widget)
+  # Widget aanmaken, met COALESCE() voor lege velden
+  bind(str(concat(
+    '<div style="margin-top:5mm;">',  
+    '   <div style="background-color:rgba(0,0,0,.2); padding-top:5mm;">', 
+    '      <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', coalesce(str(?rijksmonumentnummer), "-"), '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
+    '      <li>Naam: ', coalesce(str(?naam_), "-"), '</li>',
+    '      <li>In: <a href="', coalesce(str(?enkele_beeldbank), "#"), '" target="_blank">Beeldbank</a></li>',
+    '      <li>Monumentaard: ', coalesce(str(?monumentaard), "-"), '</li>',
+    '      <li>Functie: ', coalesce(str(?functies), "-"), '</li>',
+    '      <li>Adres: ', coalesce(str(?adres), "-"), '</li>',
+    '      <li>Plaats: ', coalesce(str(?plaats), "-"), '</li>',
+    '      <li>Provincie: ', coalesce(str(?provincie), "-"), '</li>',
+    '      <li>Gevonden woorden in omschrijving:</br>- ', coalesce(str(?literal), "-"), '</li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  )) as ?widget)
 }
 
-LIMIT 100
+limit 100

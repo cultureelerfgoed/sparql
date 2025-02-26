@@ -22,7 +22,10 @@ construct {
   ?exactMatch_uri skos:prefLabel ?exactMatch_prefLabel .
 }
   where {
+    # Voeg wildcards toe aan de zoekterm
+   BIND(CONCAT("*", ?zoekvraag, "*") AS ?query)
 
+  #  ?uri text:query (?predicate ?query).
     ?uri text:query (?predicate ?query).
     ?uri a skos:Concept;
          skos:prefLabel ?label.
@@ -71,4 +74,3 @@ construct {
       }
     }
   }
-  limit 1
