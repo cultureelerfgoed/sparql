@@ -1,6 +1,4 @@
 #+ name: rest-api
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
-
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 construct {
@@ -30,9 +28,7 @@ construct {
           $this ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:provinciecode ?provinciecode0.
           filter(coalesce(?provinciecode) && ?provinciecode = ?provinciecode0)
         }
-      }
-      limit 10
-      # paginate
+      } limit 10 offset 1 # paginate
     }
     $this ?p1 ?o1.
     optional {

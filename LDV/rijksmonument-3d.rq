@@ -10,13 +10,12 @@ prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
-prefix vbo: <https://data.kkg.kadaster.nl/id/verblijfsobject/>
 prefix wde: <http://www.wikidata.org/entity/>
 prefix wdt: <http://www.wikidata.org/prop/direct/>
 select
   ?bagWkt (10 as ?bagWktHeight) (5 as ?bagWktZ) ('green' as ?bagWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?gebouw)),'">BAG geometrie van een gebouw</a>'),rdf:HTML) as ?bagWktLabel)
   ?bgtWkt (15 as ?bgtWktHeight) (10 as ?bgtWktZ) ('dodgerblue' as ?bgtWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?gebouw)),'">BGT geometrie van een gebouw</a>'),rdf:HTML) as ?bgtWktLabel)
-  ?perceelWkt (1 as ?perceelWktHeight) ('yellow' as ?perceelWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?perceel)),'">BRK geometrie van een perceel </a>'),rdf:HTML) as ?perceelWktLabel)
+  #?perceelWkt (1 as ?perceelWktHeight) ('yellow' as ?perceelWktColor) (strdt(concat('<a href="',?prefix,encode_for_uri(str(?perceel)),'">BRK geometrie van een perceel </a>'),rdf:HTML) as ?perceelWktLabel)
   ?rceWkt ('purple' as ?rceWktColor) ?rceWktLabel
 {
   bind(<https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/rijksmonument/15494> as ?rijksmonument)
@@ -28,7 +27,7 @@ select
     ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam;
     ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
   optional { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl. }
-  bind(iri(concat(str(vbo:),?vboId)) as ?vbo)
+  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
   service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
     ?gebouw
       a sor:Gebouw;
