@@ -1,6 +1,4 @@
 #+ name: construct-abr-virtuoso
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/services/archeologischbasisregister-virtuoso/sparql
-
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 CONSTRUCT {

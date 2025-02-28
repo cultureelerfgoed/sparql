@@ -1,6 +1,4 @@
 #+ name: rest-api-rijksmonumenten
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

@@ -1,6 +1,4 @@
 #+ name: Query-8-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

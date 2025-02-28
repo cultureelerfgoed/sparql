@@ -1,7 +1,5 @@
 #+ name: Query-35
 #+ description: Met dank aan Wikimedia en memorix.maior
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

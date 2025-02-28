@@ -1,6 +1,4 @@
 #+ name: Query-12
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
-
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 # Definieer PREFIXes voor diverse namenruimten die in de query worden gebruikt.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
