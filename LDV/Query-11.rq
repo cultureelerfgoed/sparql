@@ -1,4 +1,6 @@
 #+ name: Query-11
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX dbo: <http://dbpedia.org/ontology/>

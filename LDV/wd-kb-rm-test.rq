@@ -1,5 +1,7 @@
 #+ name: wd-kb-rm-test
 #+ description: Query verbindt rijksmonument RCE met rijkmonument Wikidata, haalt VIAF van architect op en gebruikt die VIAF om werken van architect te zoeken in de NL bibliografie van de KB.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

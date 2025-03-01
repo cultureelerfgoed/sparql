@@ -10,6 +10,8 @@
 #- </p>
 #- Date: dd. 2024-03-05</br>
 #- Version: 1.0
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 # This query constructs a graph pattern by traversing linked data from a cultural heritage dataset.
 # It starts from a specific type of object (Grondsporen) and explores its relationships with other objects.
 # It also includes optional patterns for additional levels of depth in the traversal.

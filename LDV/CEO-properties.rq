@@ -1,5 +1,7 @@
 #+ name: CEO-properties
 #+ description: The query selects datatype properties in the specified namespace, while excluding object properties. Change the # for object properties.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 #+ The query selects datatype properties in the specified namespace, while excluding object properties. Change the # for object properties.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 

@@ -1,4 +1,6 @@
 #+ name: kadaster
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix kad: <https://data.kkg.kadaster.nl/kad/model/def/>
@@ -28,7 +30,7 @@ select distinct ?akrAanduiding ?oppervlakte ?perceelnummer ?bouwjaar ?gemeentena
     '<dt>Gebruiksdoelen</dt><dd>',(group_concat(distinct ?gebruiksdoel)),'</dd>',
     '</dl>'),rdf:HTML) as ?shapeLabel)
 where {
-  service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
     ?koppeling
       rdf:object ?nummeraanduiding;
       rdf:subject ?perceel.

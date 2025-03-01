@@ -39,7 +39,7 @@ where {
     }
   }
 
-  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
     # GRAPH <https://data.kkg.kadaster.nl/graph/instanties-adresseerbaarObject> {
     ?verblijfsobject bag:hoofdadres ?hoofdadres .
     ?hoofdadres bag:ligtAan/skos:prefLabel ?bagstraat .

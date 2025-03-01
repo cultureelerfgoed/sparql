@@ -1,5 +1,7 @@
 #+ name: Query-1-10
 #+ description: This query retrieves information about cultural heritage objects that are Rijksmonumenten, along with their associated images from the Beeldbank. The results are grouped by the object and include an HTML widget for displaying the information.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

@@ -16,7 +16,7 @@ prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
 select distinct * where {
-  service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
     ?koppeling
       rdf:object ?nummeraanduiding;
       rdf:subject ?perceel1.

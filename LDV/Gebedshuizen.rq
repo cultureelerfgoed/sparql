@@ -1,4 +1,6 @@
 #+ name: Gebedshuizen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

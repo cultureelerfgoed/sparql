@@ -1,5 +1,7 @@
 #+ name: Query-32
 #+ description: The query retrieves the municipality name, the monument number, and the residence name for cultural heritage sites using the specified relationships and properties.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 #+ the query retrieves the municipality name, the monument number, and the residence name for cultural heritage sites using the specified relationships and properties.
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

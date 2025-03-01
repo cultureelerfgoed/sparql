@@ -1,5 +1,7 @@
 #+ name: Query-16-1-1-1-1
 #+ description: Query waarbij in de gezocht wordt op functie "Winkels" en alles wat er onder hangt
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX gr: <http://purl.org/goodrelations/v1#>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

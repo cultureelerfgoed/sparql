@@ -1,4 +1,6 @@
 #+ name: Query-29
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
 #+ This query searches a dataset using the Simple Knowledge Organization System (SKOS) vocabulary, and retrieves information about a specific concept based on its preferred label (prefLabel), alternative labels (altLabel), scope notes (scopeNote), as well as broader and narrower terms (broader and narrower).
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
@@ -14,7 +16,7 @@ SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept
     (GROUP_CONCAT(DISTINCT ?scopeNote; SEPARATOR = ". - ") AS ?notes)
     (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
     (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
-    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583") AS ?finalImage)
 
 # The WHERE clause determines what data is selected for the output. The variables listed in the SELECT statement above will be defined here.
 WHERE {

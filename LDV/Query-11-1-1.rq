@@ -39,7 +39,7 @@ select distinct ?choi ?rijksmonumentnummer ?naam ?adres ?provincie ?functies ?na
   )) as ?widget)
 
 where {
-  (?choi ?sc ?literal) text:query (schema:description '(Jood OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees OR Synagoge OR Sefardisch OR Isr. OR Rabbijn OR Davidster OR Davidsster)'
+  (?choi ?sc ?literal) text:query (schema:description '(Jood OR Diamant OR Joods OR Joodse OR Joden OR Israëlitisch OR Hebreeuws OR Jiddisch OR Kosher OR Koosjer OR Sjabbat OR Kille OR Mikwe OR Sjoel OR Hoogduits OR Asjkenazisch OR Portugees OR Synagoge OR Sefardisch OR Isr. OR Rabbijn OR Davidster OR Davidsster)'
                                    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
   (?choi) text:query (schema:addressRegion ?provincie).
   ?choi schema:description ?omschrijving.

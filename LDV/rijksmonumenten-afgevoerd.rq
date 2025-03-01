@@ -1,5 +1,7 @@
 #+ name: rijksmonumenten-afgevoerd
 #+ description: Data over afgevoerde rijksmonumenten.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

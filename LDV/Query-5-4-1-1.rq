@@ -32,7 +32,7 @@ select distinct ?cho ?gemeentenaam ?cbscode ?kadastraleGemeentecode ?perceel ?se
   BIND (xsd:integer(?perceel) AS ?integerPerceel)
 
   # Part 2: Retrieve Kadastrale Aanduiding data from external service
-  service <https://api.labs.kadaster.nl/datasets/brk/dkk/services/default/sparql> {
+  service <https://api.labs.kadaster.nl/datasets/kadaster/kkg/sparql> {
     ?kad a brk:KadastraleAanduiding ;
          skos:prefLabel ?aanduiding ;
          brk:perceelnummer ?integerPerceel ;

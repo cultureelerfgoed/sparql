@@ -9,7 +9,7 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
 select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) 
-?provincie ?functie ?categorieenfunctie 
+?rijksmonumentnummer ?provincie ?functie ?categorieenfunctie
 (group_concat(distinct ?joodsGerelateerd) as ?gevondenTermen) ?omschrijving
 where {
   graph graph:instanties-rce {
@@ -76,14 +76,15 @@ where {
   optional {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
     ?functies_ ceo:heeftFunctieNaam ?functies .
-    ?functies skos:prefLabel ?functie .
-      #  bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiesl)
+    ?functies skos:prefLabel ?functieh .
+    bind(replace(?functieh, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
     ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
 
     graph graph:bebouwdeomgeving {
       optional {
         ?functies skos:broader ?broader1 .
-        ?broader1 skos:prefLabel ?functie1 .
+        ?broader1 skos:prefLabel ?functie1h .
+            bind(replace(?functie1h, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie1)
         filter(?functie1 != "bebouwde omgeving")
         optional {
           ?broader1 skos:broader ?broader2 .

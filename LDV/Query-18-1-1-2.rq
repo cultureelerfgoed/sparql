@@ -1,4 +1,6 @@
 #+ name: Query-18-1-1-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX luc: <http://www.ontotext.com/connectors/lucene#>
 PREFIX luc-index: <http://www.ontotext.com/connectors/lucene/instance#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

@@ -1,5 +1,7 @@
 #+ name: RM-adres
 #+ description: Adres opvragen van een rijksmonument
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

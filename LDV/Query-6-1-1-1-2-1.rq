@@ -1,4 +1,6 @@
 #+ name: Query-6-1-1-1-2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX owms: <http://standaarden.overheid.nl/owms/terms/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>

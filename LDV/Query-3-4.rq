@@ -1,5 +1,7 @@
 #+ name: Query-3-4
 #+ description: De query zoekt concepten in een thesaurus op basis van verschillende zoektermen, zoals exacte overeenkomsten, beginletters en fuzzy-zoekopdrachten. Het haalt informatie op zoals preferred labels, alternative labels, scope notes, bredere termen en smallere termen van de concepten. Het genereert een HTML-widget met de gevonden gegevens en optionele afbeeldingen. De resultaten worden gegroepeerd op basis van de preferred label, widget, afbeelding, topconcept label, thesaurus en concept, en gesorteerd op thesaurus en preferred label.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
+
 # PREFIX-statements voor het definiëren van de gebruikte prefixes in de query
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -13,7 +15,7 @@ SELECT ?widget ?prefLabel ?image ?thesaurus ?topConceptLabel ?concept
     (GROUP_CONCAT(DISTINCT ?scopeNote; SEPARATOR = ". - ") AS ?notes)
     (GROUP_CONCAT(DISTINCT ?broaderTerm; SEPARATOR = " <= ") AS ?broaderTerms)
     (GROUP_CONCAT(DISTINCT ?narrowerTerm; SEPARATOR = " => ") AS ?narrowerTerms)
-    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") AS ?finalImage)
+    (IF(bound(?image), ?image, "https://linkeddata.cultureelerfgoed.nl/rce/afbeeldingen/assets/67b871be0a7ae3c8fd2e2583") AS ?finalImage)
 
 # WHERE-clause die de data selecteert voor de output
 WHERE {

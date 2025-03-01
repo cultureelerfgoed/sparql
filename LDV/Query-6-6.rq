@@ -1,6 +1,8 @@
 #+ name: Query-6-6
 #+ description: Vergelijk aantallen in CEO en CHO.
 #- Dat is de test.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

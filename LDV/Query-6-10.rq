@@ -1,5 +1,7 @@
 #+ name: Query-6-10
 #+ description: Gemaakt voor Leon om te zoeken op lengte van omschrijvingen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 # We definiëren de gebruikte prefixes voor namespaces aan het begin van de query.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

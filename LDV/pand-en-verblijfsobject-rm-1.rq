@@ -24,7 +24,8 @@ SELECT DISTINCT * WHERE {
 
     BIND(URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
 
-    SERVICE <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql> {
+    SERVICE <https://api.labs.kadaster.nl/datasets/kadaster/kkg/services/kkg/sparql/>
+ {
       SELECT DISTINCT * {
         ?verblijfsobjectHttp
           a sor:Verblijfsobject ;

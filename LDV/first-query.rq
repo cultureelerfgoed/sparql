@@ -1,4 +1,6 @@
 #+ name: first-query
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/thesauri/services/thesauri/sparql
+
 prefix text: <http://jena.apache.org/text#>
 
 select *

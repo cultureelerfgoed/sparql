@@ -1,4 +1,6 @@
 #+ name: Query-16-3-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

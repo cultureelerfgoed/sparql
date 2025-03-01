@@ -1,5 +1,7 @@
 #+ name: Query-1-4
 #+ description: This query retrieves information about monuments and artworks associated with the architect Gerrit Rietveld. It combines data from multiple sources, including the Rijksmuseum collection, the Het Utrechts Archief, and The Other Interface knowledge graph.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
 # gebaseerd op query Marije Timmermans
 
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
