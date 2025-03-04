@@ -121,6 +121,6 @@ where {
         }
       }
     }
-    group by ?cho ?rijksmonumentnummer ?vbo
+    group by ?cho ?rijksmonumentnummer ?vbo ?gemeente
   }
 }
