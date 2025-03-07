@@ -9,7 +9,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   
   # 1. Aantal artefacten totaal
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("1. Aantal artefacten totaal" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact . 
@@ -21,7 +21,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 2. Aantal vervallen artefacten
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("2. Aantal vervallen artefacten" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ; 
@@ -32,7 +32,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 3. Aantal nieuwe artefacten
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("3. Aantal nieuwe artefacten" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ; 
@@ -45,7 +45,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 4. Aantal oude artefacten met opvolgend artefact
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("4. Aantal oude artefacten met opvolgend artefact" AS ?category)  
   <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ; 
@@ -56,7 +56,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 5. Aantal artefacten met scopeNote
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("5. Aantal artefacten met scopeNote" AS ?category)
        <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ;
@@ -67,7 +67,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 6. Aantal matches met andere thesauri
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("6. Aantal matches met andere thesauri" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
       ?artefactUri skos:prefLabel ?artefact ;
@@ -79,7 +79,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 7. Aantal artefacten met Abrcode
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("7. Aantal artefacten met Abrcode" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ; 
@@ -90,7 +90,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 8. Aantal artefacten met PANcode
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("8. Aantal artefacten met PANcode" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ; 
@@ -101,7 +101,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
   UNION
   # 9. Aantal artefacten met periode
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("9. Aantal artefacten met periode" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ;  rnce:hasBeginPeriodAbr/skos:prefLabel ?beginperiode ; rnce:hasEndPeriodAbr/skos:prefLabel ?eindperiode 
@@ -111,7 +111,7 @@ SELECT ?category (COUNT(?artefactUri) AS ?aantal) WHERE {
 UNION
   # 10. Aantal artefacten met Deventer vormcode
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("10. Aantal artefacten met Deventer vormcode" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ;
@@ -120,7 +120,7 @@ UNION
  UNION
   # 11. Aantal artefacten met Deventer bakselcode
   {
-    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+    SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
       BIND("11. Aantal artefacten met Deventer bakselcode" AS ?category)
       <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
   ?artefactUri skos:prefLabel ?artefact ;

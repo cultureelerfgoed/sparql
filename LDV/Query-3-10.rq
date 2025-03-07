@@ -7,7 +7,7 @@ prefix rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 SELECT ?matchfix (count(distinct ?artefactUri) as ?aantal)
 
 WHERE {
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:exactMatch ?match .
@@ -15,7 +15,7 @@ WHERE {
     BIND("exactMatch" as ?matchfix)
   } }
   UNION
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:closeMatch ?match .
@@ -23,7 +23,7 @@ WHERE {
     BIND("closeMatch" AS ?matchfix)
   } }
   UNION
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:broadMatch ?match .
@@ -31,7 +31,7 @@ WHERE {
     BIND("broadMatch" AS ?matchfix)
   } }
   UNION
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:narrowMatch ?match .
@@ -39,7 +39,7 @@ WHERE {
     BIND("narrowMatch" AS ?matchfix)
   } }
   UNION
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact ;
                  skos:relatedMatch ?match .
@@ -47,7 +47,7 @@ WHERE {
     BIND("relatedMatch" AS ?matchfix)
   } }
   UNION
-  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+  { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
     <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .
     ?artefactUri skos:prefLabel ?artefact .
     FILTER NOT EXISTS {

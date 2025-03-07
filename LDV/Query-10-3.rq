@@ -6,7 +6,7 @@ PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?Artefact (GROUP_CONCAT(?mat; SEPARATOR=", ") AS ?Materiaal)
-WHERE { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+WHERE { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
                
                
 <https://data.cultureelerfgoed.nl/term/id/abr/22cbb070-6542-48f0-8afe-7d98d398cc0b> skos:narrower+ ?artefactUri .

@@ -6,7 +6,7 @@ PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
 SELECT ?aardewerkcategorie ?beginPeriode ?eindPeriode
 
-WHERE { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/abr> {
+WHERE { SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/cb410a13-a6e8-4077-a02c-412a93714114> {
   <https://data.cultureelerfgoed.nl/term/id/abr/6b152e0a-34da-4309-bd3e-c7140ca58640> skos:narrower+ ?cat_uri .
   ?cat_uri skos:prefLabel ?aardewerkcategorie ; rnce:hasBeginPeriodAbr/skos:prefLabel ?beginPeriode ; rnce:hasEndPeriodAbr/skos:prefLabel ?eindPeriode
       
