@@ -1,0 +1,93 @@
+#+ name: arnhem
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix wdt: <http://www.wikidata.org/prop/direct/>
+prefix wd: <http://www.wikidata.org/entity/>
+
+select distinct ?cho ?rijksmonumentnummer ?functie ?toelichting ?geo ?adres ?perceel ?sectie ?mapEndpoint ?omschrijving ?img ?label (CONCAT(
+    COALESCE(str(?beginBouwjaar), ""), "-", COALESCE(str(?eindBouwjaar), "")) AS ?datering) (CONCAT(COALESCE(str(?toelichting), "")) AS ?info) (CONCAT(COALESCE(str(?zuiverheid), ""), " - ", COALESCE(str(?stijl), "")) AS ?bouwstijl)
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2); padding-top:5mm;">',
+    '   <center><img src="{{img}}" style="max-width: 150px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', coalesce(str(?rijksmonumentnummer), "-"), '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
+    '      <li>Naam: {{label}}',
+    '      <li>Datering: {{datering}} {{info}}',
+    '      <li>Bouwstijl: {{bouwstijl}}',
+    '      <li>{{adres}}</li>',
+    '      <li>Functie: {{functie}}',
+    '      <li>Perceel: {{perceel}}',
+    '      <li>Sectie: {{sectie}}',
+    '   </ul>',
+    '<ul>',
+    '<td><b>Omschrijving: </b>',
+    if(strlen(str(?omschrijving)) > 250,
+      concat(substr(str(?omschrijving), 1, 250), "... <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rijksmonumentnummer), "' target='_blank'>lees hier verder</a>"),
+      str(?omschrijving)),
+    '</td>',
+    '</ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) as ?geoLabel)
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente <http://standaarden.overheid.nl/owms/terms/Arnhem_(gemeente)>.
+    ?cho ceo:heeftGeometrie/geo:asWKT ?geo.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:perceelnummer ?perceel.
+    ?cho ceo:heeftBasisregistratieRelatie/ceo:heeftBRKRelatie/ceo:sectie ?sectie.
+    optional {
+      ?cho ceo:heeftOorspronkelijkeFunctie ?functies_.
+      ?functies_ ceo:heeftFunctieNaam ?functies .
+      ?functies skos:prefLabel ?functie .
+    }
+    ?cho ceo:heeftOmschrijving ?omschrijving1 .
+    ?omschrijving1 ceo:omschrijving ?omschrijving.
+    ?omschrijving1 ceo:heeftOmschrijvingstype <https://data.cultureelerfgoed.nl/term/id/rn/0273a12d-7259-4391-aee2-5dac264aebe9>.
+ optional { ?cho ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+   ?gebeurtenis ceo:kennisregistratieToelichting ?toelichting.
+  ?gebeurtenis ceo:heeftDatering ?datering_.
+  ?datering_ ceo:heeftBeginDatering ?beginDatering.
+  ?datering_ ceo:heeftEindDatering ?eindDatering.
+  ?beginDatering ceo:datum ?beginDatum.
+    BIND(year(xsd:dateTime(?beginDatum)) as ?beginBouwjaar)
+  bind(concat(str(?beginBouwjaar)) as ?beginBouwjaars)
+  ?eindDatering ceo:datum ?eindDatum .
+    BIND(year(xsd:dateTime(?eindDatum)) as ?eindBouwjaar)
+  bind(concat(str(?eindBouwjaar)) as ?eindBouwjaars)
+  FILTER (CONTAINS(?gebeurtenisNaam, "vervaardiging"))}
+
+  OPTIONAL {?cho ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl.
+  ?cho ceo:heeftStijlEnCultuur/ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.}  
+
+    filter regex(?adres, "Pauwstraat|Jansstraat|Varkensstraat|Munterstraat|Rozemarijnsteeg", "i")
+    filter (!regex(?adres, "31", "i"))
+    filter (!regex(?rijksmonumentnummer, "516850", "i"))
+  }
+  bind("red" as ?choColor)
+  bind(15 as ?choHeight)
+  bind(<https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?request=GetCapabilities> as ?mapEndpoint)
+
+  service <https://query.wikidata.org/sparql> {
+    #  ?wikidata wdt:P1435 wd:Q916333.
+    ?wikidata wdt:P359 ?rijksmonumentnummer.
+    optional {
+      ?wikidata wdt:P580 ?bouwjaarWikidata.
+    }
+    ?wikidata wdt:P18 ?img.
+    ?wikidata rdfs:label ?label.
+    filter (lang(?label) = 'nl')
+  }
+}
+limit 1000
