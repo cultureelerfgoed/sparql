@@ -1,0 +1,10 @@
+#+ name: Query-35-1
+#+ description: aangemaakt n.a.v. d DERA scan
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select * where {
+  Graph <https://linkeddata.cultureelerfgoed.nl/cho-kennis/graph/meta> {  
+  ?graph ?eigenschap ?waarde.}
+} 

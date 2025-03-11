@@ -1,0 +1,18 @@
+#+ name: Archeologische-onderzoeksgebieden-1
+#+ description: Grondsporen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?grondsporentype (count(?i) as ?aantal) {
+  ?i a ceo:Grondsporen.
+  ?i ceo:heeftType ?c.
+  ?c ceo:heeftTypeNaam/skos:prefLabel ?grondsporentype.
+
+} 
+group by ?grondsporentype
+order by desc(?aantal)
+

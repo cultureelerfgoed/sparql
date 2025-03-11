@@ -1,0 +1,37 @@
+#+ name: rijksmonumenten-groningen-drenthe-snn-1
+#+ description: Groningen en Noord-Drenthe
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+
+SELECT 
+    ?provincie (COUNT(DISTINCT ?rijksmonument) AS ?aantalMonumentenProvincie)
+    ?gemeente (COUNT(DISTINCT ?rijksmonument) AS ?aantalMonumentenGemeente)
+WHERE {
+    GRAPH graph:instanties-rce {
+        ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+        ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+   #     ?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/fc966a68-8863-4970-a83e-110f96006c21>.
+        ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+        ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gem.
+    }
+
+    GRAPH owms: {
+        ?prov skos:prefLabel ?provincie.
+        ?gem skos:prefLabel ?gemeente.
+    }
+
+    GRAPH graph:bebouwdeomgeving {
+        ?functies skos:hiddenLabel ?hid.
+        FILTER regex(?hid, "k", "i")
+    }
+}
+GROUP BY ?provincie ?gemeente
+ORDER BY ?provincie ?gemeente

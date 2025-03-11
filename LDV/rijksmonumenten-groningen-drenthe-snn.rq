@@ -1,0 +1,45 @@
+#+ name: rijksmonumenten-groningen-drenthe-snn
+#+ description: Groningen en Noord-Drenthe
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+
+select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?rijksmonumentnummer ?naam ?datumInschrijving ?adres ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie
+where
+{
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+     optional {
+       ?rijksmonument ceo:heeftNaam/ceo:naam ?naam.
+     }
+    ?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/fc966a68-8863-4970-a83e-110f96006c21>.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gem.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
+    ?functies_ ceo:heeftFunctieNaam ?functies .
+    ?functies skos:prefLabel ?functieh .
+    bind(replace(?functieh, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+    ?functies_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+   }
+    graph owms:{
+      ?prov skos:prefLabel ?provincie.
+      ?gem skos:prefLabel ?gemeente.
+    }
+  graph graph:bebouwdeomgeving {
+    ?functies skos:hiddenLabel ?hid.
+    FILTER regex(?hid, "k",  "i")
+  }
+  }
+ORDER by ?rijksmonumentnummer ?gemeente ?adres
