@@ -1,6 +1,4 @@
 #+ name: Query-11-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
-
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX edm: <http://www.europeana.eu/schemas/edm/>

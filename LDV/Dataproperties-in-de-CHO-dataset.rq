@@ -1,5 +1,5 @@
 #+ name: Dataproperties-in-de-CHO-dataset
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/sparql
 
 # CEO dataproperties 156
 PREFIX owl: <http://www.w3.org/2002/07/owl#>

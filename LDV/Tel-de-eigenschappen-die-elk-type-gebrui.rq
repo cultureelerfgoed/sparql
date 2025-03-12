@@ -5,7 +5,7 @@
 #-    ?s ?p ?o . 
 #- }
 #- GROUP BY ?type
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/sparql
 
 SELECT DISTINCT ?type (COUNT(DISTINCT ?p) AS ?c)
 WHERE {

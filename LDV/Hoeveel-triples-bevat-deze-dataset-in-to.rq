@@ -2,7 +2,7 @@
 #+ description: SELECT (COUNT (*) AS?tripleCount) WHERE {
 #-    ?s ?p ?o
 #- }
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/services/ceo/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/ceo/sparql
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

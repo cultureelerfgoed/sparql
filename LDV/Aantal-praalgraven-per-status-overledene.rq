@@ -1,6 +1,4 @@
 #+ name: Aantal-praalgraven-per-status-overledene
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
-
 
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 
