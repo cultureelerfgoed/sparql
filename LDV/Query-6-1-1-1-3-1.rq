@@ -1,6 +1,8 @@
 #+ name: Query-6-1-1-1-3-1
 #+ description: Poging om in keuzeblokken van 50 of honderd jaar de verspreiding van gebedshuizen te tonen op een kaart.
 #- Met gekleurde denominatie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
 PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>

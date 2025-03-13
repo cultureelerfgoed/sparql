@@ -1,4 +1,6 @@
 #+ name: Query-2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+
 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/joop-van-der-heiden/gebedshuizen/graphs/>
