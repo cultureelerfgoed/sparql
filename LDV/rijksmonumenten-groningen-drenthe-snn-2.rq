@@ -1,0 +1,46 @@
+#+ name: rijksmonumenten-groningen-drenthe-snn-2
+#+ description: Groningen en Noord-Drenthe
+#- rijksmonumentnummer, adres (straat, huisnummer toevoeging)
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+
+select (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+  ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam
+
+where {
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/fc966a68-8863-4970-a83e-110f96006c21>.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gem.
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode_.
+    ?bagrelatie ceo:volledigAdres ?adres.
+    optional {
+      ?bagrelatie ceo:openbareRuimte ?straat.
+    }
+    optional {
+      ?bagrelatie ceo:huisnummer ?huisnummer.
+    }
+
+   bind(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
+    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+
+
+    # Provincie en gemeente via OWMS graph
+    graph owms: {
+      ?prov skos:prefLabel ?provincie.
+      ?gem skos:prefLabel ?gemeente.
+    }
+  }
+}
+group by ?rijksmonument ?monumentenregister ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam
+order by ?provincie ?gemeente ?woonplaatsnaam ?rijksmonumentnummer
+#limit 1000
