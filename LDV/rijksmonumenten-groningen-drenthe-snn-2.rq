@@ -11,7 +11,7 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 
 select (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-  ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam
+  ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie
 
 where {
   graph graph:instanties-rce {
@@ -22,6 +22,8 @@ where {
     ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
     ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gem.
     ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode_.
+    OPTIONAL {?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .}
+
     ?bagrelatie ceo:volledigAdres ?adres.
     optional {
       ?bagrelatie ceo:openbareRuimte ?straat.
@@ -39,8 +41,12 @@ where {
       ?prov skos:prefLabel ?provincie.
       ?gem skos:prefLabel ?gemeente.
     }
+    
+    GRAPH graph:bebouwdeomgeving {
+        ?functies skos:prefLabel ?functie_.
+        ?functies skos:hiddenLabel ?hid.
+      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+        FILTER regex(?hid, "k", "i")
+    }
   }
 }
-group by ?rijksmonument ?monumentenregister ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam
-order by ?provincie ?gemeente ?woonplaatsnaam ?rijksmonumentnummer
-#limit 1000
