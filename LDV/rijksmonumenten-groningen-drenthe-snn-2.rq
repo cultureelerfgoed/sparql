@@ -10,43 +10,46 @@ prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 
-select (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-  ?rijksmonumentnummer ?adres ?straat ?huisnummer ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie
+select DISTINCT (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+       ?rijksmonumentnummer ?straat ?huisnummer ?adres ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie
 
 where {
   graph graph:instanties-rce {
-    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
-    ?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/fc966a68-8863-4970-a83e-110f96006c21>.
-    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bagrelatie.
-    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov.
-    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente ?gem.
-    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode_.
-    OPTIONAL {?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .}
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer;
+                    ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864;
+                    ceo:heeftMonumentAard rn:fc966a68-8863-4970-a83e-110f96006c21;
+                    ceo:heeftBasisregistratieRelatie ?basisrel.
 
+    ?basisrel ceo:heeftBAGRelatie ?bagrelatie;
+              ceo:heeftProvincie ?prov;
+              ceo:heeftGemeente ?gem.
+
+    ?bagrelatie ceo:volledigAdres ?adres;
+                ceo:postcode ?postcode_;
+                ceo:woonplaatsnaam ?woonplaatsnaam.
     ?bagrelatie ceo:volledigAdres ?adres.
-    optional {
-      ?bagrelatie ceo:openbareRuimte ?straat.
-    }
-    optional {
-      ?bagrelatie ceo:huisnummer ?huisnummer.
-    }
-
-   bind(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
-    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+OPTIONAL { ?bagrelatie ceo:openbareRuimte ?straat. }
+OPTIONAL { ?bagrelatie ceo:huisnummer ?huisnummer. }
 
 
-    # Provincie en gemeente via OWMS graph
-    graph owms: {
-      ?prov skos:prefLabel ?provincie.
-      ?gem skos:prefLabel ?gemeente.
+    BIND(replace(?postcode_, "([0-9]{4})([A-Z]{2})", "$1 $2") AS ?postcode)
+
+    OPTIONAL {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies.
     }
-    
-    GRAPH graph:bebouwdeomgeving {
-        ?functies skos:prefLabel ?functie_.
-        ?functies skos:hiddenLabel ?hid.
-      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
-        FILTER regex(?hid, "k", "i")
+  }
+
+  graph owms: {
+    ?prov skos:prefLabel ?provincie.
+    ?gem skos:prefLabel ?gemeente.
+  }
+
+  OPTIONAL {
+    graph graph:bebouwdeomgeving {
+      ?functies skos:prefLabel ?functie_;
+  #              skos:hiddenLabel ?hid.
+      # FILTER regex(?hid, "k", "i")
+       BIND(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
     }
   }
 }
