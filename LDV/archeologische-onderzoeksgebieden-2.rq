@@ -1,0 +1,28 @@
+#+ name: archeologische-onderzoeksgebieden-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select
+  ?ArcheologischOnderzoeksgebied
+  ?wkt
+  (sample(?wktLabel0) as ?wktLabel)
+  (sample(?wktColor0) as ?wktColor)
+  ('https://service.pdok.nl/rce/ps-ch/wms/v1_0?request=GetCapabilities&service=WMS' as ?mapEndpoint)
+{
+  ?ArcheologischOnderzoeksgebied
+    a ceo:ArcheologischOnderzoeksgebied;
+    ceo:cultuurhistorischObjectnummer ?choNummer;
+    ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaats;
+    ceo:heeftGeometrie/geo:asWKT ?wkt.
+  optional { ?ArcheologischOnderzoeksgebied ceo:bevatObject ?object. }
+  optional { ?ArcheologischOnderzoeksgebied ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving. }
+  optional { ?ArcheologischOnderzoeksgebied ceo:registratiedatum ?registratiedatum. }
+  bind(concat('https://linkeddata.cultureelerfgoed.nl/rce/cho/browser?resource=',encode_for_uri(str(?ArcheologischOnderzoeksgebied))) as ?link)
+  bind(strdt(concat('<h3>Archeologisch onderzoeksgebied <a href="',?link,'">',str(?choNummer),'</a></h3><p>',?omschrijving,'</p>'),rdf:HTML) as ?wktLabel0)
+  bind(if(bound(?wktLabel0),'green','yellow') as ?wktColor0)
+}
+group by ?ArcheologischOnderzoeksgebied ?wkt
