@@ -1,0 +1,44 @@
+#+ name: vondstlocaties
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select ?wkt ?wktLabel     ('https://service.pdok.nl/rce/ps-ch/wms/v1_0?request=GetCapabilities&service=WMS' as ?mapEndpoint) {
+  {
+    select
+      ?wkt
+      (count(?object) as ?aantalObjecten)
+      (sample(?ArcheologischOnderzoeksgebied0) as ?ArcheologischOnderzoeksgebied)
+      (sample(?choNummer0) as ?choNummer)
+      (group_concat(?objectLine) as ?objectLines)
+    {
+      ?ArcheologischOnderzoeksgebied0
+        a ceo:ArcheologischOnderzoeksgebied;
+        ceo:cultuurhistorischObjectnummer ?choNummer0;
+        ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaats;
+        ceo:heeftGeometrie/geo:asWKT ?wkt;
+        ceo:bevatObject+ ?object.
+      ?object
+        ceo:aantalVondsten ?aantalVondsten;
+        ceo:cultuurhistorischObjectnummer ?objectNummer0;
+        ceo:heeftGebeurtenis/ceo:heeftDatering/ceo:heeftBeginDatering/ceo:heeftPeriode/skos:prefLabel ?periode;
+        ceo:heeftMateriaal/ceo:heeftMateriaalNaam/skos:prefLabel ?materiaal;
+        ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type2.
+      bind(concat(
+        '<li>Object <a href="https://linkeddata.cultureelerfgoed.nl/rce/cho/browser?resource=',encode_for_uri(str(?object)),'">',str(?objectNummer0),'</a>',
+        ' bevat ',if(?aantalVondsten=1, 'vondst', 'vondsten'),
+        ' uit de periode ',str(?periode),
+        '; materiaal ',str(?materiaal),
+        '; type ',str(?type2),'.</li>') as ?objectLine)
+    }
+    group by ?wkt
+  }
+  bind(strdt(concat(
+    '<h3>Archeologisch onderzoeksgebied <a href="https://linkeddata.cultureelerfgoed.nl/rce/cho/browser?resource=',
+    encode_for_uri(str(?ArcheologischOnderzoeksgebied)),'">',str(?choNummer),'</a></h3>',
+    '<p>Vondstlocatie met ',str(?aantalObjecten),' objecten:</p>',
+    '<ul>',?objectLines,'</ul>'),rdf:HTML) as ?wktLabel)
+}
