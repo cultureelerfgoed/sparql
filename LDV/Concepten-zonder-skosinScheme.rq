@@ -1,0 +1,16 @@
+#+ name: Concepten-zonder-skosinScheme
+#+ description: Concepten zonder skos:inScheme
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?label WHERE {
+  ?concept a skos:Concept .
+  OPTIONAL {
+    ?concept skos:prefLabel ?label .
+    FILTER (lang(?label) = "nl")
+  }
+  FILTER NOT EXISTS {
+    ?concept skos:inScheme ?scheme .
+  }
+}

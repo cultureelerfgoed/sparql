@@ -1,0 +1,17 @@
+#+ name: structuuroverzicht-met-labels-in-nl
+#+ description: Structuuroverzicht met labels in @nl
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?prefLabel ?broader ?broaderLabel WHERE {
+  ?concept a skos:Concept ;
+           skos:prefLabel ?prefLabel .
+  FILTER (lang(?prefLabel) = "nl")
+
+  OPTIONAL {
+    ?concept skos:broader ?broader .
+    ?broader skos:prefLabel ?broaderLabel .
+    FILTER (lang(?broaderLabel) = "nl")
+  }
+}

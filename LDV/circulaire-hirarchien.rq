@@ -1,0 +1,10 @@
+#+ name: circulaire-hirarchien
+#+ description: Detecteert als een concept indirect zijn eigen bovenliggend concept is.
+#- Resultaat: true betekent dat er een cirkel zit in de hiërarchie.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+ASK {
+  ?concept skos:broader+ ?concept .
+}

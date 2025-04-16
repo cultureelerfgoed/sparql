@@ -1,0 +1,11 @@
+#+ name: Meerdere-skosprefLabel-in-dezelfde-taal
+#+ description: Meerdere skos:prefLabel in dezelfde taal
+#- SKOS staat maar één prefLabel per taal per concept toe.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?label WHERE {
+  ?concept skos:prefLabel ?label1, ?label2 .
+  FILTER(lang(?label1) = lang(?label2) && ?label1 != ?label2)
+}

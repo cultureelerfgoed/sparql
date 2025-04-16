@@ -14,6 +14,7 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 construct {
   ?rijksmonument a ceo:Rijksmonument;
     ceo:rijksmonumentnummer ?rijksmonumentnummer;
+    ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
     ceo:heeftGebeurtenis ?gebeurtenis;
     ceo:heeftKennisregistratie ?kennisregistratie;
     ceo:kennisregistratieToelichting ?toelichting.
@@ -56,9 +57,10 @@ where {
     minus {
       ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
     }
-
-    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+   ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+  
+    OPTIONAL {?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.}
 
     optional {
       ?gebeurtenis ceo:heeftDatering ?datering.
@@ -94,10 +96,18 @@ where {
     optional {
       ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
       ?actorenrol ceo:heeftActor ?actor.
-      optional { ?actor rdfs:label ?actorLabel. }
-      optional { ?actor skos:exactMatch ?link. }
-      optional { ?actor ceo:plaatsActor ?plaatsActor. }
-      optional { ?actorenrol ceo:heeftRol ?rol. }
+      optional {
+        ?actor rdfs:label ?actorLabel.
+      }
+      optional {
+        ?actor skos:exactMatch ?link.
+      }
+      optional {
+        ?actor ceo:plaatsActor ?plaatsActor.
+      }
+      optional {
+        ?actorenrol ceo:heeftRol ?rol.
+      }
     }
 
     # Optionele blok voor originele functie
