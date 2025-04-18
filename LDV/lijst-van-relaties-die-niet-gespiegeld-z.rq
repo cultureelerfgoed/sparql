@@ -1,0 +1,22 @@
+#+ name: lijst-van-relaties-die-niet-gespiegeld-z
+#+ description: lijst van relaties die niet gespiegeld zijn
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?narrower ?narrowerLabel ?broader ?broaderLabel WHERE {
+  ?narrower skos:broader ?broader .
+  
+  FILTER NOT EXISTS {
+    ?broader skos:narrower ?narrower .
+  }
+
+  OPTIONAL {
+    ?narrower skos:prefLabel ?narrowerLabel .
+    FILTER (lang(?narrowerLabel) = "nl")
+  }
+  OPTIONAL {
+    ?broader skos:prefLabel ?broaderLabel .
+    FILTER (lang(?broaderLabel) = "nl")
+  }
+}
