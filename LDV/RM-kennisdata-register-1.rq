@@ -17,15 +17,23 @@ construct {
     ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
     ceo:heeftGebeurtenis ?gebeurtenis;
     ceo:heeftKennisregistratie ?kennisregistratie;
-    ceo:kennisregistratieToelichting ?toelichting.
+    ceo:kennisregistratieToelichting ?toelichting;
+    ceo:heeftOorspronkelijkeFunctie ?functies_.
+
+  ?functies_ ceo:heeftFunctieNaam ?functies;
+    ceo:formeelStandpunt "1"^^xsd:boolean.
+  ?functies skos:prefLabel ?functie;
+    skos:exactMatch ?functieMatch.
 
   ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisNaam;
     ceo:heeftDatering ?datering;
     ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
+  ?gebeurtenisNaam skos:exactMatch ?gebeurtenisNaamMatch.
 
   ?datering ceo:heeftIndicatieNauwkeurigheid ?indicatienauwkeurigheid;
     ceo:heeftBeginDatering ?beginDatering;
     ceo:heeftEindDatering ?eindDatering.
+  ?indicatienauwkeurigheid skos:exactMatch ?nauwkeurigheidMatch.
 
   ?beginDatering ceo:datum ?beginDatum.
   ?eindDatering ceo:datum ?eindDatum.
@@ -34,8 +42,9 @@ construct {
   ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlLabel;
     ceo:heeftStijlEnCultuurNaam ?bouwstijlUri;
     ceo:heeftZuiverheid ?zuiverheid.
+  ?bouwstijlLabel skos:exactMatch ?bouwstijlMatch.
+  ?zuiverheid skos:exactMatch ?zuiverheidMatch.
 
-  # Zorg ervoor dat meerdere actoren per gebeurtenis correct worden gekoppeld
   ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
   ?actorenrol ceo:heeftActor ?actor;
     ceo:heeftRol ?rol.
@@ -43,12 +52,6 @@ construct {
   ?actor rdfs:label ?actorLabel;
     skos:exactMatch ?link;
     ceo:plaatsActor ?plaatsActor.
-
-  # Toegevoegde construct-regels voor de originele functie
-  ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
-  ?functies_ ceo:heeftFunctieNaam ?functies;
-    ceo:formeelStandpunt "1"^^xsd:boolean.
-  ?functies skos:prefLabel ?functie.
 }
 where {
   graph graph:instanties-rce {
@@ -57,20 +60,21 @@ where {
     minus {
       ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
     }
-   ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
-  
-    OPTIONAL {?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.}
+
+    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+
+    optional {
+      ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
+      ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+    }
 
     optional {
       ?gebeurtenis ceo:heeftDatering ?datering.
       ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
-
       optional {
         ?datering ceo:heeftBeginDatering ?beginDatering.
         ?beginDatering ceo:datum ?beginDatum.
       }
-
       optional {
         ?datering ceo:heeftEindDatering ?eindDatering.
         ?eindDatering ceo:datum ?eindDatum.
@@ -81,36 +85,20 @@ where {
       ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
       ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
       ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
-
-      optional {
-        ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
-      }
+      optional { ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid. }
     }
 
-    # Toegevoegde gebeurtenis-toelichting
-    optional {
-      ?gebeurtenis ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
-    }
+    optional { ?gebeurtenis ceo:kennisregistratieToelichting ?gebeurtenisToelichting. }
 
-    # ** Fix: Meerdere actoren per gebeurtenis correct ophalen **
     optional {
       ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
       ?actorenrol ceo:heeftActor ?actor.
-      optional {
-        ?actor rdfs:label ?actorLabel.
-      }
-      optional {
-        ?actor skos:exactMatch ?link.
-      }
-      optional {
-        ?actor ceo:plaatsActor ?plaatsActor.
-      }
-      optional {
-        ?actorenrol ceo:heeftRol ?rol.
-      }
+      optional { ?actor rdfs:label ?actorLabel. }
+      optional { ?actor skos:exactMatch ?link. }
+      optional { ?actor ceo:plaatsActor ?plaatsActor. }
+      optional { ?actorenrol ceo:heeftRol ?rol. }
     }
 
-    # Optionele blok voor originele functie
     optional {
       ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
       ?functies_ ceo:heeftFunctieNaam ?functies;
@@ -119,11 +107,19 @@ where {
       bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
     }
 
-    # Toegevoegde optionele kennisregistratie en toelichting
     optional {
       ?rijksmonument ceo:heeftKennisregistratie ?kennisregistratie.
       ?kennisregistratie ceo:kennisregistratieToelichting ?toelichting.
     }
+  }
+
+  # SERVICE-block om exactMatch op te halen voor alle relevante labels
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/referentienetwerk/sparql> {
+    optional { ?gebeurtenisNaam skos:exactMatch ?gebeurtenisNaamMatch. }
+    optional { ?indicatienauwkeurigheid skos:exactMatch ?nauwkeurigheidMatch. }
+    optional { ?bouwstijlLabel skos:exactMatch ?bouwstijlMatch. }
+    optional { ?zuiverheid skos:exactMatch ?zuiverheidMatch. }
+    optional { ?functie skos:exactMatch ?functieMatch. }
   }
 }
 limit 500
