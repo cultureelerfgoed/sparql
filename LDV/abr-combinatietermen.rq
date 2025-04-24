@@ -1,0 +1,20 @@
+#+ name: abr-combinatietermen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+PREFIX abr: <https://data.cultureelerfgoed.nl/id/rnce#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+select ?s ?sLabel ?o ?oLabel
+
+where {
+
+  service <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/abr> {
+
+  ?s abr:hasMaterialAbr ?o ;
+      skos:scopeNote ?sNote ;
+      skos:prefLabel ?sLabel .
+
+  ?o skos:prefLabel ?oLabel .
+
+  FILTER contains (?sNote, 'combinatieterm')
+}} 
