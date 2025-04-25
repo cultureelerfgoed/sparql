@@ -2,109 +2,116 @@
 #+ description: Inhoudelijke data (kennis) in het rijksmonumentenregister: kopjes Bouwactiviteiten, Bouwstijlen, Ambachten
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 construct {
   ?rijksmonument a ceo:Rijksmonument;
     ceo:rijksmonumentnummer ?rijksmonumentnummer;
     ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
+    ceo:heeftOorspronkelijkeFunctie ?functieResource;
+    ceo:heeftType ?typeResource;
     ceo:heeftGebeurtenis ?gebeurtenis;
     ceo:heeftKennisregistratie ?kennisregistratie;
-    ceo:kennisregistratieToelichting ?toelichting;
-    ceo:heeftOorspronkelijkeFunctie ?functies_.
+    ceo:kennisregistratieToelichting ?toelichting.
 
-  ?functies_ ceo:heeftFunctieNaam ?functies;
-    ceo:formeelStandpunt "1"^^xsd:boolean.
-  ?functies skos:prefLabel ?functie;
-    skos:exactMatch ?functieMatch.
+  ?functieResource a ceo:Functie;
+    ceo:heeftFunctieNaam ?functieConcept;
+    ceo:formeelStandpunt ?standpunt.
+  ?functieConcept skos:prefLabel ?functieLabel;
+                  skos:exactMatch ?functieMatch.
+  ?functieMatch skos:prefLabel ?functieMatchLabel.
 
-  ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisNaam;
-    ceo:heeftDatering ?datering;
-    ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
-  ?gebeurtenisNaam skos:exactMatch ?gebeurtenisNaamMatch.
+  ?typeResource ceo:heeftTypeNaam ?typeConcept.
+  ?typeConcept skos:prefLabel ?typeLabel;
+               skos:exactMatch ?typeMatch.
+  ?typeMatch skos:prefLabel ?typeMatchLabel.
 
-  ?datering ceo:heeftIndicatieNauwkeurigheid ?indicatienauwkeurigheid;
+  ?gebeurtenis a ceo:Gebeurtenis;
+    ceo:heeftGebeurtenisNaam ?gebeurtenisConcept;
+    ceo:heeftDatering ?datering.
+
+  ?gebeurtenisConcept skos:prefLabel ?gebeurtenisLabel;
+                      skos:exactMatch ?gebeurtenisMatch.
+  ?gebeurtenisMatch skos:prefLabel ?gebeurtenisMatchLabel.
+
+  ?datering a ceo:Datering;
+    ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
     ceo:heeftBeginDatering ?beginDatering;
     ceo:heeftEindDatering ?eindDatering.
-  ?indicatienauwkeurigheid skos:exactMatch ?nauwkeurigheidMatch.
 
-  ?beginDatering ceo:datum ?beginDatum.
-  ?eindDatering ceo:datum ?eindDatum.
+  ?nauwkeurigheidConcept skos:prefLabel ?nauwkeurigheidLabel;
+                         skos:exactMatch ?nauwkeurigheidMatch.
+  ?nauwkeurigheidMatch skos:prefLabel ?nauwkeurigheidMatchLabel.
 
-  ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
-  ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlLabel;
-    ceo:heeftStijlEnCultuurNaam ?bouwstijlUri;
-    ceo:heeftZuiverheid ?zuiverheid.
-  ?bouwstijlLabel skos:exactMatch ?bouwstijlMatch.
-  ?zuiverheid skos:exactMatch ?zuiverheidMatch.
+  ?beginDatering a ceo:BeginDatering;
+    ceo:datum ?beginDatum.
+  ?eindDatering a ceo:EindDatering;
+    ceo:datum ?eindDatum.
 
   ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
   ?actorenrol ceo:heeftActor ?actor;
-    ceo:heeftRol ?rol.
+              ceo:heeftRol ?rol.
 
-  ?actor rdfs:label ?actorLabel;
-    skos:exactMatch ?link;
-    ceo:plaatsActor ?plaatsActor.
+  ?actor rdfs:label ?actorLabel.
+  ?actor skos:exactMatch ?actorMatch.
+  ?actor ceo:plaatsActor ?plaatsActor.
 }
 where {
   graph graph:instanties-rce {
-    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?rijksmonument a ceo:Rijksmonument;
+      ceo:rijksmonumentnummer ?rijksmonumentnummer;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
 
-    minus {
-      ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functieResource.
+      ?functieResource ceo:heeftFunctieNaam ?functieConcept;
+                       ceo:formeelStandpunt ?standpunt.
+      ?functieConcept skos:prefLabel ?functieLabelRaw.
+      bind(replace(?functieLabelRaw, "\\s\\(.*\\)|\\(.*\\)", "") as ?functieLabel)
     }
 
-    ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    optional {
+      ?rijksmonument ceo:heeftType ?typeResource.
+      ?typeResource ceo:heeftTypeNaam ?typeConcept.
+      ?typeConcept skos:prefLabel ?typeLabel.
+    }
 
     optional {
       ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-      ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
-    }
+      ?gebeurtenis a ceo:Gebeurtenis;
+                   ceo:heeftGebeurtenisNaam ?gebeurtenisConcept.
+      ?gebeurtenisConcept skos:prefLabel ?gebeurtenisLabel.
 
-    optional {
-      ?gebeurtenis ceo:heeftDatering ?datering.
-      ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
       optional {
-        ?datering ceo:heeftBeginDatering ?beginDatering.
-        ?beginDatering ceo:datum ?beginDatum.
+        ?gebeurtenis ceo:heeftDatering ?datering.
+        ?datering a ceo:Datering;
+                  ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
+                  ceo:heeftBeginDatering ?beginDatering;
+                  ceo:heeftEindDatering ?eindDatering.
+        ?nauwkeurigheidConcept skos:prefLabel ?nauwkeurigheidLabel.
+        ?beginDatering a ceo:BeginDatering;
+                       ceo:datum ?beginDatum.
+        ?eindDatering a ceo:EindDatering;
+                      ceo:datum ?eindDatum.
       }
+
       optional {
-        ?datering ceo:heeftEindDatering ?eindDatering.
-        ?eindDatering ceo:datum ?eindDatum.
+        ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+        ?actorenrol ceo:heeftActor ?actor;
+                    ceo:heeftRol ?rol.
+
+        optional {
+          ?actor rdfs:label ?actorLabel.
+          optional { ?actor skos:exactMatch ?actorMatch. }
+          optional { ?actor ceo:plaatsActor ?plaatsActor. }
+        }
       }
-    }
-
-    optional {
-      ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
-      ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
-      ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
-      optional { ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid. }
-    }
-
-    optional { ?gebeurtenis ceo:kennisregistratieToelichting ?gebeurtenisToelichting. }
-
-    optional {
-      ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
-      ?actorenrol ceo:heeftActor ?actor.
-      optional { ?actor rdfs:label ?actorLabel. }
-      optional { ?actor skos:exactMatch ?link. }
-      optional { ?actor ceo:plaatsActor ?plaatsActor. }
-      optional { ?actorenrol ceo:heeftRol ?rol. }
-    }
-
-    optional {
-      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functies_.
-      ?functies_ ceo:heeftFunctieNaam ?functies;
-        ceo:formeelStandpunt "1"^^xsd:boolean.
-      ?functies skos:prefLabel ?functie_.
-      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
     }
 
     optional {
@@ -113,13 +120,28 @@ where {
     }
   }
 
-  # SERVICE-block om exactMatch op te halen voor alle relevante labels
+  # Alleen externe matches (dus geen rn:2/ structuren)
   service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/referentienetwerk/sparql> {
-    optional { ?gebeurtenisNaam skos:exactMatch ?gebeurtenisNaamMatch. }
-    optional { ?indicatienauwkeurigheid skos:exactMatch ?nauwkeurigheidMatch. }
-    optional { ?bouwstijlLabel skos:exactMatch ?bouwstijlMatch. }
-    optional { ?zuiverheid skos:exactMatch ?zuiverheidMatch. }
-    optional { ?functie skos:exactMatch ?functieMatch. }
+    optional {
+      ?functieConcept skos:exactMatch ?functieMatch.
+      filter(strstarts(str(?functieMatch), "http") && !strstarts(str(?functieMatch), str(rn:)))
+      ?functieMatch skos:prefLabel ?functieMatchLabel.
+    }
+    optional {
+      ?typeConcept skos:exactMatch ?typeMatch.
+      filter(strstarts(str(?typeMatch), "http") && !strstarts(str(?typeMatch), str(rn:)))
+      ?typeMatch skos:prefLabel ?typeMatchLabel.
+    }
+    optional {
+      ?gebeurtenisConcept skos:exactMatch ?gebeurtenisMatch.
+      filter(strstarts(str(?gebeurtenisMatch), "http") && !strstarts(str(?gebeurtenisMatch), str(rn:)))
+      ?gebeurtenisMatch skos:prefLabel ?gebeurtenisMatchLabel.
+    }
+    optional {
+      ?nauwkeurigheidConcept skos:exactMatch ?nauwkeurigheidMatch.
+      filter(strstarts(str(?nauwkeurigheidMatch), "http") && !strstarts(str(?nauwkeurigheidMatch), str(rn:)))
+      ?nauwkeurigheidMatch skos:prefLabel ?nauwkeurigheidMatchLabel.
+    }
   }
 }
 limit 500

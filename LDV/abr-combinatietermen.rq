@@ -4,17 +4,17 @@
 PREFIX abr: <https://data.cultureelerfgoed.nl/id/rnce#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-select ?s ?sLabel ?o ?oLabel
+select ?combiterm ?combitermLabel ?materiaal ?materiaalLabel ?combitermScopeNote
 
 where {
 
   service <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/abr> {
 
-  ?s abr:hasMaterialAbr ?o ;
-      skos:scopeNote ?sNote ;
-      skos:prefLabel ?sLabel .
+  ?combiterm skos:scopeNote ?combitermScopeNote ;
+     skos:prefLabel ?combitermLabel .
 
-  ?o skos:prefLabel ?oLabel .
+  OPTIONAL { ?combiterm abr:hasMaterialAbr ?materiaal .
+             ?materiaal skos:prefLabel ?materiaalLabel .}
 
-  FILTER contains (?sNote, 'combinatieterm')
+  FILTER contains (?combitermScopeNote, 'combinatieterm')
 }} 
