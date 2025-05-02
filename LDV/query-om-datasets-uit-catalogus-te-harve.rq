@@ -5,7 +5,7 @@
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dct:  <http://purl.org/dc/terms/>
 
-SELECT ?dataset ?title ?description ?issued ?modified ?accessURL ?sparqlEndpoint
+SELECT ?dataset ?title ?description ?issued ?modified ?accessURL ?format ?license ?sparqlEndpoint ?landingPage
 WHERE {
   GRAPH <https://linkeddata.cultureelerfgoed.nl/catalog> {
     <https://linkeddata.cultureelerfgoed.nl/catalog> dcat:dataset ?dataset .
@@ -14,12 +14,21 @@ WHERE {
     ?dataset a dcat:Dataset ;
              dct:title ?title ;
              dct:description ?description ;
-             dct:issued ?issued ;
-             dct:modified ?modified ;
-             dcat:distribution ?distribution ;
-             dcat:service ?service .
-    ?distribution dcat:accessURL ?accessURL .
-    ?service a dcat:DataService ;
-             dcat:endpointURL ?sparqlEndpoint .
+             dct:issued ?issued .
+
+    OPTIONAL { ?dataset dct:modified ?modified . }
+    OPTIONAL { ?dataset dcat:landingPage ?landingPage . }
+
+    OPTIONAL {
+      ?dataset dcat:distribution ?dist .
+      ?dist dcat:accessURL ?accessURL .
+      OPTIONAL { ?dist dct:format ?format . }
+      OPTIONAL { ?dist dct:license ?license . }
+    }
+
+    OPTIONAL {
+      ?dataset dcat:service ?svc .
+      ?svc dcat:endpointURL ?sparqlEndpoint .
+    }
   }
 }

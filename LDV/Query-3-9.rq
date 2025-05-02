@@ -18,3 +18,4 @@ select ?publicatie ?name (group_concat(?auteur; separator=", ") as ?authors) whe
     ?publicatie schema:name ?name.
   }
 } group by ?name ?publicatie
+limit 10

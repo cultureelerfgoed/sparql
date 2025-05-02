@@ -37,7 +37,7 @@ WHERE {
 
   # Pattern for the third dataset (optional, for possible images)
   OPTIONAL {
-    SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Afbeeldingen/services/Afbeeldingen/sparql> {
+    SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen/sparql> {
       GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/image> {
         ?afb a edm:ProvidedCHO;
              ceo:rijksmonumentnummer ?rm;
