@@ -1,6 +1,6 @@
 #+ name: Query-11-5
 #+ description: met jena, zonder afbeeldingen
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-1/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
 prefix text: <http://jena.apache.org/text#>
 prefix schema: <https://schema.org/>

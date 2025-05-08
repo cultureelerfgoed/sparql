@@ -1,6 +1,6 @@
 #+ name: Query-22
 #+ description: Valideren van tellen aantal instances per properties in huidige ceo.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
