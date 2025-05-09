@@ -31,3 +31,4 @@ WHERE {
   }
 }
 ORDER BY COALESCE(?class, ?property)
+LIMIT 500
