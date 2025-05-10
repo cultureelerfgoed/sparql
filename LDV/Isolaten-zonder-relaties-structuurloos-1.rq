@@ -1,0 +1,24 @@
+#+ name: Isolaten-zonder-relaties-structuurloos-1
+#+ description: Isolaten zonder relaties (structuurloos)
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?label WHERE {
+  ?concept a skos:Concept .
+
+  OPTIONAL {
+    ?concept skos:prefLabel ?label .
+    FILTER (lang(?label) = "nl")
+  }
+
+  FILTER NOT EXISTS {
+    ?concept skos:broader|skos:narrower|skos:related ?any
+  }
+  FILTER NOT EXISTS {
+    ?any skos:broader|skos:narrower|skos:related ?concept
+  }
+  FILTER NOT EXISTS {
+    ?concept skos:topConceptOf ?scheme
+  }
+}

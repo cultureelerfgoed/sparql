@@ -1,0 +1,23 @@
+#+ name: related-tussen-conceptschemes-1-1
+#+ description: relaties tussen conceptschemes
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept1 ?concept1Label ?scheme1 ?concept2 ?concept2Label ?scheme2 WHERE {
+  ?concept1 skos:related ?concept2 .
+
+  ?concept1 skos:inScheme ?scheme1 .
+  ?concept2 skos:inScheme ?scheme2 .
+
+  FILTER (?scheme1 != ?scheme2)
+
+  OPTIONAL {
+    ?concept1 skos:prefLabel ?concept1Label .
+    FILTER (lang(?concept1Label) = "nl")
+  }
+  OPTIONAL {
+    ?concept2 skos:prefLabel ?concept2Label .
+    FILTER (lang(?concept2Label) = "nl")
+  }
+}

@@ -1,0 +1,21 @@
+#+ name: Concepten-zonder-labels-in-het-Nederla-1
+#+ description: Concepten zonder labels (in het Nederlands)
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept WHERE {
+  ?concept a skos:Concept .
+  FILTER NOT EXISTS {
+    ?concept skos:prefLabel ?label .
+    FILTER (lang(?label) = "nl")
+  }
+  FILTER NOT EXISTS {
+    ?concept skos:altLabel ?alt .
+    FILTER (lang(?alt) = "nl")
+  }
+  FILTER NOT EXISTS {
+    ?concept skos:hiddenLabel ?hidden .
+    FILTER (lang(?hidden) = "nl")
+  }
+}

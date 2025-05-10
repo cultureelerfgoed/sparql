@@ -1,0 +1,17 @@
+#+ name: skosrelated-is-niet-symmetrisch-1
+#+ description: Skos:related is niet symmetrisch
+#- Als A skos:related is aan B, moet B ook skos:related zijn aan A.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?c1 ?label1 ?c2 ?label2 WHERE {
+  ?c1 skos:related ?c2 .
+  
+  OPTIONAL { ?c1 skos:prefLabel ?label1 . FILTER (lang(?label1) = "nl") }
+  OPTIONAL { ?c2 skos:prefLabel ?label2 . FILTER (lang(?label2) = "nl") }
+
+  FILTER NOT EXISTS {
+    ?c2 skos:related ?c1 .
+  }
+}

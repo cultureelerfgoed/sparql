@@ -1,0 +1,13 @@
+#+ name: Concepten-in-meerdere-conceptschemes-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?concept ?label (COUNT(DISTINCT ?scheme) AS ?aantalSchemes) WHERE {
+  ?concept a skos:Concept ;
+           skos:inScheme ?scheme ;
+           skos:prefLabel ?label .
+  FILTER (lang(?label) = "nl")
+}
+GROUP BY ?concept ?label
+HAVING (COUNT(DISTINCT ?scheme) > 1)

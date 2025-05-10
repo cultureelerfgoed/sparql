@@ -1,0 +1,11 @@
+#+ name: Concepten-die-zowel-broader-als-narrow-1
+#+ description: Concepten die zowel broader als narrower zijn van elkaar
+#- Zelfde als punt 2 maar expliciet voor broader/narrower.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?c1 ?c2 WHERE {
+  ?c1 skos:broader ?c2 .
+  ?c1 skos:narrower ?c2 .
+}

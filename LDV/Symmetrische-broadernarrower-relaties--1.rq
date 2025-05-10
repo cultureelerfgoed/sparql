@@ -1,0 +1,10 @@
+#+ name: Symmetrische-broadernarrower-relaties--1
+#+ description: Detecteert als skos:broader en skos:narrower elkaars spiegel zijn (wat niet hoort).
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?c1 ?c2 WHERE {
+  ?c1 skos:broader ?c2 .
+  ?c2 skos:broader ?c1 .
+}
