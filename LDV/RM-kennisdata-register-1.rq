@@ -12,152 +12,158 @@ construct {
   ?rijksmonument a ceo:Rijksmonument;
     ceo:rijksmonumentnummer ?rijksmonumentnummer;
     ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
-    ceo:heeftType ?typeResource;
     ceo:heeftGebeurtenis ?gebeurtenis;
-    ceo:heeftKennisregistratie ?kennisregistratie;
-    ceo:kennisregistratieToelichting ?toelichting.
+    ceo:heeftType ?typeResource;
+    ceo:heeftStijlEnCultuur ?stijl;
+    ceo:heeftOorspronkelijkeFunctie ?functieResource;
+    ceo:heeftKennisregistratie ?kennisregistratie.
 
-  ?stijl ceo:heeftStijlEnCultuur ?stijlEnCultuurConcept.
-  ?stijlEnCultuurConcept skos:prefLabel ?stijlEnCultuurLabel;
-    skos:exactMatch ?stijlEnCultuurMatch;
-    ceo:heeftZuiverheid ?zuiverheidConcept.
-  ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
+  ?gebeurtenis a ceo:Gebeurtenis;
+    ceo:heeftGebeurtenisNaam ?gebeurtenisConcept;
+    ceo:heeftDatering ?datering;
+    ceo:heeftActorEnRol ?actorenrol;
+    ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
+
+  ?gebeurtenisConcept skos:prefLabel ?gebeurtenisLabel;
+                      skos:exactMatch ?gebeurtenisMatch.
+
+  ?datering a ceo:Datering;
+    ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
+    ceo:heeftBeginDatering ?beginDatering;
+    ceo:heeftEindDatering ?eindDatering.
+
+  ?nauwkeurigheidConcept skos:prefLabel ?nauwkeurigheidLabel.
+  ?beginDatering a ceo:BeginDatering; ceo:datum ?beginDatum.
+  ?eindDatering a ceo:EindDatering; ceo:datum ?eindDatum.
+
+  ?actorenrol ceo:heeftActor ?actor; ceo:heeftRol ?rol.
+  ?actor skos:prefLabel ?actorLabel;
+         ceo:plaatsActor ?plaatsActor.
 
   ?typeResource ceo:heeftTypeNaam ?typeConcept.
   ?typeConcept skos:prefLabel ?typeLabel;
-    skos:exactMatch ?typeMatch.
+               skos:exactMatch ?typeMatch;
+               ceo:kennisregistratieToelichting ?typeToelichting.
 
-  ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisConcept;
-    ceo:heeftDatering ?datering;
-    ceo:heeftActorEnRol ?actorenrol.
-  ?gebeurtenisConcept skos:prefLabel ?gebeurtenisLabel;
-    skos:exactMatch ?gebeurtenisMatch.
+  ?stijl ceo:heeftStijlEnCultuurNaam ?stijlConcept.
+  ?stijlConcept skos:prefLabel ?stijlLabel;
+                skos:exactMatch ?stijlMatch;
+                ceo:kennisregistratieToelichting ?stijlToelichting;
+                ceo:heeftZuiverheid ?zuiverheidConcept.
 
-  ?datering ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
-    ceo:heeftBeginDatering ?beginDatering;
-    ceo:heeftEindDatering ?eindDatering.
-  ?nauwkeurigheidConcept skos:prefLabel ?nauwkeurigheidLabel;
-    skos:exactMatch ?nauwkeurigheidMatch.
+  ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
 
-  ?beginDatering ceo:datum ?beginDatum.
-  ?eindDatering ceo:datum ?eindDatum.
+  ?functieResource a ceo:Functie;
+    ceo:heeftFunctieNaam ?functieConcept;
+    ceo:formeelStandpunt ?standpunt.
+  ?functieConcept skos:prefLabel ?functieLabel;
+                  skos:exactMatch ?functieMatch.
 
-  ?actorenrol ceo:heeftActor ?actor;
-    ceo:heeftRol ?rol.
-  ?actor skos:prefLabel ?actorLabel;
-    skos:exactMatch ?actorMatch;
-    ceo:plaatsActor ?plaatsActor.
+  ?kennisregistratie ceo:kennisregistratieToelichting ?kennisToelichting.
 }
 where {
   graph graph:instanties-rce {
     ?rijksmonument a ceo:Rijksmonument;
       ceo:rijksmonumentnummer ?rijksmonumentnummer;
       ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+  }
 
-    optional {
-      ?rijksmonument ceo:heeftStijlEnCultuur ?stijl.
-      ?stijl ceo:heeftStijlEnCultuurNaam ?stijlEnCultuurConcept.
-      ?stijlEnCultuurConcept skos:prefLabel ?stijlEnCultuurLabel.
-
-      optional {
-        ?stijlEnCultuurConcept ceo:heeftZuiverheid ?zuiverheidConcept.
-        ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
-      }
-    }
-
-    optional {
-      ?rijksmonument ceo:heeftType ?typeResource.
-      ?typeResource ceo:heeftTypeNaam ?typeConcept.
-      ?typeConcept skos:prefLabel ?typeLabel.
-    }
-
-    optional {
+  {
+    graph graph:instanties-rce {
       ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-      ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisConcept.
+      ?gebeurtenis a ceo:Gebeurtenis;
+                   ceo:heeftGebeurtenisNaam ?gebeurtenisConcept.
       ?gebeurtenisConcept skos:prefLabel ?gebeurtenisLabel.
 
       optional {
         ?gebeurtenis ceo:heeftDatering ?datering.
         ?datering a ceo:Datering;
-          ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
-          ceo:heeftBeginDatering ?beginDatering;
-          ceo:heeftEindDatering ?eindDatering.
+                  ceo:heeftIndicatieNauwkeurigheid ?nauwkeurigheidConcept;
+                  ceo:heeftBeginDatering ?beginDatering;
+                  ceo:heeftEindDatering ?eindDatering.
+        ?beginDatering ceo:datum ?beginDatum.
+        ?eindDatering ceo:datum ?eindDatum.
         ?nauwkeurigheidConcept skos:prefLabel ?nauwkeurigheidLabel.
       }
 
       optional {
         ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
         ?actorenrol ceo:heeftActor ?actor;
-          ceo:heeftRol ?rol.
+                    ceo:heeftRol ?rol.
         optional { ?actor skos:prefLabel ?actorLabel. }
         optional { ?actor ceo:plaatsActor ?plaatsActor. }
       }
+
+      optional {
+        ?gebeurtenis ceo:kennisregistratieToelichting ?gebeurtenisToelichting.
+      }
     }
 
-    optional {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
+      optional {
+        ?gebeurtenisConcept skos:exactMatch ?gebeurtenisMatch.
+      }
+    }
+  }
+  union
+  {
+    graph graph:instanties-rce {
+      ?rijksmonument ceo:heeftType ?typeResource.
+      ?typeResource ceo:heeftTypeNaam ?typeConcept.
+      ?typeConcept skos:prefLabel ?typeLabel.
+      optional { ?typeConcept ceo:kennisregistratieToelichting ?typeToelichting. }
+    }
+
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+      optional {
+        ?typeConcept skos:exactMatch ?typeMatch.
+      }
+    }
+  }
+  union
+  {
+    graph graph:instanties-rce {
+      ?rijksmonument ceo:heeftStijlEnCultuur ?stijl.
+      ?stijl ceo:heeftStijlEnCultuurNaam ?stijlConcept.
+      ?stijlConcept skos:prefLabel ?stijlLabel.
+
+      optional {
+        ?stijl ceo:heeftZuiverheid ?zuiverheidConcept.
+       ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
+      }
+
+      optional {
+        ?stijlConcept ceo:kennisregistratieToelichting ?stijlToelichting.
+      }
+    }
+
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+      optional {
+        ?stijlConcept skos:exactMatch ?stijlMatch.
+      }
+    }
+  }
+  union
+  {
+    graph graph:instanties-rce {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functieResource.
+      ?functieResource ceo:heeftFunctieNaam ?functieConcept;
+                       ceo:formeelStandpunt ?standpunt.
+      ?functieConcept skos:prefLabel ?functieLabel.
+    }
+
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+      optional {
+        ?functieConcept skos:exactMatch ?functieMatch.
+      }
+    }
+  }
+  union
+  {
+    graph graph:instanties-rce {
       ?rijksmonument ceo:heeftKennisregistratie ?kennisregistratie.
-      ?kennisregistratie ceo:kennisregistratieToelichting ?toelichting.
-    }
-  }
-
-  # ExactMatch per concept (excl. functie)
-
-  optional {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
-      ?typeConcept skos:exactMatch ?typeMatch.
-      filter strstarts(str(?typeMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      filter not exists {
-        ?typeConcept skos:exactMatch ?otherMatch.
-        filter(str(?otherMatch) < str(?typeMatch))
-        filter strstarts(str(?otherMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      }
-    }
-  }
-
-  optional {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
-      ?stijlEnCultuurConcept skos:exactMatch ?stijlEnCultuurMatch.
-      filter strstarts(str(?stijlEnCultuurMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      filter not exists {
-        ?stijlEnCultuurConcept skos:exactMatch ?otherMatch.
-        filter(str(?otherMatch) < str(?stijlEnCultuurMatch))
-        filter strstarts(str(?otherMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      }
-    }
-  }
-
-  optional {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
-      ?gebeurtenisConcept skos:exactMatch ?gebeurtenisMatch.
-      filter strstarts(str(?gebeurtenisMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      filter not exists {
-        ?gebeurtenisConcept skos:exactMatch ?otherMatch.
-        filter(str(?otherMatch) < str(?gebeurtenisMatch))
-        filter strstarts(str(?otherMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      }
-    }
-  }
-
-  optional {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
-      ?nauwkeurigheidConcept skos:exactMatch ?nauwkeurigheidMatch.
-      filter strstarts(str(?nauwkeurigheidMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      filter not exists {
-        ?nauwkeurigheidConcept skos:exactMatch ?otherMatch.
-        filter(str(?otherMatch) < str(?nauwkeurigheidMatch))
-        filter strstarts(str(?otherMatch), "https://data.cultureelerfgoed.nl/term/id/cht/")
-      }
-    }
-  }
-
-  optional {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql> {
-      ?actor skos:exactMatch ?actorMatch.
-      filter strstarts(str(?actorMatch), "https://data.rkd.nl/")
-      filter not exists {
-        ?actor skos:exactMatch ?otherMatch.
-        filter(str(?otherMatch) < str(?actorMatch))
-        filter strstarts(str(?otherMatch), "https://data.rkd.nl/")
+      optional {
+        ?kennisregistratie ceo:kennisregistratieToelichting ?kennisToelichting.
       }
     }
   }
