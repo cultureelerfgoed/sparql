@@ -1,0 +1,11 @@
+#+ name: De-titels-van-alle-datasets-in-de-catalo
+#+ description: Deze query toont de titels van alle datasets in de catalogus.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/datacatalog/services/datacalatog/sparql
+
+prefix dcat: <http://www.w3.org/ns/dcat#>
+prefix dct: <http://purl.org/dc/terms/>
+
+SELECT ?dataset ?title WHERE {
+  ?dataset a dcat:Dataset ;
+           dct:title ?title .
+}

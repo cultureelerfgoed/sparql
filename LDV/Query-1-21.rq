@@ -1,0 +1,39 @@
+#+ name: Query-1-21
+#+ description: Ten behoeve van archievendag
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix abr: <https://data.cultureelerfgoed.nl/term/id/abr/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select distinct * where {
+  graph graph:instanties-rce {
+    ?archeologischmonument a ceo:Rijksmonument.
+    ?archeologischmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    ?archeologischmonument ceo:heeftGeometrie/geo:asWKT ?geo.
+    ?archeologischmonument ceo:heeftMonumentAard/skos:prefLabel "archeologisch".
+    ?archeologischmonument ceo:heeftOmschrijving ?omschrijving .
+  }
+
+  graph graph:OmschrijvingenOnderwerp {
+    ?omschrijving ceox:heeftOmschrijvingOnderwerp ?verrijkteonderwerp.
+
+
+    OPTIONAL {
+      FILTER(STRSTARTS(STR(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/abr/"))
+      BIND(?verrijkteonderwerp AS ?abr)
+      ?abr skos:prefLabel ?abrLabel.
+    }
+
+    OPTIONAL {
+      FILTER(STRSTARTS(STR(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/cht/"))
+      BIND(?verrijkteonderwerp AS ?cht)
+      ?cht skos:prefLabel ?chtLabel.
+    }
+  }
+}
+order by ?rijksmonumentnummer
+LIMIT 1000
