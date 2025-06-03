@@ -5,35 +5,71 @@
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix abr: <https://data.cultureelerfgoed.nl/term/id/abr/>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-select distinct * where {
+select distinct ?archeologischmonument ?geo ?omschrijving ?abrLabel ?naam ?provincie ?gemeente
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2); padding-top:5mm;">',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',
+    coalesce(str(?rijksmonumentnummer), "-"),
+    '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
+    ' <li>Naam: {{naam}}',
+    ' <li>ABR: {{abrLabel}}',
+    ' <li>Provincie: {{provincie}}',
+    ' <li>Gemeente: {{gemeente}}',
+    '   </ul>',
+    '<ul>',
+    '<li><b>Omschrijving: </b>',
+    if(strlen(str(?omschrijving)) > 250,
+      concat(substr(str(?omschrijving), 1, 250), "... <a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rijksmonumentnummer), "' target='_blank'>lees hier verder</a>"),
+      str(?omschrijving)),
+    '</li>',
+    '</ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) as ?geoLabel)
+where {
   graph graph:instanties-rce {
     ?archeologischmonument a ceo:Rijksmonument.
     ?archeologischmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
     ?archeologischmonument ceo:heeftGeometrie/geo:asWKT ?geo.
     ?archeologischmonument ceo:heeftMonumentAard/skos:prefLabel "archeologisch".
-    ?archeologischmonument ceo:heeftOmschrijving ?omschrijving .
+    ?archeologischmonument ceo:heeftOmschrijving ?omschrijving_ .
+    ?omschrijving_ ceo:omschrijving ?omschrijving.
+    optional {
+      ?archeologischmonument ceo:heeftNaam/ceo:naam ?naam.
+    }
+    ?archeologischmonument ceo:heeftBasisregistratieRelatie ?basisrel.
+    ?basisrel ceo:heeftProvincie ?prov;
+      ceo:heeftGemeente ?gem.
+  }
+
+  graph owms: {
+    ?prov skos:prefLabel ?provincie.
+    ?gem skos:prefLabel ?gemeente.
   }
 
   graph graph:OmschrijvingenOnderwerp {
-    ?omschrijving ceox:heeftOmschrijvingOnderwerp ?verrijkteonderwerp.
-
-
-    OPTIONAL {
-      FILTER(STRSTARTS(STR(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/abr/"))
-      BIND(?verrijkteonderwerp AS ?abr)
-      ?abr skos:prefLabel ?abrLabel.
-    }
-
-    OPTIONAL {
-      FILTER(STRSTARTS(STR(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/cht/"))
-      BIND(?verrijkteonderwerp AS ?cht)
-      ?cht skos:prefLabel ?chtLabel.
-    }
+    ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?verrijkteonderwerp.
+    filter(strstarts(str(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/abr/"))
+    bind(?verrijkteonderwerp as ?abr)
+    ?abr skos:prefLabel ?abrLabel.
   }
+
+  # Alleen meenemen als de opgegeven abrFilter voorkomt
+  filter(
+    !bound(?abrFilter) || exists {
+      graph graph:OmschrijvingenOnderwerp {
+        ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?v.
+        ?v skos:prefLabel ?lbl.
+        filter(?lbl = ?abrFilter)
+      }
+    }
+  )
 }
 order by ?rijksmonumentnummer
-LIMIT 1000
+limit 1500
