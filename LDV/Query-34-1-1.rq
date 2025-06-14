@@ -11,7 +11,7 @@ SELECT * WHERE {
   GRAPH graph:instanties-rce {
   ?rm a ceo:Rijksmonument.
   ?rm ceo:rijksmonumentnummer ?rmn.
-  ?rm ceo:heeftGeometrie ?geo.  
+  ?rm ceo:heeftOmschrijving ?geo.  
  # ?rm ceo:heeftBasisregistratieRelatie ?brr.
  # ?brr ceo:heeftBAGRelatie ?bag.
  # ?bag ceo:volledigAdres ?adres.

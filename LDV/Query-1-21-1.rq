@@ -1,4 +1,4 @@
-#+ name: Query-1-21
+#+ name: Query-1-21-1
 #+ description: Ten behoeve van archievendag
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
@@ -17,10 +17,10 @@ select distinct ?archeologischmonument ?geo ?omschrijving ?abrLabel ?naam ?provi
     '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',
     coalesce(str(?rijksmonumentnummer), "-"),
     '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
-    ' <li>Naam: {{naam}}',
-    ' <li>ABR: {{abrLabel}}',
-    ' <li>Provincie: {{provincie}}',
-    ' <li>Gemeente: {{gemeente}}',
+    ' <li>Naam: ', coalesce(?naam, "-"), '</li>',
+    ' <li>ABR: ', coalesce(?abrLabel, "-"), '</li>',
+    ' <li>Provincie: ', coalesce(?provincie, "-"), '</li>',
+    ' <li>Gemeente: ', coalesce(?gemeente, "-"), '</li>',
     '   </ul>',
     '<ul>',
     '<li><b>Omschrijving: </b>',
@@ -33,43 +33,47 @@ select distinct ?archeologischmonument ?geo ?omschrijving ?abrLabel ?naam ?provi
     '</div>'
   ), rdf:HTML) as ?geoLabel)
 where {
+
+  # Vind invoerconcept en broader
+  graph <https://data.cultureelerfgoed.nl/term/id/abr/thesaurus> {
+    ?abrConceptFromInput skos:prefLabel ?abrInputLabel .
+    FILTER (lcase(str(?abrInputLabel)) = lcase(?inputString))
+    
+    ?abrConceptFromInput skos:broader ?startConcept .
+    
+    # Haal startConcept + narrowers (0..n niveaus)
+    ?startConcept skos:narrower* ?term .
+    
+    ?term skos:prefLabel ?abrLabel .
+  }
+
+  # Selecteer Omschrijvingen en Monumenten op die termen
+  graph graph:archiefdagen {
+    ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?term .
+  }
+
   graph graph:instanties-rce {
-    ?archeologischmonument a ceo:Rijksmonument.
-    ?archeologischmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?archeologischmonument ceo:heeftGeometrie/geo:asWKT ?geo.
-    ?archeologischmonument ceo:heeftMonumentAard/skos:prefLabel "archeologisch".
+    ?archeologischmonument a ceo:Rijksmonument .
     ?archeologischmonument ceo:heeftOmschrijving ?omschrijving_ .
-    ?omschrijving_ ceo:omschrijving ?omschrijving.
+    ?archeologischmonument ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    ?archeologischmonument ceo:heeftGeometrie/geo:asWKT ?geo .
+    ?archeologischmonument ceo:heeftMonumentAard/skos:prefLabel "archeologisch" .
+    ?omschrijving_ ceo:omschrijving ?omschrijving .
+    
     optional {
-      ?archeologischmonument ceo:heeftNaam/ceo:naam ?naam.
+      ?archeologischmonument ceo:heeftNaam/ceo:naam ?naam .
     }
-    ?archeologischmonument ceo:heeftBasisregistratieRelatie ?basisrel.
-    ?basisrel ceo:heeftProvincie ?prov;
-      ceo:heeftGemeente ?gem.
+    
+    ?archeologischmonument ceo:heeftBasisregistratieRelatie ?basisrel .
+    ?basisrel ceo:heeftProvincie ?prov ;
+              ceo:heeftGemeente ?gem .
   }
 
   graph owms: {
-    ?prov skos:prefLabel ?provincie.
-    ?gem skos:prefLabel ?gemeente.
+    ?prov skos:prefLabel ?provincie .
+    ?gem skos:prefLabel ?gemeente .
   }
 
-  graph graph:archiefdagen {
-    ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?verrijkteonderwerp.
-    filter(strstarts(str(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/abr/"))
-    bind(?verrijkteonderwerp as ?abr)
-    ?abr skos:prefLabel ?abrLabel.
-  }
-
-  # Alleen meenemen als de opgegeven abrFilter voorkomt
-  filter(
-    !bound(?abrFilter) || exists {
-      graph graph:archiefdagen {
-        ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?v.
-        ?v skos:prefLabel ?lbl.
-        filter(?lbl = ?abrFilter)
-      }
-    }
-  )
 }
 order by ?rijksmonumentnummer
-limit 1800
+limit 1500

@@ -1,5 +1,6 @@
-#+ name: Query-1-21
-#+ description: Ten behoeve van archievendag
+#+ name: Archiefdagen-filter
+#+ description: Voor Archiefdagen 2025 om filter te tonen.
+#- Gefilterd op Terp
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
@@ -10,7 +11,7 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-select distinct ?archeologischmonument ?geo ?omschrijving ?abrLabel ?naam ?provincie ?gemeente
+select distinct ?archeologischmonument ?geo ?omschrijving ?naam ?provincie ?gemeente
   (strdt(concat(
     '<div style="background-color:rgba(0,0,0,.2); padding-top:5mm;">',
     '   <ul>',
@@ -18,7 +19,6 @@ select distinct ?archeologischmonument ?geo ?omschrijving ?abrLabel ?naam ?provi
     coalesce(str(?rijksmonumentnummer), "-"),
     '" target="_blank">', coalesce(str(?rijksmonumentnummer), "-"), '</a></li>',
     ' <li>Naam: {{naam}}',
-    ' <li>ABR: {{abrLabel}}',
     ' <li>Provincie: {{provincie}}',
     ' <li>Gemeente: {{gemeente}}',
     '   </ul>',
@@ -40,6 +40,10 @@ where {
     ?archeologischmonument ceo:heeftMonumentAard/skos:prefLabel "archeologisch".
     ?archeologischmonument ceo:heeftOmschrijving ?omschrijving_ .
     ?omschrijving_ ceo:omschrijving ?omschrijving.
+
+    # Toegevoegde tekstfilter op 'terp'
+    filter(contains(lcase(str(?omschrijving)), "terp"))
+
     optional {
       ?archeologischmonument ceo:heeftNaam/ceo:naam ?naam.
     }
@@ -52,24 +56,9 @@ where {
     ?prov skos:prefLabel ?provincie.
     ?gem skos:prefLabel ?gemeente.
   }
-
-  graph graph:archiefdagen {
-    ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?verrijkteonderwerp.
-    filter(strstarts(str(?verrijkteonderwerp), "https://data.cultureelerfgoed.nl/term/id/abr/"))
-    bind(?verrijkteonderwerp as ?abr)
-    ?abr skos:prefLabel ?abrLabel.
-  }
-
-  # Alleen meenemen als de opgegeven abrFilter voorkomt
-  filter(
-    !bound(?abrFilter) || exists {
-      graph graph:archiefdagen {
-        ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?v.
-        ?v skos:prefLabel ?lbl.
-        filter(?lbl = ?abrFilter)
       }
-    }
-  )
-}
+    
+  
+
 order by ?rijksmonumentnummer
-limit 1800
+limit 1500

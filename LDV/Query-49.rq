@@ -1,11 +1,13 @@
 #+ name: Query-49
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 select * where {
   ?s a ceo:ArcheologischOnderzoeksgebied.
   ?s ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
   ?s ceo:heeftGeometrie/geo:asWKT ?geo.
-  ?s ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?wp.
-  BIND(CONCAT("Plaats: ", ?wp, " ", "Omschrijving: ", ?omschrijving) AS ?geoLabel)
+  ?s ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaats.
+  BIND(CONCAT("Plaats: ", ?plaats, " ", "Omschrijving: ", ?omschrijving) AS ?geoLabel)
 
 } limit 10000
