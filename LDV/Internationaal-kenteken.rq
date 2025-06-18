@@ -1,0 +1,109 @@
+#+ name: Internationaal-kenteken
+#+ description: Rijksmonumenten met internationaal kenteken
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX geo:   <http://www.opengis.net/ont/geosparql#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT
+  ?cho
+  ?rijksmonumentnummer
+  ?adres
+  ?gemeente
+  ?provincie
+  ?functie
+  ?omschrijving
+  ?datering
+  ?bouwstijl
+  ?geo
+  ?geoLabel
+WHERE {
+
+  # ---------- hoofdbron: RCE ----------
+  GRAPH graph:instanties-rce {
+
+    # verplichte eigenschappen
+    ?cho a ceo:Rijksmonument ;
+         ceo:rijksmonumentnummer        ?rijksmonumentnummer ;
+         ceo:internationaalKenteken     "true"^^xsd:boolean ;
+         ceo:heeftOmschrijving          ?omschrijvingURI .
+
+    ?omschrijvingURI
+         ceo:omschrijving              ?omschrijving ;
+         ceo:heeftOmschrijvingstype    <https://data.cultureelerfgoed.nl/term/id/rn/0273a12d-7259-4391-aee2-5dac264aebe9> .
+
+    # --- adres, gemeente, provincie ---
+      ?cho ceo:heeftBasisregistratieRelatie [
+             ceo:heeftBAGRelatie/ceo:volledigAdres ?adres ;
+             ceo:heeftGemeente                    ?gemeenteURI ;
+             ceo:heeftProvincie                   ?provincieURI
+           ] .
+    }
+
+    # --- functie ---
+    OPTIONAL {
+      ?cho ceo:heeftOorspronkelijkeFunctie/
+           ceo:heeftFunctieNaam/skos:prefLabel ?functie .
+    }
+
+    # --- bouwstijl ---
+    OPTIONAL {
+      ?cho ceo:heeftStijlEnCultuur ?sc .
+      ?sc  ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl .
+      OPTIONAL { ?sc ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid . }
+      BIND(CONCAT(COALESCE(?zuiverheid, ''), ' - ', COALESCE(?stijl,  '')) AS ?bouwstijl)
+    }
+
+    # --- datering vervaardiging ---
+    OPTIONAL {
+      ?cho ceo:heeftGebeurtenis ?gebeurtenis .
+      ?gebeurtenis
+          ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam ;
+          ceo:heeftDatering                       ?dateringStruct .
+      FILTER CONTAINS(LCASE(?gebeurtenisNaam), 'vervaardiging')
+
+      ?dateringStruct
+          ceo:heeftBeginDatering/ceo:datum ?beginDatum ;
+          ceo:heeftEindDatering/ceo:datum  ?eindDatum .
+
+      BIND(CONCAT(
+            STR(YEAR(xsd:dateTime(?beginDatum))), '-',
+            STR(YEAR(xsd:dateTime(?eindDatum)))
+          ) AS ?datering)
+    }
+  
+
+  # ---------- OWMS: namen gemeente & provincie ----------
+  GRAPH graph:owms {
+ ?gemeenteURI  skos:prefLabel ?gemeente . 
+  ?provincieURI skos:prefLabel ?provincie . 
+  }
+
+  # ---------- puntenlaag: geometrie ----------
+  GRAPH graph:punten {
+    ?cho ceo:heeftGeometrie/geo:asWKT ?geo .
+  }
+
+  # ---------- popup-html ----------
+  BIND(STRDT(
+        CONCAT(
+          '<div style="background-color:rgba(0,0,0,.05);padding:5mm;"><ul>',
+          '<li><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></li>',
+          '<li><b>Datering:</b> ', COALESCE(?datering, '-'), '</li>',
+          '<li><b>Bouwstijl:</b> ', COALESCE(?bouwstijl, '-'), '</li>',
+          '<li><b>Adres:</b> ', COALESCE(?adres, '-'), '</li>',
+          '<li><b>Functie:</b> ', COALESCE(?functie, '-'), '</li>',
+          '<li><b>Gemeente/Provincie:</b> ', COALESCE(?gemeente, '-'), ', ', COALESCE(?provincie, '-'), '</li>',
+          '</ul><b>Omschrijving:</b><br>',
+          IF(STRLEN(STR(?omschrijving)) > 250,
+             CONCAT(SUBSTR(STR(?omschrijving),1,250),'... <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">lees verder</a>'),
+             STR(?omschrijving)
+          ),
+          '</div>'
+        ),
+        rdf:HTML) AS ?geoLabel)
+}

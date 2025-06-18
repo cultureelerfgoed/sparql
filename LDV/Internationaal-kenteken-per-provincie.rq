@@ -1,0 +1,26 @@
+#+ name: Internationaal-kenteken-per-provincie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?provincie (COUNT(DISTINCT ?cho) AS ?aantalMonumentenMetKenteken)
+WHERE {
+
+  GRAPH graph:instanties-rce {
+    ?cho a ceo:Rijksmonument ;
+         ceo:internationaalKenteken "true"^^xsd:boolean ;
+         ceo:heeftBasisregistratieRelatie [
+           ceo:heeftProvincie ?provincieURI
+         ] .
+  }
+
+  GRAPH graph:owms {
+    ?provincieURI skos:prefLabel ?provincie .
+  }
+
+}
+GROUP BY ?provincie
+ORDER BY DESC(?aantalMonumentenMetKenteken)

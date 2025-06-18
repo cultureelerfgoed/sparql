@@ -1,0 +1,22 @@
+#+ name: Internationaal-kenteken-verdeeld-per-fun
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?functie (COUNT(DISTINCT ?cho) AS ?aantal)
+WHERE {
+  GRAPH graph:instanties-rce {
+    ?cho a ceo:Rijksmonument ;
+         ceo:internationaalKenteken "true"^^xsd:boolean .
+
+    # Functie is optioneel, maar we willen alleen gevallen waar hij bestaat
+    ?cho ceo:heeftOorspronkelijkeFunctie/
+         ceo:heeftFunctieNaam/skos:prefLabel ?functie_ .
+        BIND(REPLACE(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
+  }
+}
+GROUP BY ?functie
+ORDER BY DESC(?aantal)
