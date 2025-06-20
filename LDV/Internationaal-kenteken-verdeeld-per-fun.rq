@@ -13,8 +13,10 @@ WHERE {
          ceo:internationaalKenteken "true"^^xsd:boolean .
 
     # Functie is optioneel, maar we willen alleen gevallen waar hij bestaat
-    ?cho ceo:heeftOorspronkelijkeFunctie/
-         ceo:heeftFunctieNaam/skos:prefLabel ?functie_ .
+    ?cho ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies.
+    ?cho ceo:heeftOorspronkelijkeFunctie ?standpunt_functie.
+    ?standpunt_functie ceo:hoofdfunctie true.
+    ?functies skos:prefLabel ?functie_ .
         BIND(REPLACE(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
   }
 }
