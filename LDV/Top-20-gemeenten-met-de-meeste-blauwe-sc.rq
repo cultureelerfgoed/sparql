@@ -1,0 +1,28 @@
+#+ name: Top-20-gemeenten-met-de-meeste-blauwe-sc
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX owms:  <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT ?gemeente (COUNT(DISTINCT ?rijksmonument) AS ?aantal)
+WHERE {
+  ?rijksmonument
+    ceo:internationaalKenteken true ;
+          ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
+    ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+    ceo:heeftBasisregistratieRelatie ?basisrel .
+
+  ?basisrel
+    ceo:heeftGemeente ?gem ;
+    ceo:heeftProvincie ?prov .
+
+  GRAPH owms: {
+    ?gem  skos:prefLabel ?gemeente .
+    ?prov skos:prefLabel ?provincie .
+  }
+}
+GROUP BY ?gemeente
+ORDER BY DESC(?aantal)
+LIMIT 20

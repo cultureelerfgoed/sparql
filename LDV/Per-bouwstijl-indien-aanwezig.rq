@@ -1,0 +1,21 @@
+#+ name: Per-bouwstijl-indien-aanwezig
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?bouwstijlLabel ?zuiverheid (COUNT(DISTINCT ?rijksmonument) AS ?aantal) ?toelichting
+WHERE {
+  ?rijksmonument ceo:internationaalKenteken true ;
+                 ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                 ceo:heeftStijlEnCultuur ?bouwstijl .
+
+  ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri .
+  ?bouwstijlUri skos:prefLabel ?bouwstijlLabel .
+  ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid .
+
+  OPTIONAL { ?bouwstijl ceo:kennisregistratieToelichting ?toelichting. }
+}
+GROUP BY ?bouwstijlLabel ?zuiverheid ?toelichting
+ORDER BY DESC(?aantal)
+

@@ -89,21 +89,25 @@ WHERE {
   }
 
   # ---------- popup-html ----------
-  BIND(STRDT(
-        CONCAT(
-          '<div style="background-color:rgba(0,0,0,.05);padding:5mm;"><ul>',
-          '<li><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></li>',
-          '<li><b>Datering:</b> ', COALESCE(?datering, '-'), '</li>',
-          '<li><b>Bouwstijl:</b> ', COALESCE(?bouwstijl, '-'), '</li>',
-          '<li><b>Adres:</b> ', COALESCE(?adres, '-'), '</li>',
-          '<li><b>Functie:</b> ', COALESCE(?functie, '-'), '</li>',
-          '<li><b>Gemeente/Provincie:</b> ', COALESCE(?gemeente, '-'), ', ', COALESCE(?provincie, '-'), '</li>',
-          '</ul><b>Omschrijving:</b><br>',
-          IF(STRLEN(STR(?omschrijving)) > 250,
-             CONCAT(SUBSTR(STR(?omschrijving),1,250),'... <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">lees verder</a>'),
-             STR(?omschrijving)
-          ),
-          '</div>'
-        ),
-        rdf:HTML) AS ?geoLabel)
+BIND(STRDT(
+  CONCAT(
+    '<div style="background-color:rgba(0,0,0,.05);padding:5mm;">',
+    '<div style="text-align:center;">',
+    '<img src="https://linkeddata.cultureelerfgoed.nl/rce/Asset-dataset/assets/685193d17ddccf19de4f9d82" alt="Blauw-wit schildje" style="width:40px;height:auto;margin-bottom:5px;" />',
+    '</div>',
+    '<ul>',
+    '<li><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></li>',
+    '<li><b>Datering:</b> ', COALESCE(?datering, '-'), '</li>',
+    '<li><b>Bouwstijl:</b> ', COALESCE(?bouwstijl, '-'), '</li>',
+    '<li><b>Adres:</b> ', COALESCE(?adres, '-'), '</li>',
+    '<li><b>Functie:</b> ', COALESCE(?functie, '-'), '</li>',
+    '<li><b>Gemeente/Provincie:</b> ', COALESCE(?gemeente, '-'), ', ', COALESCE(?provincie, '-'), '</li>',
+    '</ul><b>Omschrijving:</b><br>',
+    IF(STRLEN(STR(?omschrijving)) > 250,
+       CONCAT(SUBSTR(STR(?omschrijving),1,250),'... <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">lees verder</a>'),
+       STR(?omschrijving)
+    ),
+    '</div>'
+  ),
+  rdf:HTML) AS ?geoLabel)
 }

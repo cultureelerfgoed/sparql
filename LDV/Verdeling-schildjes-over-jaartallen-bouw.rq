@@ -1,0 +1,27 @@
+#+ name: Verdeling-schildjes-over-jaartallen-bouw
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?jaar (COUNT(DISTINCT ?rijksmonument) AS ?aantal)
+WHERE {
+  ?rijksmonument ceo:internationaalKenteken true ;
+                 ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                 ceo:heeftGebeurtenis ?gebeurtenis .
+
+  ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam .
+
+  OPTIONAL {
+    ?gebeurtenis ceo:heeftDatering ?datering .
+    OPTIONAL {
+      ?datering ceo:heeftBeginDatering ?beginDatering .
+      ?beginDatering ceo:datum ?beginDatum .
+BIND(STR(xsd:integer(SUBSTR(STR(?beginDatum), 1, 4))) AS ?jaar)    }
+  }
+
+  FILTER(BOUND(?jaar))
+}
+GROUP BY ?jaar
+ORDER BY ASC(?jaar)
