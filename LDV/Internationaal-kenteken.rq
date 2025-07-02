@@ -47,7 +47,9 @@ WHERE {
     # --- functie ---
     OPTIONAL {
       ?cho ceo:heeftOorspronkelijkeFunctie/
-           ceo:heeftFunctieNaam/skos:prefLabel ?functie .
+           ceo:heeftFunctieNaam ?functies .
+          ?functies skos:prefLabel ?functie_ .
+        BIND(REPLACE(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
     }
 
     # --- bouwstijl ---
