@@ -36,9 +36,11 @@ construct {
   ?beginDatering a ceo:BeginDatering; ceo:datum ?beginDatum.
   ?eindDatering a ceo:EindDatering; ceo:datum ?eindDatum.
 
-  ?actorenrol ceo:heeftActor ?actor; ceo:heeftRol ?rol.
-  ?actor skos:prefLabel ?actorLabel;
-         ceo:plaatsActor ?plaatsActor.
+  ?actorenrol ceo:heeftActor ?actorLiteral;
+              ceo:heeftRol ?rol;
+              ceo:heeftNaam ?actorNaam;
+              ceo:heeftPlaats ?actorPlaats;
+              ceo:heeftExacteMatch ?actorMatchUri.
 
   ?typeResource ceo:heeftTypeNaam ?typeConcept.
   ?typeConcept skos:prefLabel ?typeLabel;
@@ -88,10 +90,25 @@ where {
 
       optional {
         ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
-        ?actorenrol ceo:heeftActor ?actor;
+        ?actorenrol ceo:heeftActor ?actorLiteral;
                     ceo:heeftRol ?rol.
-        optional { ?actor skos:prefLabel ?actorLabel. }
-        optional { ?actor ceo:plaatsActor ?plaatsActor. }
+
+        bind(str(?actorLiteral) as ?actorString)
+        bind(strbefore(?actorString, " ;") as ?actorNaam)
+        bind(strafter(?actorString, " ;") as ?actorPlaats)
+
+        optional {
+          graph graph:actorenrol {
+            ?actorUri skos:prefLabel ?actorLiteral.
+          }
+
+          service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+            optional {
+              ?actorUri skos:exactMatch ?actorMatchUri.
+              filter strstarts(str(?actorMatchUri), "https://data.rkd.nl/")
+            }
+          }
+        }
       }
 
       optional {
@@ -129,7 +146,7 @@ where {
 
       optional {
         ?stijl ceo:heeftZuiverheid ?zuiverheidConcept.
-       ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
+        ?zuiverheidConcept skos:prefLabel ?zuiverheidLabel.
       }
 
       optional {
