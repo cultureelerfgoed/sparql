@@ -1,5 +1,5 @@
 #+ name: werelderfgoed-hvdl
-#+ description: #### Guery for the path werelderfgoed.</p>
+#+ description: #### Query for the path werelderfgoed.</p>
 #- This SPARQL query is designed to retrieve information about Dutch UNESCO World Heritage Sites (Unesco Werelderfgoederen in Dutch) from the Cultural Heritage Linked Data source that conforms to the Cultureel Erfgoed Ontology (CEO).</p>
 #- 
 #- - werelderfgoednummer, ex: 1349
