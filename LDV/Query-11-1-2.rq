@@ -1,0 +1,82 @@
+#+ name: Query-11-1-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+
+prefix text: <http://jena.apache.org/text#>
+prefix schema: <https://schema.org/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select distinct
+  ?naam ?adres ?provincie ?functies ?omschrijving ?naam_ ?literal_netjes ?plaats ?monumentaard ?beeldbank ?afbeelding
+  (max(?afbeelding) as ?enkele_afbeelding)
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '<center><img src="{{image}}" style="max-width: 250px;"></center>',
+    '<ul>',
+    '<li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/35278" target="_blank">35278</a></li>',
+    '<li>naam: {{naam_}}</li>',
+    '<li>monumentaard: {{monumentaard}}</li>',
+    '<li>functie: {{functies}}</li>',
+    '<li>adres: {{adres}}</li>',
+    '<li>plaats: {{plaats}}</li>',
+    '<li>provincie: {{provincie}}</li>',
+    '      <li>In: <a href="', coalesce(str(?beeldbank), "#"), '" target="_blank">Beeldbank</a></li>',
+
+
+    '<li>omschrijving: {{omschrijving}}</li>',
+    '<li>gevonden woorden in omschrijving:</br><ul><li>{{literal_netjes}}</li></ul></li>',
+    '</ul><br><br></div>'
+  ), rdf:HTML) as ?widget)
+  (coalesce(max(?afbeelding), "https://linkeddata.cultureelerfgoed.nl/thesauri/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") as ?image)
+
+where {
+  # Zoek op specifieke monumentomschrijving (met highlighting)
+  (?choi ?sc ?literal) text:query (
+    schema:description
+    '(ijzer OR gietijzer OR smeedijzer OR smeedijzeren OR rvs OR gietijzeren OR corten OR cortenstaal OR roestvast OR roestvrij OR ijzeren OR roest OR welijzer OR staal OR stalen)'
+    'highlight:s:<strong class="hiLite">|e:</strong>|f:|'
+  ).
+
+
+  # Beperk op exact monumentnummer
+  ?choi schema:identifier "35278".
+
+  # Overige basisgegevens
+  ?choi schema:description ?omschrijving.
+  ?choi schema:addressLocality ?plaats.
+  ?choi schema:addressRegion ?provincie.
+  ?choi schema:category ?monumentaard.
+  ?choi schema:additionalType ?functie.
+  ?choi schema:sameAs ?cho.
+
+  bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
+  bind(replace(?literal, "\\|", "</li><li>") as ?literal_netjes)
+
+  optional {
+    ?choi schema:address ?adres.
+  }
+  optional {
+    ?choi schema:name ?naam.
+  }
+
+  bind(coalesce(str(?naam), " -") as ?naam_)
+
+  filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
+
+  optional {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+      graph <https://linkeddata.cultureelerfgoed.nl/graph/image> {
+        ?afb schema:about ?choi .
+        ?afb schema:contentUrl ?afbeelding .
+        ?afb edm:isShownAt ?beeldbank .
+      }
+    }
+  }
+}
+
+group by ?provincie ?description ?enkele_beeldbank ?omschrijving ?functies ?literal_netjes ?beeldbank ?naam ?plaats ?monumentaard ?adres ?afbeelding ?naam_
+limit 1
