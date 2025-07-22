@@ -57,7 +57,7 @@ where {
   }
   bind(coalesce(str(?naam), " -") as ?naam_)
 
-  filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+  filter(!regex(?omschrijving, "gehucht Kille|Jodenbreestraat|Jozef Israëls", "i"))
 
   # Afbeelding is optioneel
   optional {

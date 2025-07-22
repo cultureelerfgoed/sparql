@@ -71,7 +71,7 @@ where {
   }
   
   filter(?joodsGerelateerd != "")
-  filter(!regex(?omschrijving, "Jodenbreestraat|Jozef Israëls", "i"))
+  filter(!regex(?omschrijving, "gehucht Kille|Jodenbreestraat|Jozef Israëls", "i"))
 
   optional {
     ?choi ceo:heeftOorspronkelijkeFunctie ?functies_.
