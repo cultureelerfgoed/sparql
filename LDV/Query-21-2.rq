@@ -1,0 +1,28 @@
+#+ name: Query-21-2
+#+ description: Aantal afgevoerde rijksmonumenten per jaar voor story
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select ?jaar (count(distinct ?rm) as ?aantalAfgevoerd)
+where {
+  graph graph:instanties-rce {
+    ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+        ceo:registratiedatum ?afvoerdatum .
+
+    # Pak altijd de eerste 4 tekens als jaar, werkt voor zowel date, dateTime als string
+    bind((substr(str(?afvoerdatum), 1, 4)) as ?jaar)
+  }
+  # optioneel: beperk periode
+  # filter(?jaar >= 1960 && ?jaar <= 2025)
+}
+group by ?jaar
+order by ?jaar

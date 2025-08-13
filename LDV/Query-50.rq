@@ -1,0 +1,36 @@
+#+ name: Query-50
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?provincie ?aantal
+       ((xsd:decimal(?aantal) * 100) / xsd:decimal(?totaal) AS ?percentageVanTotaal)
+WHERE {
+  { # Aantallen per provincie (alleen afgevoerd)
+    SELECT ?provincie (COUNT(DISTINCT ?cho) AS ?aantal)
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?cho a ceo:Rijksmonument ;
+             ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+             ceo:heeftBasisregistratieRelatie [ ceo:heeftProvincie ?provURI ] .
+      }
+      GRAPH graph:owms {
+        ?provURI skos:prefLabel ?provincie .
+      }
+    }
+    GROUP BY ?provincie
+  }
+  { # Landelijk totaal afgevoerd
+    SELECT (COUNT(DISTINCT ?rm) AS ?totaal)
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?rm a ceo:Rijksmonument ;
+            ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> .
+      }
+    }
+  }
+}
+ORDER BY DESC(?aantal) ?provincie

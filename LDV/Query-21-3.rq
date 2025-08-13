@@ -1,0 +1,70 @@
+#+ name: Query-21-3
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+# status-URIs:
+# rn/b2d9... = rijksmonument
+# rn/3e79... = afgevoerd
+
+select ?jaar
+       (coalesce(?inschrijvingen, 0) as ?aantalIngeschreven)
+       (coalesce(?afvoeringen,   0) as ?aantalAfgevoerd)
+where {
+  # 1) jaartabel uit beide bronnen (union)
+  {
+    select distinct ?jaar
+    where {
+      {
+        graph graph:instanties-rce {
+          ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+              ceo:datumInschrijvingInMonumentenregister ?dIn .
+          bind(xsd:integer(substr(str(?dIn), 1, 4)) as ?jaar)
+        }
+      }
+      union
+      {
+        graph graph:instanties-rce {
+          ?rm2 ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+               ceo:registratiedatum ?dUit .
+          bind(xsd:integer(substr(str(?dUit), 1, 4)) as ?jaar)
+        }
+      }
+    }
+  }
+
+  # 2) telling in per jaar, alleen status rijksmonument
+  optional {
+    select ?jaar (count(distinct ?rm) as ?inschrijvingen)
+    where {
+      graph graph:instanties-rce {
+        ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+            ceo:datumInschrijvingInMonumentenregister ?dIn2 .
+        bind(xsd:integer(substr(str(?dIn2), 1, 4)) as ?jaar)
+      }
+    }
+    group by ?jaar
+  }
+
+  # 3) telling uit per jaar, alleen status afgevoerd
+  optional {
+    select ?jaar (count(distinct ?rm3) as ?afvoeringen)
+    where {
+      graph graph:instanties-rce {
+        ?rm3 ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+             ceo:registratiedatum ?dUit2 .
+        bind(xsd:integer(substr(str(?dUit2), 1, 4)) as ?jaar)
+      }
+    }
+    group by ?jaar
+  }
+}
+order by ?jaar
