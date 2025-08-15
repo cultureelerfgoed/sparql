@@ -12,7 +12,7 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 prefix owms: <http://standaarden.overheid.nl/owms/terms/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select distinct ?afgevoerd_rijksmonument ?rijksmonumentnummer ?datumInschrijving ?afgevoerd ?naam ?woonplaats ?omschrijving (group_concat(?functie; separator="; ") as ?functies)
+select distinct ?afgevoerd_rijksmonument ?rijksmonumentnummer ?datumInschrijving ?afgevoerd ?naam ?woonplaats ?omschrijving (group_concat(distinct ?functieNorm; separator="; ") as ?functies)
 
 where
 {
@@ -40,10 +40,14 @@ where
 
     }
     optional {
-      ?afgevoerd_rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
-      ?functienaam skos:prefLabel ?functie_ .
-      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
-    }
+optional {
+  ?afgevoerd_rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam .
+  ?functienaam skos:prefLabel ?functieLabel .
+  # Alleen NL (of taalloos) en haakjes weg
+  bind(replace(?functieLabel, "\\s*\\(.*?\\)", "") as ?functieNorm)
+}
+ #     bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+   }
   }
 }
 group by ?afgevoerd_rijksmonument ?rijksmonumentnummer ?datumInschrijving ?afgevoerd ?naam ?woonplaats ?omschrijving

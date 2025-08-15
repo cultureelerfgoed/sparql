@@ -1,0 +1,42 @@
+#+ name: rijksmonumenten-afgevoerd-2
+#+ description: Data over afgevoerde rijksmonumenten.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+# Per functie: aantal en percentage van alle functie-toekenningen
+select ?functie (xsd:integer(?n) as ?aantal)
+       ( round( (xsd:decimal(?n) * 100) / xsd:decimal(?totaal) * 10 ) / 10 as ?percentage )
+where {
+  # A) telling per functie
+  {
+    select ?functie (count(distinct ?pair) as ?n)
+    where {
+      graph graph:instanties-rce {
+        ?rm  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+             ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?funNaam .
+        ?funNaam skos:prefLabel ?lbl .
+        bind(replace(?lbl, "\\s*\\(.*?\\)", "") as ?functie)
+        bind(concat(str(?rm), "||", str(?funNaam)) as ?pair)
+      }
+    }
+    group by ?functie
+  }
+
+  # B) totaal aantal functie-toekenningen
+  {
+    select (count(distinct ?pair2) as ?totaal)
+    where {
+      graph graph:instanties-rce {
+        ?rm2  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+              ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?funNaam2 .
+        bind(concat(str(?rm2), "||", str(?funNaam2)) as ?pair2)
+      }
+    }
+  }
+}
+order by desc(?aantal)
+limit 20
