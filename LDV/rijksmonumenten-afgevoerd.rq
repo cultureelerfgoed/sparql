@@ -39,7 +39,6 @@ where
       #    bind(replace(replace(?omschrijving_, "\r", ""), "\n", "") as ?omschrijving)
 
     }
-    optional {
 optional {
   ?afgevoerd_rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam .
   ?functienaam skos:prefLabel ?functieLabel .
@@ -49,6 +48,5 @@ optional {
  #     bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
    }
   }
-}
 group by ?afgevoerd_rijksmonument ?rijksmonumentnummer ?datumInschrijving ?afgevoerd ?naam ?woonplaats ?omschrijving
 order by (strlen(?omschrijving))
