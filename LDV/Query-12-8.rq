@@ -1,0 +1,35 @@
+#+ name: Query-12-8
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+#+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+# Definieer PREFIXes voor diverse namenruimten die in de query worden gebruikt.
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+# De SELECT-clausule specificeert welke variabelen zullen worden geretourneerd.
+# Elk van de geselecteerde variabelen bevat het aantal unieke instanties in de betreffende categorie.
+SELECT (COUNT(DISTINCT ?beschermd_) AS ?Beschermd)
+       (COUNT(DISTINCT ?gebouwd_) AS ?Gebouwd)
+       (COUNT(DISTINCT ?archeologisch_) AS ?Archeologisch)
+       (COUNT(DISTINCT ?nietbeschermd) AS ?Afgevoerd)
+       (COUNT(DISTINCT ?voorbeschermd) AS ?Voorbeschermd)
+       (COUNT(DISTINCT ?complex) AS ?Complexen)
+
+# De WHERE-clausule specificeert de voorwaarden waaraan de data moeten voldoen.
+WHERE {
+# De GRAPH-clausule specificeert de graph waarin we geïnteresseerd zijn.
+  GRAPH graph:instanties-rce {
+# Elk blok binnen deze haakjes specificeert een type instantie dat we willen tellen.
+# UNION wordt gebruikt om meerdere types te tellen in dezelfde query.
+    { ?rijksmonument a ceo:Rijksmonument. }
+     UNION { ?beschermd_ a ceo:Rijksmonument ; ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 .}
+    UNION { ?gebouwd_ a ceo:Rijksmonument ; ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ; ceo:heeftMonumentAard rn:fc966a68-8863-4970-a83e-110f96006c21.}
+    UNION { ?nietbeschermd a ceo:Rijksmonument ; ceo:heeftJuridischeStatus rn:3e79bb7c-b459-4998-a9ed-78d91d069227 .}
+    UNION { ?voorbeschermd a ceo:Rijksmonument ; ceo:heeftJuridischeStatus rn:2e93edd1-098f-4f31-ae7e-72cb77f4d2ca .}
+    UNION { ?archeologisch_ a ceo:Rijksmonument ; ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ; ceo:heeftMonumentAard rn:b673c8c1-5d93-496d-8f9e-89133d579d77.}
+    UNION { ?complex a ceo:Complex. }
+  }
+}
