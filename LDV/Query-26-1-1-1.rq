@@ -1,0 +1,127 @@
+#+ name: Query-26-1-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix geo:   <http://www.opengis.net/ont/geosparql#>
+
+select distinct
+  (strdt(concat(
+    '<table>',
+    '<tr><td><b>Rijksmonument met houten kapconstructie</b></td></tr>',
+    '<tr><td><b>Monument: </b>', str(?rijksmonumentnummer), '</td></tr>',
+    '<tr><td><b>Functie: </b>', group_concat(distinct str(?functiel); separator='; '), '</td></tr>',
+    '<tr><td><b>Hoofdcategorie: </b>', str(?label), '</td></tr>',
+    '<tr><td><b>Omschrijving: </b>',
+    if(strlen(str(?desc)) > 250,
+      concat(substr(str(?desc), 1, 250), "... <a href=\"https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rijksmonumentnummer), "\" target=\"_blank\">lees hier verder</a>"),
+      str(?desc)),
+    '</td></tr>',
+    '<tr><td><b>Register: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td></tr>',
+    '</table>'
+  ), rdf:HTML) as ?geometrieLabel)
+  ?geometrie ?provincie ?geometrieColor
+
+where {
+  graph graph:instanties-rce {
+    ?rm a ceo:Rijksmonument ;
+        ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+        ceo:heeftOmschrijving/ceo:omschrijving ?desc ;
+        ceo:heeftOorspronkelijkeFunctie ?functie .
+    
+    ?functie ceo:heeftFunctieNaam ?uri .
+
+    optional {
+      ?rm ceo:heeftGebeurtenis ?gebeurtenis .
+      ?gebeurtenis ceo:heeftDatering ?datering .
+      ?datering ceo:heeftBeginDatering/ceo:datum ?beginDatum .
+      ?datering ceo:heeftEindDatering/ceo:datum ?eindDatum .
+    }
+
+    # ---- DATUMFILTER ----
+    filter(
+      (
+        bound(?beginDatum) && bound(?eindDatum) &&
+        year(xsd:dateTime(?beginDatum)) <= 1800 &&
+        year(xsd:dateTime(?eindDatum))  >= 1300
+      )
+      ||
+      regex(lcase(str(?desc)), "\\b(13e|14e|15e|16e|17e|18e) eeuw\\b") ||
+      regex(str(?desc), "\\b(XIII|XIV|XV|XVI|XVII|XVIII)\\s*[a-dmA-B]?\\b") ||
+      regex(lcase(str(?desc)), "ca.? 1[34567][0-9]{2}") ||
+      regex(lcase(str(?desc)), "± ?1[34567][0-9]{2}") ||
+      regex(str(?desc), "\\b1[34567][0-9]{2}\\s*[a-dmA-B]?\\b")
+    )
+
+    # ---- UITSLUITING ----
+    filter(
+      !regex(str(?desc), "\\b19[0-9]{2}\\b") &&
+      !regex(str(?desc), "\\bXIX\\b") &&
+      !regex(lcase(str(?desc)), "\\b19e eeuw\\b") &&
+      !regex(lcase(str(?desc)), "neo\\s?(got|romaans|renaissance|barok|classic)")
+    )
+
+    # ---- ZOEKTERMEN HOUTEN KAP ----
+    filter(
+      regex(lcase(str(?desc)),
+        "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|hanebalk|hanebalken|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
+      )
+    )
+
+    # ---- Functie label opschonen ----
+    optional {
+      ?functie ceo:heeftFunctieNaam/skos:prefLabel ?functieLabel .
+      bind(replace(?functieLabel, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
+    }
+  }
+
+  # ---- HOOFDCATEGORIE ----
+  graph graph:bebouwdeomgeving {
+    <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
+    ?narrow skos:prefLabel ?label .
+    values (?label ?narrow) {
+      ("Archeologie (N)" <https://data.cultureelerfgoed.nl/term/id/rn/d60159d2-8b55-47b7-8301-5ac82b0f2d7f>)
+      ("Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
+      ("Boerderijen, molens en bedrijven" <https://data.cultureelerfgoed.nl/term/id/rn/b8077035-db8f-47f1-ae1d-e64f75344fcf>)
+      ("Cultuur, gezondheid en wetenschap" <https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
+      ("Handelsgebouwen, opslag- en transportgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
+      ("Kastelen, landhuizen en parken" <https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
+      ("Religieuze gebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+      ("Sport, recreatie, vereniging en horeca" <https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
+      ("Uitvaartcentra en begraafplaatsen" <https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
+      ("Verdedigingswerken en militaire gebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
+      ("Voorwerpen op pleinen en dergelijke" <https://data.cultureelerfgoed.nl/term/id/rn/92cda3e4-8c6a-41dc-9a81-02f8aba88b25>)
+      ("Weg- en waterbouwkundige werken" <https://data.cultureelerfgoed.nl/term/id/rn/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
+      ("Woningen en woningbouwcomplexen" <https://data.cultureelerfgoed.nl/term/id/rn/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
+    }
+    ?narrow skos:narrower+ ?uri .
+  }
+
+  # ---- Provincie ----
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov .
+  graph graph:owms { ?prov skos:prefLabel ?provincie. }
+
+  # ---- Geometrie ----
+  graph graph:punten { optional { ?rm ceo:heeftGeometrie/geo:asWKT ?geometrie. } }
+
+  # ---- Kleur ----
+  bind(
+    if(?label="Boerderijen, molens en bedrijven", "green",
+    if(?label="Kastelen, landhuizen en parken", "blue",
+    if(?label="Religieuze gebouwen", "purple",
+    if(?label="Woningen en woningbouwcomplexen", "orange",
+    if(?label="Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen", "red",
+    if(?label="Handelsgebouwen, opslag- en transportgebouwen", "brown",
+    if(?label="Cultuur, gezondheid en wetenschap", "pink",
+    if(?label="Verdedigingswerken en militaire gebouwen", "black",
+    if(?label="Weg- en waterbouwkundige werken", "teal",
+    if(?label="Uitvaartcentra en begraafplaatsen", "gray",
+    if(?label="Voorwerpen op pleinen en dergelijke", "yellow",
+    if(?label="Sport, recreatie, vereniging en horeca", "cyan",
+    "fuchsia")))))))))))) as ?geometrieColor
+  )
+}
+group by ?rm ?rijksmonumentnummer ?desc ?geometrie ?provincie ?label ?geometrieLabel ?geometrieColor

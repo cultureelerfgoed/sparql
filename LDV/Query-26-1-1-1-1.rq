@@ -1,0 +1,61 @@
+#+ name: Query-26-1-1-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select ?eeuw (count(distinct ?rm) as ?aantal)
+where {
+  graph graph:instanties-rce {
+    ?rm a ceo:Rijksmonument ;
+        ceo:heeftOmschrijving/ceo:omschrijving ?desc .
+
+    optional {
+      ?rm ceo:heeftGebeurtenis ?gebeurtenis .
+      ?gebeurtenis ceo:heeftDatering ?datering .
+      ?datering ceo:heeftBeginDatering/ceo:datum ?beginDatum .
+      ?datering ceo:heeftEindDatering/ceo:datum ?eindDatum .
+    }
+
+    # ---- ZOEKTERMEN HOUTEN KAP ----
+    filter(
+      regex(lcase(str(?desc)),
+        "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|han[ea]balk|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
+      )
+    )
+
+    # ---- BEPALEN VAN EEUW ALS LABEL ----
+bind(
+  if(bound(?beginDatum) && bound(?eindDatum) &&
+     year(xsd:dateTime(?beginDatum)) >= 1200 &&
+     year(xsd:dateTime(?eindDatum)) <= 1800,
+    concat(str(floor((year(xsd:dateTime(?beginDatum))) / 100) + 1), "e eeuw"),
+    if(regex(lcase(str(?desc)), "13e eeuw|xiii"), "13e eeuw",
+    if(regex(lcase(str(?desc)), "14e eeuw|xiv"), "14e eeuw",
+    if(regex(lcase(str(?desc)), "15e eeuw|xv"), "15e eeuw",
+    if(regex(lcase(str(?desc)), "16e eeuw|xvi"), "16e eeuw",
+    if(regex(lcase(str(?desc)), "17e eeuw|xvii"), "17e eeuw",
+    if(regex(lcase(str(?desc)), "18e eeuw|xviii"), "18e eeuw", "")))))))
+   as ?eeuw
+)
+filter(?eeuw IN ("13e eeuw","14e eeuw","15e eeuw","16e eeuw","17e eeuw","18e eeuw"))
+
+filter(?eeuw != "")
+
+
+    filter(?eeuw != "onbekend")
+
+    # ---- UITSLUITING 19e EEUW EN NEOSTIJLEN ----
+    filter(
+  !regex(str(?desc), "\\b(18[1-9][0-9]|19[0-9]{2}|20[0-9]{2}|21[0-9]{2})\\b") &&
+  !regex(lcase(str(?desc)), "\\b(19e|20e|21e) eeuw\\b") &&
+  !regex(str(?desc), "\\bXIX\\b|\\bXX\\b|\\bXXI\\b") &&
+  !regex(lcase(str(?desc)), "neo\\s?(got|romaans|renaissance|barok|classic)")
+)
+  }
+}
+group by ?eeuw
+order by ?eeuw
