@@ -65,11 +65,16 @@ where {
     )
 
     # ---- ZOEKTERMEN HOUTEN KAP ----
-    filter(
-      regex(lcase(str(?desc)),
-        "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|hanebalk|hanebalken|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
-      )
-    )
+    FILTER(
+  regex(lcase(str(?desc)),
+    "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|han[ea]balk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
+  )
+)
+    # filter(
+    #   regex(lcase(str(?desc)),
+    #     "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|hanebalk|hanebalken|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
+    #   )
+    # )
 
     # ---- Functie label opschonen ----
     optional {
