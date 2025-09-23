@@ -1,0 +1,53 @@
+#+ name: Relatie-clashes
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?type ?concept1 ?label1 ?concept2 ?label2
+WHERE {
+  {
+    # clash: broader + related
+    ?concept1 skos:broader ?concept2 .
+    ?concept1 skos:related ?concept2 .
+    BIND("broader+related" AS ?type)
+  }
+  UNION
+  {
+    # clash: narrower + related
+    ?concept1 skos:narrower ?concept2 .
+    ?concept1 skos:related ?concept2 .
+    BIND("narrower+related" AS ?type)
+  }
+  UNION
+  {
+    # clash: broader en narrower tegelijk (cirkel)
+    ?concept1 skos:broader ?concept2 .
+    ?concept1 skos:narrower ?concept2 .
+    BIND("broader+narrower" AS ?type)
+  }
+  UNION
+  {
+    # clash: wederkerig broader
+    ?concept1 skos:broader ?concept2 .
+    ?concept2 skos:broader ?concept1 .
+    BIND("broader+broader" AS ?type)
+  }
+  UNION
+  {
+    # clash: wederkerig narrower
+    ?concept1 skos:narrower ?concept2 .
+    ?concept2 skos:narrower ?concept1 .
+    BIND("narrower+narrower" AS ?type)
+  }
+  UNION
+  {
+    # clash: related naar zichzelf
+    ?concept1 skos:related ?concept1 .
+    BIND("self-related" AS ?type)
+  }
+
+  # Labels ophalen
+  OPTIONAL { ?concept1 skos:prefLabel ?label1 . FILTER (lang(?label1) = "nl") }
+  OPTIONAL { ?concept2 skos:prefLabel ?label2 . FILTER (lang(?label2) = "nl") }
+}
+ORDER BY ?type ?label1 ?label2

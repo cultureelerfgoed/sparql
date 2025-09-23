@@ -12,7 +12,7 @@ where {
   graph graph:instanties-rce {
     ?rijksmonument a ceo:Rijksmonument ;
         ceo:heeftOorspronkelijkeFunctie ?functie ;
-        ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving .
+        ceo:heeftOmschrijving/ceo:omschrijving ?desc .
 
     optional {
       ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis .
@@ -22,39 +22,37 @@ where {
     }
     ?functie ceo:heeftFunctieNaam ?uri .
 
-    # ---- BEPALEN VAN EEUW ALS LABEL ----
+    # ---- BEPALEN VAN EEUW ALS LABEL (zelfde als query 4) ----
     bind(
-      coalesce(
-        # 1. Formele datering (bij begin- en einddatum)
-        if(bound(?beginDatum) && bound(?eindDatum) &&
-           year(xsd:dateTime(?beginDatum)) <= 1800 &&
-           year(xsd:dateTime(?eindDatum))  >= 1300,
-           concat(str(floor((year(xsd:dateTime(?beginDatum))) / 100) + 1), "e eeuw"),
-           ""),
-
-        # 2. Tekstuele datering in omschrijving
-        if(regex(lcase(str(?omschrijving)), "13e eeuw|xiii"),  "13e eeuw",
-        if(regex(lcase(str(?omschrijving)), "14e eeuw|xiv"),  "14e eeuw",
-        if(regex(lcase(str(?omschrijving)), "15e eeuw|xv"),   "15e eeuw",
-        if(regex(lcase(str(?omschrijving)), "16e eeuw|xvi"),  "16e eeuw",
-        if(regex(lcase(str(?omschrijving)), "17e eeuw|xvii"), "17e eeuw",
-        if(regex(lcase(str(?omschrijving)), "18e eeuw|xviii"),"18e eeuw", ""))))))
-      ) as ?eeuw
+      if(bound(?beginDatum) && bound(?eindDatum) &&
+         year(xsd:dateTime(?beginDatum)) >= 1200 &&
+         year(xsd:dateTime(?eindDatum)) <= 1800,
+        concat(str(floor((year(xsd:dateTime(?beginDatum))) / 100) + 1), "e eeuw"),
+        if(regex(lcase(str(?desc)), "13e eeuw|xiii"), "13e eeuw",
+        if(regex(lcase(str(?desc)), "14e eeuw|xiv"), "14e eeuw",
+        if(regex(lcase(str(?desc)), "15e eeuw|xv"), "15e eeuw",
+        if(regex(lcase(str(?desc)), "16e eeuw|xvi"), "16e eeuw",
+        if(regex(lcase(str(?desc)), "17e eeuw|xvii"), "17e eeuw",
+        if(regex(lcase(str(?desc)), "18e eeuw|xviii"), "18e eeuw", "")))))))
+       as ?eeuw
     )
 
-    filter(?eeuw != "")
-filter(?eeuw in ("13e eeuw","14e eeuw","15e eeuw","16e eeuw","17e eeuw","18e eeuw"))
+    filter(?eeuw in ("13e eeuw","14e eeuw","15e eeuw","16e eeuw","17e eeuw","18e eeuw"))
 
-    # ---- FILTER OP HOUTEN KAPCONSTRUCTIES ----
-    FILTER(regex(lcase(str(?omschrijving)),
-    "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|han[ea]balk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
-  )
-)
-    # filter(
-    #   regex(lcase(str(?omschrijving)),
-    #     "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|han[ea]balk|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
-    #   )
-    # )
+    # ---- FILTER OP HOUTEN KAPCONSTRUCTIES (zelfde als query 4) ----
+    FILTER(
+      regex(lcase(str(?desc)),
+        "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|han[ea]balk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
+      )
+    )
+
+    # ---- UITSLUITING 19e EEUW EN NEOSTIJLEN (zelfde als query 4) ----
+    filter(
+      !regex(str(?desc), "\\b(18[1-9][0-9]|19[0-9]{2}|20[0-9]{2}|21[0-9]{2})\\b") &&
+      !regex(lcase(str(?desc)), "\\b(19e|20e|21e) eeuw\\b") &&
+      !regex(str(?desc), "\\bXIX\\b|\\bXX\\b|\\bXXI\\b") &&
+      !regex(lcase(str(?desc)), "neo\\s?(got|romaans|renaissance|barok|classic)")
+    )
   }
 
   # ---- KOPPELING NAAR HOOFDCATEGORIE ----
