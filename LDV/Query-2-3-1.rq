@@ -1,0 +1,43 @@
+#+ name: Query-2-3-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql
+
+prefix schema: <https://schema.org/>
+prefix skos:   <http://www.w3.org/2004/02/skos/core#>
+prefix ceo:    <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+select ?about ?rmnr ?image ?nm ?kw
+  where {
+  {
+    select distinct ?about ?image ?nm where {
+      # Afbeeldingen uit afbeeldingen2
+      service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+        ?imgObj a schema:ImageObject ;
+                schema:about ?about ;
+                schema:contentUrl ?image .
+
+        {
+          # A) keyword bevat CHT term
+          ?imgObj schema:keywords/skos:prefLabel ?kw .
+          filter(regex(lcase(str(?kw)),
+            "kapconstructies|sporenkappen|daksporen|spantbalken|tussenspantbalken|boogspanten|philibertspanten|gebinten|kapgebinten|gebintstijlen|hanebalken|gordingen \\(balk\\)|korbeelstellen|koningsstijlen|keperbogen|kappen \\(daken\\)"
+          ))
+        }
+        union
+        {
+          # B) name bevat regex-termen
+          ?imgObj schema:name ?nm .
+          filter(regex(lcase(str(?nm)),
+            "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|hanebalk|hanenbalk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
+          ))
+        }
+      }
+    }
+  }
+
+  # Koppel via CHO dataset om het echte rijksmonumentnummer op te halen
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    ?about ceo:rijksmonumentnummer ?rmnr .
+  }
+}
+order by ?rmnr

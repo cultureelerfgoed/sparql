@@ -7,6 +7,7 @@ prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
 prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo:   <http://www.opengis.net/ont/geosparql#>
+prefix schema: <https://schema.org/>
 
 select distinct
   (strdt(concat(
@@ -21,6 +22,9 @@ select distinct
       str(?desc)),
     '</td></tr>',
     '<tr><td><b>Register: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',str(?rijksmonumentnummer),'" target="_blank">',str(?rijksmonumentnummer),'</a></td></tr>',
+    '<tr><td>',
+    '<center><img src="', COALESCE(STR(?image), ''), '" style="max-width:200px;"></center>',
+    '</td></tr>',
     '</table>'
   ), rdf:HTML) as ?geometrieLabel)
   ?geometrie ?provincie ?geometrieColor
@@ -66,20 +70,25 @@ where {
 
     # ---- ZOEKTERMEN HOUTEN KAP ----
     FILTER(
-  regex(lcase(str(?desc)),
-    "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|han[ea]balk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
-  )
-)
-    # filter(
-    #   regex(lcase(str(?desc)),
-    #     "\\bkap\\b|houten kap|kapconstructie|gebint|spantenkap|beuken kap|sporenkap|sporekap|hanebalk|hanebalken|gordingen|spant|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap"
-    #   )
-    # )
+      regex(lcase(str(?desc)),
+        "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|han[ea]balk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
+      )
+    )
 
     # ---- Functie label opschonen ----
     optional {
       ?functie ceo:heeftFunctieNaam/skos:prefLabel ?functieLabel .
       bind(replace(?functieLabel, "\\s\\(.*\\)|\\(.*\\)", "") as ?functiel)
+    }
+  }
+
+  # ---- Federated query naar afbeeldingen2 ----
+  optional {
+    SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+      ?imgObj schema:about ?rm ;
+              schema:contentUrl ?img .
+      # Pak een voorbeeldafbeelding
+      BIND(?img AS ?image)
     }
   }
 
@@ -129,4 +138,4 @@ where {
     "fuchsia")))))))))))) as ?geometrieColor
   )
 }
-group by ?rm ?rijksmonumentnummer ?desc ?geometrie ?provincie ?label ?geometrieLabel ?geometrieColor
+group by ?rm ?rijksmonumentnummer ?desc ?geometrie ?provincie ?label ?geometrieLabel ?geometrieColor ?image
