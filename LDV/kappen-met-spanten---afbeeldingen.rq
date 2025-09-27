@@ -1,0 +1,53 @@
+#+ name: kappen-met-spanten---afbeeldingen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix schema: <https://schema.org/>
+prefix skos:   <http://www.w3.org/2004/02/skos/core#>
+prefix ceo:    <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix xsd:    <http://www.w3.org/2001/XMLSchema#>
+prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+
+select ?widget where {
+  {
+    select distinct ?about ?rmnr ?image ?nm ?kw where {
+      service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+        ?imgObj a schema:ImageObject ;
+                schema:about ?about ;
+                schema:contentUrl ?image .
+
+        {
+          ?imgObj schema:keywords/skos:prefLabel ?kw .
+          filter(regex(lcase(str(?kw)),
+            "kapconstructies|sporenkappen|daksporen|spantbalken|tussenspantbalken|boogspanten|philibertspanten|gebinten|kapgebinten|gebintstijlen|hanebalken|gordingen \\(balk\\)|korbeelstellen|koningsstijlen|keperbogen|kappen \\(daken\\)"
+          ))
+        }
+        union
+        {
+          ?imgObj schema:name ?nm .
+          filter(regex(lcase(str(?nm)),
+            "\\bkap\\b|houten kap|kapconstructie|gebint(en)?|spantenkap|beuken kap|sporen?kap|hanebalk|hanenbalk|gording(en)?|spant(en)?|kappen|dakstoel|kapvoet|eiken kap|vur(e|en)houten kap|fliering|stijlenkap|nok(balk|stijl)?|koningsstijl?|koningsspant|ankerbalk(spant)?|schaarspant|halfspant|keper|hoekkeper|spantbeen|trekbalk|juk|kapjuk|korbeel|stijl(en)? en regelwerk"
+          ))
+        }
+      }
+
+      service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+        ?about ceo:rijksmonumentnummer ?rmnr .
+      }
+    }
+  }
+
+  # ---- Gallery widget HTML ----
+bind(concat(
+    "<div style='max-width:250px;'>",
+    "<h3>Rijksmonument ", str(?rmnr), "</h3>",
+    "<a href='https://monumentenregister.cultureelerfgoed.nl/monumenten/", str(?rmnr), "' target='_blank'>",
+    "<img src='", str(?image), "' style='max-width:240px; height:auto; border:1px solid #ccc;'>",
+    "</a>",
+    "<p>", coalesce(str(?kw), str(?nm), ""), "</p>",
+    "</div>"
+) as ?html)
+
+bind(strdt(?html, rdf:HTML) as ?widget)
+}
+order by ?rmnr
