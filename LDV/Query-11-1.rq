@@ -1,42 +1,74 @@
 #+ name: Query-11-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX edm: <http://www.europeana.eu/schemas/edm/>
-PREFIX id: <https://hetutrechtsarchief.nl/id/>
-PREFIX edm: <http://www.europeana.eu/schemas/edm/>
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
-prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+prefix text: <http://jena.apache.org/text#>
+prefix schema: <https://schema.org/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
+select distinct ?rijksmonumentnummer ?naam ?adres ?provincie ?functies ?naam_ ?literal ?plaats ?monumentaard ?beeldbank ?afbeelding
+  (max(?afbeelding) as ?enkele_afbeelding)
+  (strdt(concat(
+    '<div style="background-color:rgba(0,0,0,.2);">',
+    '   <center><img src="{{image}}" style="max-width: 150px;"></center>',
+    '   <ul>',
+    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', str(?rijksmonumentnummer), '" target="_blank">', str(?rijksmonumentnummer), '</a></li>',
+    '      <li>naam: {{naam_}}</li>',
+ #   '      <li>In: <a href="', str(?beeldbank), '" target="_blank">Beeldbank</a></li>',
+    '      <li>monumentaard: {{monumentaard}}</li>',
+    '      <li>functie: {{functies}}</li>',
+    '      <li>adres: {{adres}}</li>',
+    '      <li>plaats: {{plaats}}</li>',
+    '      <li>provincie: {{provincie}}</li>',
+    '      <li>gevonden woorden in omschrijving:</br>- {{literal}}</li>',
+    '   </ul>',
+    '   <br><br>',
+    '</div>'
+  ), rdf:HTML) as ?widget)
+  (if(bound(?enkele_afbeelding), ?enkele_afbeelding, "https://linkeddata.cultureelerfgoed.nl/thesauri/Cultuurhistorische-Thesaurus-CHT/assets/649ece54686a0119f59e2452") as ?image)
 
-SELECT distinct(strdt(concat(
-	'<img style="height:170px;" src="',str(?img),'">',
-	'</a></div>',
-      concat(str(?naam), ": ", str(?description)),'<br />',
-	'</p>', "Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rmnr),'" target="_blank">',str(?rmnr),'</a>'
-	),rdf:HTML) as ?widget)
+where {
+  (?choi ?sc ?literal) text:query (schema:description '(ijzer OR gietijzer OR smeedijzer OR rvs OR corten OR cortenstaal OR roestvast OR roestvrij OR ijzeren OR roest OR welijzer OR staal OR stalen)'
+                                   'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- ').
+  (?choi) text:query (schema:addressRegion ?provincie).
 
-WHERE {
- ?reliGebouw ceox:heeftAdresgegevens/ceox:woonplaats "Utrecht".
-  ?reliGebouw ceox:rijksmonumentnummer ?rmnr.
- ?reliGebouw ceox:heeftNaam/ceox:naam ?naam. 
+  ?choi schema:description ?omschrijving.
+  ?choi schema:identifier ?rijksmonumentnummer.
+  ?choi schema:addressLocality ?plaats.
+  # ?choi schema:addressRegion ?provincie.
+  ?choi schema:category ?monumentaard.
+  ?choi schema:additionalType ?functie.
+  ?choi schema:sameAs ?cho.
+  bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
+  optional {
+    ?choi schema:address ?adres.
+  }
+  optional {
+    ?choi schema:name ?naam.
 
-{SELECT distinct   ?naamU ?description ?img
-WHERE { SERVICE <https://api.data.netwerkdigitaalerfgoed.nl/datasets/hetutrechtsarchief/Beeldbank/services/Beeldbank/sparql>{
-  ?cho dct:spatial ?plek.
-   ?plek rdfs:label ?naamU.
-	?cho edm:isShownBy ?img .
-	?cho dc:description ?description .
-        Filter regex (?description, ?zoekwoord, "i")
+  }
+  bind(coalesce(str(?naam), " -") as ?naam_)
+
+  filter(!regex(?omschrijving, "Corten, J.P.|J.P. Corten|Cortenbach|Cortensstraat|Huis Corten", "i"))
+
+  # Afbeelding is optioneel
+  optional {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+      graph <https://linkeddata.cultureelerfgoed.nl/graph/image> {
+        ?afb a schema:ImageObject .
+        optional {
+          ?afb schema:about ?choi.
+        }
+        ?afb schema:contentUrl ?afbeelding.
+        ?afb edm:isShownAt ?beeldbank.
+      }
+    }
+  }
 }
-    }}
-  Filter(contains(?naam,  ?naamU))
 
-}
+group by ?rijksmonumentnummer ?provincie ?functies ?literal ?beeldbank ?naam ?plaats ?monumentaard ?adres ?afbeelding ?rmn ?naam_
+limit 100

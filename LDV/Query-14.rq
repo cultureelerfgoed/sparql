@@ -1,6 +1,8 @@
 #+ name: Query-14
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX begindatering: <https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/begindatering/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX lxr: <https://linkeddata.cultureelerfgoed.nl/def/lxr#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -9,37 +11,69 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX wdt:  <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+PREFIX nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
 
-# wdt:P31 = instance of
+# Gebruikte wikidata properties of qualifiers
+# wdt:P1435 = heritage designation
+# wdt:P131 = instance of
 # wd:Q916333 = Rijksmonument
 # wdt:P359 = rijksmonumentnummer
-# wdt:P17 = country
-# wdt:P18 = image
-# wd:Q55 = Nederland
-# wd:Q694 = Zuid-Holand
-# wd:Q701 = Noord-Holland
-# wd:Q1093 = Limburg
 
+SELECT 
+?inschrijvingsjaar (count(distinct(?rijksmonumentnummer)) AS ?aantal_rijksmonumenten)
 
-
-SELECT distinct ?rijksmonumentUri ?rijksmonumentnummer ?datumInschrijving ?startdatumOplevering ?einddatumOplevering
 
 WHERE {
-
-  SERVICE <https://query.wikidata.org/sparql> {?rm_wiki wdt:P1435 wd:Q916333 ; wdt:P359 ?rijksmonumentnummer 
-    ; wdt:P131 ?plaats . ?plaats wdt:P131 wd:Q1093 . 
-    optional {?rm_wiki wdt:P571  ?startdatumOplevering  . }
-    optional {?rm_wiki wdt:P1619 ?einddatumOplevering . }
-    optional {?rm_wiki rdfs:label ?label_wiki } 
-    
-      
-  }
-  
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {?rijksmonumentUri ceo:rijksmonumentnummer ?rijksmonumentnummer 
-  ; ceo:datumInschrijvingInMonumentenregister ?datumInschrijving 
+{
+    # Wikidata
+  {SERVICE <https://query.wikidata.org/sparql>{?rm_wiki wdt:P1435 wd:Q916333 ;
+                                                        wdt:P359 ?rijksmonumentnummer ;
+                                                        wdt:P131 ?plaats .
+    {?rm_wiki wdt:P571  ?startdatumOplevering  . }
+    {?rm_wiki wdt:P1619 ?einddatumOplevering . }
+}
+}
+  union
+  {
+      # RCE
+ GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {
+ ?rijksmonumentUri ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                   ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
+                   ceo:heeftGebeurtenis ?gebeurtenis.
+  ?gebeurtenis ceo:heeftDatering ?datering.
+  ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.  
+  ?datering ceo:heeftBeginDatering ?beginDatering.
+  ?beginDatering ceo:datum ?beginDatum.
+        
+      BIND(year(xsd:dateTime(?beginDatum)) as ?jaarBeginDatum)   
   } 
-} 
-order by ?rijksmonumentnummer
+  }
+  }
+  union
+  # Kadaster
+  {service <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql> {
+    ?verblijfsobject 
+    	a sor:Verblijfsobject ;
+        sor:maaktDeelUitVan ?pand;
+        sor:geregistreerdMet/nen3610:identificatie ?verblijfsobjectIdBag.
+    ?pand sor:oorspronkelijkBouwjaar ?bouwjaar
+  }
+      ?rijksmonument
+      ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdBag ;
+       ceo:datumInschrijvingInMonumentenregister ?datumInschrijving;
+      ceo:rijksmonumentnummer ?rijksmonumentnummer.
+  } 
+ ?rijksmonumentUri ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                   ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+                   BIND(year(xsd:dateTime(?datumInschrijving)) as ?inschrijvingsjaarInt)
+   bind(concat(str(?inschrijvingsjaarInt)) as ?inschrijvingsjaar)
+}
+ 
+ 
+
+order by ?inschrijvingsjaar
+
 
 
 

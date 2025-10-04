@@ -1,46 +1,33 @@
 #+ name: Query-2-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/joop-van-der-heiden/gebedshuizen/graphs/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX dce: <http://purl.org/dc/elements/1.1/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-prefix edm: <http://www.europeana.eu/schemas/edm/>
 
-SELECT DISTINCT *
-#?item ?reliGebouw ?imageLink ?geo ?name ?geoLabel (sample(?widget) as ?widget) ?naamRCE
-#?widget
+
+SELECT ?rijksmonumentnummer (SAMPLE(?naam) AS ?naam) (SAMPLE(?adres) AS ?adres) 
+       (SAMPLE(?postcode) AS ?postcode) ?woonplaats ?gemeente (SAMPLE(?functie) AS ?functie) 
+(SUBSTR((?redengevende_omschrijving), 1, 100) AS ?redengevende_omschrijving)
+#(SAMPLE(xsd:string(?redengevende_omschrijving)) AS ?ro)
 WHERE {
-  service <https://api.data.netwerkdigitaalerfgoed.nl/datasets/Rijksmuseum/collection/services/collection/sparql> {
-    ?item dce:subject/skos:prefLabel "Nijmegen"@nl.
-    ?item dce:title ?name.
-    FILTER REGEX(?name, "kerk", "i")
-    [ edm:aggregatedCHO ?item;
-    edm:isShownBy ?imageLink;
-    edm:provider ?provider ].
-    
+  ?rm ceo:rijksmonumentnummer ?rijksmonumentnummer .
+  ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+  OPTIONAL { ?rm ceo:heeftNaam/ceo:naam ?naam }
+  OPTIONAL { ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres }
+  OPTIONAL { 
+    ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:postcode ?postcode_x .
+    BIND(replace(str(?postcode_x), "([0-9])([A-Z])", "$1 $2") AS ?postcode)
   }
-  ?reliGebouw ceox:heeftAdresgegevens/ceox:woonplaats "Nijmegen".
-  OPTIONAL {?reliGebouw ceox:heeftNaam/ceox:naam ?naamRCE.}
-  OPTIONAL {?reliGebouw ceox:heeftGeometrie/geo:asWKT ?geo.}
-  
-  # filter(str(?subject) = str(?woonplaats))
-   
-  bind(strdt(concat(
-'<div style="position: relative;">',
-  '<a href="https://data.netwerkdigitaalerfgoed.nl/Rijksmuseum/collection/browser?resource=',encode_for_uri(?item),'" target="_blank">',
-    '<img src="',str(?imageLink),'" style="max-width: 400px;">',
-  '</a>',
-  '<h1 style="position: absolute; top: -11px; left: 0; width: 100%; line-height: 0px;">',
-    '<span style="color: white; font: bold 12px/24px Helvetica, Sans-Serif; line-height: 1.5em; letter-spacing: -1.05px; background: rgb(0, 0, 0); background: rgba(0, 0, 0, 0.7); padding: 2px;">',str(?naamRCE),'</span>',
-  '</h1>',
-  '<h2 style="position: absolute; bottom: -11px; left: 0; width: 100%;">',
-    '<span style="color: white; font: bold 15px/45px Helvetica, Sans-Serif; letter-spacing: -1.05px; background: rgb(0, 0, 0); background: rgba(0, 0, 0, 0.7); padding: 1px;">',str(?provider),'</span>',
-  '</h2>',
-'</div>'),rdf:HTML)  as ?widget)
-  }
-#LIMIT 20
+  OPTIONAL { ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaats }
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente/skos:prefLabel ?gemeente .
+  ?rm ceo:heeftOmschrijving/ceo:omschrijving ?redengevende_omschrijving.
+  ?rm ceo:heeftOmschrijving/ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+ #   BIND(replace(?redengevende_omschrijving, "X", " ") AS ?redengevende_omschrijving_c)
+  OPTIONAL { ?rm ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie }
+  ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie <http://standaarden.overheid.nl/owms/terms/Zeeland_(provincie)> 
+}
+GROUP BY ?rijksmonumentnummer ?woonplaats ?gemeente ?redengevende_omschrijving
+ORDER BY ?rijksmonumentnummer

@@ -1,5 +1,5 @@
 #+ name: Query-7-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 PREFIX schema: <http://schema.org/>
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>

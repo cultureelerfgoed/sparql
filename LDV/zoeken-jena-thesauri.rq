@@ -1,5 +1,6 @@
 #+ name: zoeken-jena-thesauri
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/thesauri/services/thesauri/sparql
+#+ description: testquery voor oorlogsbronnen met Jena. Op de officiele thesaurus in Triply
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/oorlogsbronnen/services/oorlogsbronnen-jena/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix text: <http://jena.apache.org/text#>

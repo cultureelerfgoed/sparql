@@ -1,32 +1,78 @@
 #+ name: Query-3-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ description: Deze lijkt te werken bij rijksmonumentnummer test.
+#- Do not delete
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix schema: <https://schema.org/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 
+construct {
+  ?monument_uri a schema:LandmarksOrHistoricalBuildings ;
+                schema:name ?naam ;
+                schema:identifier ?rijksmonumentnummer ;
+                schema:category ?monumentaard ;
+                schema:address ?adres ;
+                schema:postalCode ?postcode ;
+                schema:additionalType ?functie_uri ;
+                skos:prefLabel ?functie;
+                schema:addressLocality ?woonplaats ;
+                schema:addressRegion ?provincie ;
+                geo:asWKT ?geometrie ;
+                schema:description ?omschrijving_label ;
+                schema:sameAs ?monument_url ;
+                schema:keywords ?subject_concept ;
+                skos:prefLabel ?subject_label .
+}
+where {
+  # service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+  select distinct ?provincie ?postcode ?monument_uri ?naam ?rijksmonumentnummer ?monumentaard ?adres ?functie ?woonplaats ?geometrie ?omschrijving_label ?monument_url ?subject_concept ?subject_label
+  where {
+    graph graph:instanties-rce {
+      ?monument_uri a ceo:Rijksmonument .
+      ?monument_uri ceo:rijksmonumentnummer ?rijksmonumentnummer .
+      ?monument_uri ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
+      ?monument_uri ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
 
-SELECT distinct *  WHERE {
-   OPTIONAL { ?rijksmonument ceox:rijksmonumentnummer ?eventDescription. }
-  ?rijksmonument ceox:heeftNaam/ceox:naam ?eventLabel.
-  ?rijksmonument ceox:heeftGebeurtenis ?gebeurtenis.
-  ?gebeurtenis ceox:heeftDatering ?eventDate .
-  ?eventDate ceox:jaar ?eventStart .
-  ?rijksmonument ceox:heeftGeometrie/wgs84:asWKT ?destination.
+      optional {
+        ?monument_uri ceo:heeftNaam/ceo:naam ?naam
+      } .
+      optional {
+        ?monument_uri ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam .
+        ?functienaam a skos:Concept ;
+                    skos:prefLabel ?functie .
+     #   bind(?functienaam as ?functie_uri)
+      }
+      } .
+      optional {
+        ?monument_uri ceo:heeftOmschrijving ?omschrijving_ .
+        ?omschrijving_ a skos:Concept ;
+                      skos:prefLabel ?omschrijving_label .
+        ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .
+      }
+      optional {
+        ?monument_uri ceo:heeftGeometrie/geo:asWKT ?geometrie
+      }
+    
+    bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_url)
 
-
-{ select ?eventDescription ?eventMedia where { SERVICE <https://query.wikidata.org/sparql> {
-  #?item wdt:P1435 wd:Q916333 . 
-        ?item  wdt:P31 wd:Q16970 . 
-        ?item wdt:P359  ?eventDescription 
-        ; wdt:P18 ?eventMedia .
-      }}#limit 1000 offset 100
+    optional {
+      ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br .
+      ?br ceo:volledigAdres ?adres .
+      ?br ceo:woonplaatsnaam ?woonplaats .
+      ?br ceo:postcode ?postcode .
+      ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie/skos:prefLabel ?provincie .
+    }
+    optional {
+      ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?subject_concept .
+      ?subject_concept a skos:Concept ;
+                      skos:prefLabel ?subject_label .
+    }
   }
-bind(?destination as ?eventLocation)  }
-order by ?eventStart
-
-
+}
+#}
+LIMIT 10000

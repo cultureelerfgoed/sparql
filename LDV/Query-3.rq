@@ -1,24 +1,75 @@
 #+ name: Query-3
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ description: Deze lijkt te werken bij rijksmonumentnummer test, 
+#- Do not delete
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix schema: <https://schema.org/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+construct {
+  ?monument_uri a schema:LandmarksOrHistoricalBuildings ;
+                schema:name ?naam ;
+                schema:identifier ?rijksmonumentnummer ;
+                schema:category ?monumentaard ;
+                schema:address ?adres ;
+                schema:postalCode ?postcode ;
+                schema:additionalType ?functie ;
+                schema:addressLocality ?woonplaats ;
+                schema:addressRegion ?provincie ;
+                geo:asWKT ?geometrie ;
+                schema:description ?omschrijving_label ;
+                schema:sameAs ?monument_url ;
+                schema:keywords ?subject_concept ;
+                schema:about ?subject_label .
+}
+  where {
+   # service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+      select distinct ?provincie ?postcode ?monument_uri ?naam ?rijksmonumentnummer ?monumentaard ?adres ?functie ?woonplaats ?geometrie ?omschrijving_label ?monument_url ?subject_concept ?subject_label
+      where {
+        graph graph:instanties-rce {
+          ?monument_uri a ceo:Rijksmonument .
+          ?monument_uri ceo:rijksmonumentnummer ?rijksmonumentnummer .
+          ?monument_uri ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
+          ?monument_uri ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+
+          optional {
+            ?monument_uri ceo:heeftNaam/ceo:naam ?naam
+          } .
+          optional {
+            ?monument_uri ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie_
+          } .
+          optional {
+            ?monument_uri ceo:heeftOmschrijving ?omschrijving_ .
+            ?omschrijving_ ceo:omschrijving ?omschrijving_label .
+            ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .
+          }
+          optional {
+            ?monument_uri ceo:heeftGeometrie/geo:asWKT ?geometrie
+          }
+        }
+        bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_url)
+        bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
 
 
-select ?jaarInschrijving ?stijl ?provincie (count(?rm) as ?aantalRM)
-where { ?rm a ceo:Rijksmonument ; ceo:datumInschrijvingInMonumentenregister ?datumIn ; 
-  ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijl .
-    BIND(year(xsd:dateTime(?datumIn)) as ?jaarInschrijvingX)
- . BIND(STR(?jaarInschrijvingX) AS ?jaarInschrijving) 
- . FILTER (?jaarInschrijving >= "1990"^^xsd:string && ?jaarInschrijving <= "2000"^^xsd:string) 
- .  MINUS { ?rm ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel "n.v.t."^^xsd:string} 
- ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie/skos:prefLabel ?provincie;
-      ceo:heeftJuridischeStatus/skos:prefLabel ?grm;
-    FILTER (regex(?grm, "^rijksmonument") || contains(?grm, "voorbeschermd"))
-} 
-group by ?jaarInschrijving ?stijl ?provincie
-having (count(?stijl) > 10)
-order by ?provincie ?jaarInschrijving ?aantalRM
+        optional {
+          ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br .
+          ?br ceo:volledigAdres ?adres .
+          ?br ceo:woonplaatsnaam ?woonplaats .
+          ?br ceo:postcode ?postcode .
+          ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie/skos:prefLabel ?provincie .
+        }
+        optional {
+          graph <https://linkeddata.cultureelerfgoed.nl/graph/OmschrijvingenOnderwerp> {
+            ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?subject_concept .
+            ?subject_concept skos:prefLabel ?subject_label .
+          }
+        }
+      }
+    }
+  #}
+#LIMIT 1

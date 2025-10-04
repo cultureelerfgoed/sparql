@@ -9,7 +9,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 
-SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image) AS ?sampleImage) ?geo
+SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image) AS ?sampleImage) ?geo 
 (GROUP_CONCAT(DISTINCT CONCAT('<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', uri(?rmn), '" target="_blank">', ?temple_name, '</a>'); SEPARATOR=" of ") AS ?temple_name_us)
 (GROUP_CONCAT(DISTINCT ?occupation; SEPARATOR=", ") as ?occupations)
 (GROUP_CONCAT(DISTINCT ?status; SEPARATOR=", ") as ?statuss)
@@ -23,7 +23,7 @@ SELECT DISTINCT ?temple ?rmn ?name ?birthYear ?deathYear ?plaats (SAMPLE(?image)
    <h2>{{name}}</h2>
    <h4><i>{{occupations}}</i></h4>
    <br><br>
-   <h2>&#10086;{{by}} - &#9841;{{dy}}</h2></center>'''^^rdf:HTML as ?widget)
+   <h2>&#10086;{{by}} - &#9841;{{dy}}</h2></center>'''^^rdf:HTML as ?geoLabel)
 
 WHERE {
   GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/praalgraven> {

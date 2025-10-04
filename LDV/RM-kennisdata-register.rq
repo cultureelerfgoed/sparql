@@ -10,58 +10,123 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select distinct ?rijksmonument ?rijksmonumentnummer ?gebeurtenisNaam ?beginDatum ?eindDatum ?indicatienauwkeurigheid ?bouwstijl ?bouwstijlLabel ?bouwstijlUri ?zuiverheid ?actorLabel ?rol ?plaatsActor ?link
-where {
+construct {
+  ?rijksmonument a ceo:Rijksmonument;
+    ceo:rijksmonumentnummer ?rijksmonumentnummer;
+    ceo:heeftGebeurtenis ?gebeurtenis;
+    ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
+    ceo:heeftJuridischeStatus ?heeftJuridischeStatus;
+    ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate;
+    ceo:heeftNaam ?text;
+    ceo:heeftMonumentAard ?heeftMonumentAard;
+    ceo:heeftOorspronkelijkeFunctie ?functieBlok;
+    ceo:heeftGeometrie ?geometrie.
+
+  ?heeftJuridischeStatus skos:prefLabel ?status.
+  ?heeftMonumentAard skos:prefLabel ?monumentaard.
+
+  ?gebeurtenis ceo:heeftGebeurtenisNaam ?gebeurtenisNaam;
+    ceo:heeftDatering ?datering;
+    ceo:heeftActorEnRol ?actorenrol.
+
+  ?datering ceo:heeftIndicatieNauwkeurigheid ?indicatienauwkeurigheid;
+    ceo:heeftBeginDatering ?beginDatering;
+    ceo:heeftEindDatering ?eindDatering.
+
+  ?beginDatering ceo:datum ?beginDatum.
+  ?eindDatering ceo:datum ?eindDatum.
+
+  ?actorenrol ceo:heeftActor ?actor;
+    ceo:heeftRol ?rol.
+
+  ?actor rdfs:label ?actorLabel;
+    skos:exactMatch ?link;
+    ceo:plaatsActor ?plaatsActor.
+
+  ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+  ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlLabel;
+    ceo:heeftStijlEnCultuurNaam ?bouwstijlUri;
+    ceo:heeftZuiverheid ?zuiverheid.
+
+  ?functieBlok ceo:heeftFunctieNaam ?oorspronkelijkeFunctie.
+  ?oorspronkelijkeFunctie skos:prefLabel ?oorspronkelijkeFunctieLabel.
+
+  ?geometrie ceo:heeftHerkomst ?herkomstGeometrie;
+    geo:asWKT ?geometrieAsWKT;
+    ceo:asWKT-RD ?WKT.
+
+} where {
   graph graph:instanties-rce {
-    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    
-    # Uitsluiten van specifieke juridische status
+    {
+      ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer;
+        ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer;
+        ceo:heeftJuridischeStatus ?heeftJuridischeStatus;
+        ceo:datumInschrijvingInMonumentenregister ?legalfoundationdate;
+        ceo:heeftNaam/ceo:naam ?text;
+        ceo:heeftMonumentAard ?heeftMonumentAard;
+        ceo:heeftOorspronkelijkeFunctie ?functieBlok;
+        ceo:heeftGeometrie ?geometrie;
+        ceo:heeftGebeurtenis ?gebeurtenis.
+
+      ?heeftJuridischeStatus skos:prefLabel ?status.
+      ?heeftMonumentAard skos:prefLabel ?monumentaard.
+
+      ?geometrie ceo:heeftHerkomst ?herkomstGeometrie;
+        ceo:heeftGeometrieStatus ?statusGeometrie;
+        ceo:heeftGeometrieKwaliteit ?kwaliteitGeometrie;
+        geo:asWKT ?geometrieAsWKT;
+        ceo:asWKT-RD ?WKT.
+
+      ?herkomstGeometrie skos:prefLabel ?herkomstGeometrieLabel.
+      ?statusGeometrie skos:prefLabel ?statusGeometrieLabel.
+      ?kwaliteitGeometrie skos:prefLabel ?kwaliteitGeometrieLabel.
+
+      ?functieBlok ceo:heeftFunctieNaam ?oorspronkelijkeFunctie.
+      ?oorspronkelijkeFunctie skos:prefLabel ?oorspronkelijkeFunctieLabel.
+
+      ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
+
+      optional {
+        ?gebeurtenis ceo:heeftDatering ?datering.
+        ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
+
+        optional {
+          ?datering ceo:heeftBeginDatering ?beginDatering.
+          ?beginDatering ceo:datum ?beginDatum.
+        }
+
+        optional {
+          ?datering ceo:heeftEindDatering ?eindDatering.
+          ?eindDatering ceo:datum ?eindDatum.
+        }
+      }
+
+      optional {
+        ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
+        graph graph:actorenrol {
+          ?actorenrol ceo:heeftActor ?actor.
+          ?actor rdfs:label ?actorLabel.
+          optional { ?actor skos:exactMatch ?link. }
+          optional { ?actor ceo:plaatsActor ?plaatsActor. }
+          optional { ?actorenrol ceo:heeftRol/skos:prefLabel ?rol. }
+        }
+      }
+
+      optional {
+        ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
+        ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
+        ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
+        optional {
+          ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
+        }
+      }
+    }
+
     minus {
       ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
-    }
-
-    # Gebeurtenissen en datering
-    ?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis.
-    ?gebeurtenis ceo:heeftGebeurtenisNaam/skos:prefLabel ?gebeurtenisNaam.
-    
-    # Datering en gebeurtenis details
-    optional {
-      ?gebeurtenis ceo:heeftDatering ?datering.
-      ?datering ceo:heeftIndicatieNauwkeurigheid/skos:prefLabel ?indicatienauwkeurigheid.
-  
-      optional {
-        ?datering ceo:heeftBeginDatering ?beginDatering.
-        ?beginDatering ceo:datum ?beginDatum.
-      }
-  
-      optional {
-        ?datering ceo:heeftEindDatering ?eindDatering.
-        ?eindDatering ceo:datum ?eindDatum.
-      }
-    }
-
-    # Bouwstijl en cultuur
-    optional {
-      ?rijksmonument ceo:heeftStijlEnCultuur ?bouwstijl.
-      ?bouwstijl ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?bouwstijlLabel.
-      ?bouwstijl ceo:heeftStijlEnCultuurNaam ?bouwstijlUri.
-      optional {
-        ?bouwstijl ceo:heeftZuiverheid/skos:prefLabel ?zuiverheid.
-      }
-    }
-
-    # Actoren en rollen binnen dezelfde gebeurtenis
-    optional {
-      ?gebeurtenis ceo:heeftActorEnRol ?actorenrol.
-                      graph graph:actorenrol {
-      ?actorenrol ceo:heeftActor ?actor.
-
-      ?actor rdfs:label ?actorLabel.
-
-      optional { ?actor skos:exactMatch ?link. }
-      optional { ?actor ceo:plaatsActor ?plaatsActor. }
-      optional { ?actorenrol ceo:heeftRol/skos:prefLabel ?rol. }}
     }
   }
 }

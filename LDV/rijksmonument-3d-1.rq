@@ -1,38 +1,51 @@
 #+ name: rijksmonument-3d-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-prefix bag:  <http://bag.basisregistraties.overheid.nl/def/bag#>
-prefix bgt:  <http://bgt.basisregistraties.overheid.nl/def/bgt#>
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
+prefix bgt: <http://bgt.basisregistraties.overheid.nl/def/bgt#>
+prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
 prefix nen3610: <https://data.kkg.kadaster.nl/nen3610/model/def/>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
-prefix sor: <https://data.kkg.kadaster.nl/sor/model/def/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select *
-{
-  ?rijksmonument
-    a ceo:Rijksmonument;
-    ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:verblijfsobjectIdentificatie ?vboId;
- #   ceo:heeftLocatieAanduiding/ceo:locatienaam ?locatienaam;
-    ceo:heeftBasisregistratieRelatie ?basisregistratie.
+select ?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?verblijfsobjectIdentificatie ?bagstraat ?baghuisnummer ?bagpostcode ?bagwoonplaatsnaam ?cho ?pandURI  ?verblijfsobjectURI
+where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Rijksmonument.
+    ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    minus {
+      ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>
+    }
+
+    ?cho ceo:heeftBasisregistratieRelatie ?basisregistratie.
     ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
-#    ?bagrelatie ceo:heeftPand ?pand.
+    ?bagrelatie ceo:heeftPand ?pand.
     ?bagrelatie ceo:heeftVerblijfsobject ?verblijfsobject.
-  #  ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
-    ?bagrelatie ceo:openbareRuimte ?straatnaam.
-    ?bagrelatie ceo:huisnummer ?huisnummer.
-     ?bagrelatie ceo:postcode ?postcode.
+    ?bagrelatie ceo:verblijfsobjectIdentificatie ?verblijfsobjectIdentificatie.
+    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/pand/", ?pand)) as ?pandURI)
+    bind(iri(concat("http://bag.basisregistraties.overheid.nl/bag/id/verblijfsobject/", ?verblijfsobjectIdentificatie)) as ?verblijfsobjectURI)
+
+    optional {
+      ?bagrelatie ceo:openbareRuimte ?straatnaam.
+      ?bagrelatie ceo:huisnummer ?huisnummer.
+      ?bagrelatie ceo:postcode ?postcode.
       ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
-  bind(iri(concat('https://data.kkg.kadaster.nl/id/verblijfsobject/',?vboId)) as ?vbo)
-  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
-    ?vbo
-      a sor:Verblijfsobject;
-      sor:hoofdadres ?nummeraanduiding.
-      ?nummeraanduiding sor:huisnummer ?baghuisnummer .
-   ?nummeraanduiding sor:postcode ?bagpostcode .
-   ?nummeraanduiding sor:ligtAan ?bagstraat.
+    }
   }
+
+  service <https://api.labs.kadaster.nl/datasets/dst/kkg/sparql> {
+    # GRAPH <https://data.kkg.kadaster.nl/graph/instanties-adresseerbaarObject> {
+    ?verblijfsobject bag:hoofdadres ?hoofdadres .
+    ?hoofdadres bag:ligtAan/skos:prefLabel ?bagstraat .
+    ?hoofdadres bag:huisnummer ?baghuisnummer .
+    ?hoofdadres bag:postcode ?bagpostcode .
+    ?hoofdadres bag:ligtAan/bag:ligtIn/skos:prefLabel ?bagwoonplaatsnaam.
+  
+  }
+  filter(?postcode != ?bagpostcode)
 }
-LIMIT 10
+
+limit 10

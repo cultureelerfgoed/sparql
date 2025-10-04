@@ -2,6 +2,8 @@
 #+ description: Eerste opzet
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
 
+PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX wdt:<http://www.wikidata.org/prop/direct/>
@@ -15,26 +17,36 @@ PREFIX geo:<http://www.opengis.net/ont/geosparql#>
 PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
 PREFIX schema:<https://schema.org/>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
 
 
-SELECT distinct * WHERE {
+SELECT ?grafmonument (group_concat(distinct ?persoon; separator=", ") as ?personen) (group_concat(distinct ?beeldhouwer; separator=",") as ?beeldhouwers)  (strdt(concat("Rijksmonument ", '<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rmnr),'" target="_blank">',str(?rmnr),'</a>', '<p>', "Begraven: ", ?personen, '<p>', "Graf ontworpen door: ", ?beeldhouwers, '<p>', "In opdracht van ", ?opdrachtgever, '<p>', "In het jaar ", ?dat),rdf:HTML) AS ?shapeLabel)  ?shape ?shapeColor
 
-  OPTIONAL { ?rijksmonument ceox:rijksmonumentnummer ?eventDescription. }
-  ?rijksmonument ceox:heeftNaam/ceox:naam ?eventLabel.
-  ?rijksmonument ceox:heeftGebeurtenis ?gebeurtenis.
-  ?gebeurtenis ceox:heeftDatering ?eventDate .
-  ?eventDate ceox:jaar ?eventStart .
-  ?eventDate ceox:jaar ?eventEnd .
-  ?rijksmonument ceox:heeftGeometrie/wgs84:asWKT ?destination.
+WHERE {
 
-#  SERVICE <https://query.wikidata.org/sparql>
-#{
-#  ?wikirm wdt:P1435 wd:Q916333.
-#  ?wikirm wdt:P18 ?eventMedia.
-#  ?wikirm wdt:P359 ?eventDescription.
-#  }
-   bind(?destination as ?eventLocation)  
+  ?rijksmonument ceox:rijksmonumentnummer ?rmnr. 
+ 
+  ?rijksmonument ceox:heeftGeometrie/wgs84:asWKT ?_shape.
+  bind(bif:st_geomfromtext(?_shape) as ?shape)
+  ?rijksmonument ceox:heeftDenominatie/ceox:heeftDenominatieNaam ?den.
+    ?den skos:prefLabel ?denominatie ;
+                 rnce:hasChurchMovement/skos:prefLabel ?stroming.
+  ?rijksmonument ceox:hoortBij ?grafmonument.
+  ?grafmonument ceox:IsTerNagedachtenisVan/ceox:naam ?persoon.
+  optional {?grafmonument ceox:heeftGebeurtenis/ceox:heeftActorEnRol/ceox:naam ?beeldhouwer. }
+  optional{ ?grafmonument ceox:opdrachtgever ?opdrachtgever.}
+  ?grafmonument ceox:heeftGebeurtenis/ceox:heeftDatering/ceox:datering ?dat.
+  
+  Bind( xsd:integer(?dat) as ?jaar)
+  Filter (?jaar <1830)
+ 
+  # BIND(replace(str(?bouwperiode),"( ev| ca)", "") AS ?event1)
+   #BIND(replace(str(?event1),"(^[^( |\\-)]*( |\\-))", "") AS ?event2)
+  
+
+  
+  BIND(if(?stroming="Christendom, Evangelisch", "red", if(?stroming="Christendom, Katholiek", "purple", if(?stroming="Christendom, Oecumenisch", "maroon", if(?stroming="Christendom, Overig", "black", if(?stroming="Christendom, Protestants", "orange", if(?stroming="Christendom, Reformatorisch", "gray", if(?stroming="Christendom, Vrijzinnig", "white", if(?stroming="Jodendom", "green", "fuchsia")))))))) as ?shapeColor)
 } 
 order by ?eventStart
-LIMIT 1000
-offset 100
+#LIMIT 100
+

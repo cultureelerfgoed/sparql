@@ -13,23 +13,24 @@ WHERE
 {
   GRAPH graph:instanties-rce {
   ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
-      MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
   ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
   ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
   ?functie ceo:heeftFunctieNaam ?uri.
+      MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
 
  BIND(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
-# BIND(year(xsd:dateTime(?jaarInschrijving)) as ?beginJaarInschrijving)
-#   BIND(year(xsd:dateTime(?beginInschrijving)) as ?eindJaarInschrijving)
  
   FILTER (?jaarInschrijving >= ?beginJaarInschrijving && ?jaarInschrijving <= ?eindJaarInschrijving)
     bind(concat(str(?jaarInschrijving)) as ?jaarInschrijvings)
     BIND(concat(str(?beginJaarInschrijving)," - ", ?eindJaarInschrijving) AS ?periode)
   }
 {
-  GRAPH graph:bebouwdeomgeving {
+
+graph graph:bebouwdeomgeving {
   <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow.
-    ?narrow skos:prefLabel ?label.
+  ?narrow skos:prefLabel ?label_ .
+  FILTER(?label_ = ?label)
+  ?narrow skos:narrower+ ?uri .
      
   VALUES (?label ?narrow) {
     ("Archeologie (N)" <https://data.cultureelerfgoed.nl/term/id/rn/d60159d2-8b55-47b7-8301-5ac82b0f2d7f>)
@@ -47,7 +48,7 @@ WHERE
 ("Weg- en waterbouwkundige werken" <https://data.cultureelerfgoed.nl/term/id/rn/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
 ("Woningen en woningbouwcomplexen" <https://data.cultureelerfgoed.nl/term/id/rn/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
   }   
-     ?narrow skos:narrower+ ?uri.
+
       ?uri skos:prefLabel ?uriSub.
     bind(replace(?uriSub, "\\s\\(.*\\)|\\(.*\\)", "") AS ?uriSubs)     
 } 
@@ -55,3 +56,4 @@ WHERE
   Bind(concat(str(?uriSubs), " ", ?periode) AS ?subFunctie)
 }
 GROUP BY ?subFunctie
+ORDER BY DESC(?labelSub)

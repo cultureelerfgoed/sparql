@@ -2,20 +2,24 @@
 #+ description: Query om alle `skos:Concept` uit de CHT op te halen die een scopeNote hebben, samen met labels, broader en narrower.
 #- 
 #- **DO NOT DELETE**
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Cultuurhistorische-Thesaurus-CHT/services/Cultuurhistorische-Thesaurus-CHT/sparql
 
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-CONSTRUCT {
-  ?subject rdf:type ?type .
-  ?subject skos:prefLabel ?prefLabel .
-  ?subject skos:altLabel ?altLabel .
-  ?subject skos:scopeNote ?scopeNote .
-  ?subject skos:broader ?broader .
-  ?subject skos:narrower ?narrower
+
+
+ CONSTRUCT {
+   ?subject rdf:type ?type .
+   ?subject skos:prefLabel ?prefLabel .
+   ?subject skos:altLabel ?altLabel .
+   ?subject skos:scopeNote ?scopeNote .
+   ?subject skos:broader ?broader .
+   ?subject skos:narrower ?narrower
   
   } 
+
+
   where {
   {  
     GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
@@ -25,40 +29,15 @@ CONSTRUCT {
   ?subject skos:scopeNote ?scopeNote .
    FILTER(LANG(?prefLabel) = 'nl')
    FILTER(LANG(?scopeNote) = 'nl')
+   OPTIONAL {?subject skos:altLabel ?altLabel. 
+  FILTER(LANG(?altLabel) = 'nl') }
+      optional{?subject skos:narrower ?narrower .}
+        optional{?subject skos:broader ?broader .}
       }}
-  UNION
-  {
-    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
-    ?subject rdf:type ?type .
-    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
-    ?subject skos:prefLabel ?prefLabel .
-    ?subject skos:scopeNote ?scopeNote .
-    FILTER(LANG(?prefLabel) = 'nl')
-    FILTER(LANG(?scopeNote) = 'nl')
-    OPTIONAL {?subject skos:altLabel ?altLabel. 
-    FILTER(LANG(?altLabel) = 'nl') }.
-   }}
-UNION
-  {
-    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
-    ?subject rdf:type ?type .
-    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
-    ?subject skos:prefLabel ?prefLabel .
-    ?subject skos:scopeNote ?scopeNote .
-    FILTER(LANG(?prefLabel) = 'nl')
-    FILTER(LANG(?scopeNote) = 'nl')
-    optional{?subject skos:narrower ?narrower }.
-      }}
-  UNION {
-    GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
-?subject rdf:type ?type .
-    FILTER(?type = <http://www.w3.org/2004/02/skos/core#Concept>)
-    ?subject skos:prefLabel ?prefLabel .
-    ?subject skos:scopeNote ?scopeNote .
-    FILTER(LANG(?prefLabel) = 'nl')
-    FILTER(LANG(?scopeNote) = 'nl')
-      optional{?subject skos:narrower ?narrower }.
-     optional{?subject skos:broader ?broader }
-    }
-  }
+
 }
+  
+
+
+        
+   

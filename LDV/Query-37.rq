@@ -1,17 +1,18 @@
 #+ name: Query-37
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 
-SELECT DISTINCT (COUNT(?rijksmonument) AS ?aantalArcheologischeRijksmonumenten) WHERE {
-  ?rijksmonument a ceo:Rijksmonument.
-  GRAPH graph:instanties-rce {
-  ?rijksmonument ceo:rijksmonumentnummer ?rmn .
-  ?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
-  ?rijksmonument ceo:heeftMonumentAard <https://data.cultureelerfgoed.nl/term/id/rn/b673c8c1-5d93-496d-8f9e-89133d579d77>.
-  }
-} LIMIT 10
+select ?rijksmonument ?woonplaatsnaam
+
+where {
+  graph graph:instanties-rce {
+        ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie <http://standaarden.overheid.nl/owms/terms/Groningen_(provincie)>.
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+}
+}
