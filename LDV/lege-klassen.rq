@@ -1,6 +1,6 @@
 #+ name: lege-klassen
 #+ description: Klassen die geen instanties hebben.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/services/cho-acceptance/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix owl: <http://www.w3.org/2002/07/owl#>

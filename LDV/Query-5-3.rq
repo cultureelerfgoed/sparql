@@ -1,6 +1,6 @@
 #+ name: Query-5-3
 #+ description: This SPARQL query retrieves distinct rijksmonument numbers and their corresponding rijksmonument instances, excluding those with a specific juridical status, and generates clickable URIs for each rijksmonument number. The results are ordered based on the rijksmonument number.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/services/cho-acceptance/sparql
 
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 #+ description: This SPARQL query retrieves distinct rijksmonument numbers and their corresponding rijksmonument instances, excluding those with a specific juridical status, and generates clickable URIs for each rijksmonument number. The results are ordered based on the rijksmonument number.
