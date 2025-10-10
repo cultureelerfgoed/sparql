@@ -1,84 +1,65 @@
 #+ name: Query-11-2
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/services/RCE-Knowledge-Graph/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/joop-van-der-heiden/test-rm-omschrijvingen/services/test-rm-omschrijvingen/sparql
 
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
-prefix geo: <http://www.opengis.net/ont/geosparql#>
-prefix schema: <https://schema.org/>
-prefix geof: <http://www.opengis.net/def/function/geosparql/>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX text:  <http://jena.apache.org/text#>
+PREFIX schema:<https://schema.org/>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
 
-select ?rijksmonument (MAX(?imageUrl) as ?imageUrl_) ?afbeelding ?boek ?archeologischOnderzoeksgebied ?catalogus
-       ?geoRijksmonument ?geoArcheologischOnderzoeksgebied ?archeologischOnderzoeksgebiedOmschrijving
-       ?rijksmonumentnummer ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?omschrijving
-       ?geoRijksmonumentLabel ?geoArcheologischOnderzoeksgebiedLabel ?geoRijksmonumentColor
-       ?geoArcheologischOnderzoeksgebiedColor ?geoRijksmonumentHeight
-where {
-  # Grafiek voor Rijksmonumenteninstanties en Archeologische Onderzoeksgebieden
-  graph graph:instanties-rce {
-    # Rijksmonument
-    ?rijksmonument a ceo:Rijksmonument.
-    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?rijksmonument ceo:heeftBasisregistratieRelatie ?basisregistratie.
-    ?basisregistratie ceo:heeftBAGRelatie ?bagrelatie.
-    ?rijksmonument ceo:heeftGeometrie/geo:asWKT ?geoRijksmonument.
-    ?rijksmonument ceo:heeftOmschrijving ?standpunt_omschrijving.
-    ?standpunt_omschrijving ceo:omschrijving ?omschrijving .
-    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^<http://www.w3.org/2001/XMLSchema#boolean>.
+SELECT DISTINCT
+  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+  ?provincie
+  ?functies
+  ?adres
+  ?snippet
+  ?widget
+  ?naam
+  ?plaats
+  ?monumentaard
+WHERE {
+  # basisgegevens
+  ?choi schema:description      ?omschrijving ;
+        schema:identifier       ?rijksmonumentnummer ;
+        schema:addressLocality  ?plaats ;
+        schema:category         ?monumentaard .
 
-    optional {
-      ?bagrelatie ceo:openbareRuimte ?straatnaam.
-      ?bagrelatie ceo:huisnummer ?huisnummer.
-      ?bagrelatie ceo:postcode ?postcode.
-      ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
-    }
-
-    # Archeologisch Onderzoeksgebied
-    ?archeologischOnderzoeksgebied a ceo:ArcheologischOnderzoeksgebied.
-    ?archeologischOnderzoeksgebied ceo:heeftGeometrie/geo:asWKT ?geoArcheologischOnderzoeksgebied.
-    ?archeologischOnderzoeksgebied ceo:heeftKennisregistratie/ceo:omschrijving ?archeologischOnderzoeksgebiedOmschrijving.
+  OPTIONAL {
+    ?choi schema:additionalType ?functie .
+    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
   }
+  OPTIONAL { ?choi schema:address       ?adres . }
+  OPTIONAL { ?choi schema:name          ?naam  . }
+  OPTIONAL { ?choi schema:addressRegion ?provincie . }
 
-  # Filter om te controleren of de geometrieën overlappen
-  FILTER(geof:sfOverlaps(?geoRijksmonument, ?geoArcheologischOnderzoeksgebied))
+  # normaliseer omschrijving voor case-insensitive match
+  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-  # Grafiek voor de boekeninformatie
-  graph graph:bib {
-    ?boek ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    ?boek schema:name ?boektitel.
-    ?boek schema:sameAs ?catalogus.
-  }
+  # uitsluitingen/beperkingen: patroon
+  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming" AS ?patUitsluiting)
 
-  # Grafiek voor afbeeldingen - één afbeelding per rijksmonument
-  graph graph:image {
-    ?afbeelding schema:about ?rijksmonument.
-    ?afbeelding schema:contentUrl ?imageUrl.
-    ?afbeelding edm:isShownAt ?beeldbank.
-  }
+  # filter op omschrijving met uitsluitingen
+  FILTER( REGEX(?omslLc, ?patUitsluiting) )
 
-  # Bind statements om extra attributen vast te stellen
-  bind(strdt(concat(
-    '<div style="background-color:rgba(0,0,0,.2);">',
-    '   <center><img src="', COALESCE(STR(?imageUrl), 'afbeelding-niet-beschikbaar.jpg'), '" style="max-width: 200px;"></center>',
-    '   <ul>',
-    '      <li>Rijksmonument: <a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', COALESCE(STR(?rijksmonumentnummer), 'Onbekend'), '" target="_blank">', COALESCE(STR(?rijksmonumentnummer), 'Onbekend'), '</a></li>',
-    '      <li>Literatuur: <a href="', COALESCE(STR(?catalogus), 'Geen link beschikbaar'), '" target="_blank">', COALESCE(STR(?boektitel), 'Geen boek beschikbaar'), '</a></li>',
-    '      <li>In: <a href="', STR(?beeldbank), '" target="_blank">Beeldbank</a></li>',
-    '   </ul>',
-    '   <br><br>',
-    '</div>'
-  ), rdf:HTML) AS ?geoRijksmonumentLabel)
-  bind(?archeologischOnderzoeksgebiedOmschrijving as ?geoArcheologischOnderzoeksgebiedLabel)
-  bind("red" as ?geoRijksmonumentColor)
-  bind("green" as ?geoArcheologischOnderzoeksgebiedColor)
-  bind(15 as ?geoRijksmonumentHeight)
+  # eerste gevonden term teruggeven (nu wél met correcte grouping)
+  BIND(REPLACE(?omslLc, CONCAT(".*?(", ?patUitsluiting, ").*"), "$1") AS ?uitsluitingHit)
+
+  # snippet: toon de volledige omschrijving (zonder highlight, altijd gevuld)
+  BIND(STR(?omschrijving) AS ?snippet)
+
+  # widget (eenvoudig HTML-blok, altijd gevuld)
+  BIND(STRDT(
+    CONCAT(
+      '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></p>',
+      '<p>monumentaard: ', COALESCE(STR(?monumentaard), '-'), '</p>',
+      '<p>naam: ', COALESCE(STR(?naam), '-'), '</p>',
+      '<p>functie: ', COALESCE(STR(?functies), '-'), '</p>',
+      '<p>adres: ', COALESCE(STR(?adres), '-'), '</p>',
+      '<p>plaats: ', COALESCE(STR(?plaats), '-'), '</p>',
+      '<p>provincie: ', COALESCE(STR(?provincie), '-'), '</p>',
+      '<p>uitsluiting/beperking gevonden:</br>- ', COALESCE(STR(?uitsluitingHit), '-'), '</p>'
+    ),
+    rdf:HTML) AS ?widget)
 }
-GROUP BY ?rijksmonument ?afbeelding ?boek ?archeologischOnderzoeksgebied ?geoRijksmonument ?catalogus
-         ?geoArcheologischOnderzoeksgebied ?archeologischOnderzoeksgebiedOmschrijving ?rijksmonumentnummer
-         ?straatnaam ?huisnummer ?postcode ?woonplaatsnaam ?omschrijving ?geoRijksmonumentLabel
-         ?geoArcheologischOnderzoeksgebiedLabel ?geoRijksmonumentColor ?geoArcheologischOnderzoeksgebiedColor
-         ?geoRijksmonumentHeight ?beeldbank
-LIMIT 3
+LIMIT 100

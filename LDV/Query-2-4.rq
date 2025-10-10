@@ -1,14 +1,90 @@
 #+ name: Query-2-4
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT distinct * WHERE {
-  ?s a ceo:Rijksmonument.
-  ?s ceo:heeftOmschrijving/ceo:omschrijving ?description .
-  ?s ceo:rijksmonumentnummer ?rm.
- # FILTER (regex(?description, "\\bmsterdams", "i"))
-  FILTER (regex(?description, "\\.[\\s\\r\\n]+en ", "i") && regex(?description, "\\.[\\s\\r\\n]+en ", ""))
-  FILTER (!regex(?description, "\\.[\\s\\r\\n]+En "))
-} LIMIT 100
+PREFIX text:  <http://jena.apache.org/text#>
+PREFIX schema:<https://schema.org/>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+
+SELECT DISTINCT
+  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+  ?provincie
+  ?functies
+  ?adres
+  ?literal              # highlight-snippet uit text:query
+  ?naam
+  ?plaats
+  ?monumentaard
+  ?heeftUitsluiting
+  ?heeftRelatieveWaardering
+  ?heeftReden
+  ?primaireCategorie
+  ?categorieen
+  ?widget
+WHERE {
+  # Full-text zoeken op ALLE begrippen met highlight (één stringliteral)
+  (?choi ?sc ?literal) text:query (
+    schema:description
+    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR vanwege OR "beschermd vanwege" OR "onderdeel van" OR "in samenhang met")'
+    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
+  ) .
+
+  # Basisgegevens
+  ?choi schema:description      ?omschrijving ;
+        schema:identifier       ?rijksmonumentnummer ;
+        schema:addressLocality  ?plaats ;
+        schema:category         ?monumentaard .
+  OPTIONAL {
+    ?choi schema:additionalType ?functie .
+    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+  }
+  OPTIONAL { ?choi schema:address       ?adres . }
+  OPTIONAL { ?choi schema:name          ?naam  . }
+  OPTIONAL { ?choi schema:addressRegion ?provincie . }
+
+  # Classificatie op basis van omschrijving
+  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
+
+  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming" AS ?patUitsl)
+  BIND("\\bondergeschikt\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair\\b|weinig\\s+waarde" AS ?patRel)
+  BIND("\\bvanwege\\b|beschermd\\s+vanwege|onderdeel\\s+van|in\\s+samenhang\\s+met" AS ?patReden)
+
+  BIND( REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting )
+  BIND( REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering )
+  BIND( REGEX(?omslLc, ?patReden) AS ?heeftReden )
+
+  # Primaire categorie: uitsluiting > relatieve waardering > reden
+  BIND(
+    IF(?heeftUitsluiting, "uitsluiting of beperking",
+      IF(?heeftRelatieveWaardering, "relatieve waardering",
+        IF(?heeftReden, "verwijzing naar reden van bescherming", "")
+      )
+    ) AS ?primaireCategorie
+  )
+
+  # Alle categorieën als string
+  BIND(CONCAT(
+        IF(?heeftUitsluiting, "uitsluiting of beperking|", ""),
+        IF(?heeftRelatieveWaardering, "relatieve waardering|", ""),
+        IF(?heeftReden, "verwijzing naar reden van bescherming|", "")
+      ) AS ?_cats)
+  BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
+
+  # Widget met highlight en categorie-info
+  BIND(STRDT(
+    CONCAT(
+      '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></p>',
+      '<p>monumentaard: ', COALESCE(STR(?monumentaard), '-'), '</p>',
+      '<p>naam: ', COALESCE(STR(?naam), '-'), '</p>',
+      '<p>functie: ', COALESCE(STR(?functies), '-'), '</p>',
+      '<p>adres: ', COALESCE(STR(?adres), '-'), '</p>',
+      '<p>plaats: ', COALESCE(STR(?plaats), '-'), '</p>',
+      '<p>provincie: ', COALESCE(STR(?provincie), '-'), '</p>',
+      '<p><b>categorieën:</b> ', COALESCE(STR(?categorieen), '-'), '</p>',
+      '<p><b>gevonden in omschrijving:</b><br>', STR(?literal), '</p>'
+    ),
+    rdf:HTML) AS ?widget)
+}
+LIMIT 500
