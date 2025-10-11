@@ -1,0 +1,24 @@
+#+ name: Div-tussen-Acceptance-en-productie-in-aa
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT
+#  ?prod ?acc
+#  (xsd:integer(?prod) - xsd:integer(?acc) AS ?verschil)
+  # optioneel: netjes opmaken met punt
+  (REPLACE(STR(?prod),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0.')     AS ?prodFmt)
+  (REPLACE(STR(?acc),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0.')      AS ?accFmt)
+  (CONCAT(IF(xsd:integer(?prod) - xsd:integer(?acc) > 0, "+", IF(xsd:integer(?prod) - xsd:integer(?acc) < 0, "-", "")),
+          REPLACE(STR(ABS(xsd:integer(?prod) - xsd:integer(?acc))),'[0-9](?=(?:[0-9]{3})+(?![0-9]))','$0.')) AS ?verschilFmt)
+WHERE {
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql> {
+    SELECT (COUNT(*) AS ?prod)
+    WHERE { GRAPH graph:instanties-rce { ?s ?p ?o. } }
+  }
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/services/cho-acceptance/sparql> {
+    SELECT (COUNT(*) AS ?acc)
+    WHERE { GRAPH graph:instanties-rce { ?s ?p ?o. } }
+  }
+}
