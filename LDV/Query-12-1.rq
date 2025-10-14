@@ -5,7 +5,7 @@
 # Definieer PREFIXes voor diverse namenruimten die in de query worden gebruikt.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 
