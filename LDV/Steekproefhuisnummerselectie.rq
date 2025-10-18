@@ -1,0 +1,125 @@
+#+ name: Steekproefhuisnummerselectie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT 
+   ?hoofdcategorie
+   ?totaal
+   ?percentage
+   ?pool
+WHERE {
+  # 1) totaal per hoofdcategorie
+  {
+    SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?totaal)
+    WHERE {
+      GRAPH graph:instanties-rce {
+        ?rm a ceo:Rijksmonument ;
+            ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+            ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+        ?standpunt_functie ceo:hoofdfunctie true ;
+                           ceo:heeftFunctieNaam ?uri .
+      }
+      GRAPH graph:bebouwdeomgeving {
+        <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
+        VALUES (?hoofdcategorie ?narrow) {
+          ("Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
+          ("Boerderijen, molens en bedrijven"                       <https://data.cultureelerfgoed.nl/term/id/rn/b8077035-db8f-47f1-ae1d-e64f75344fcf>)
+          ("Cultuur, gezondheid en wetenschap"                      <https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
+          ("Handelsgebouwen, opslag- en transportgebouwen"          <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
+          ("Kastelen, landhuizen en parken"                         <https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
+          ("Religieuze gebouwen"                                     <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+          ("Sport, recreatie, vereniging en horeca"                 <https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
+          ("Uitvaartcentra en begraafplaatsen"                      <https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
+          ("Verdedigingswerken en militaire gebouwen"               <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
+          ("Voorwerpen op pleinen en dergelijke"                    <https://data.cultureelerfgoed.nl/term/id/rn/92cda3e4-8c6a-41dc-9a81-02f8aba88b25>)
+          ("Weg- en waterbouwkundige werken"                        <https://data.cultureelerfgoed.nl/term/id/rn/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
+          ("Woningen en woningbouwcomplexen"                        <https://data.cultureelerfgoed.nl/term/id/rn/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
+        }
+        ?narrow skos:narrower+ ?uri .
+      }
+    }
+    GROUP BY ?hoofdcategorie
+  }
+
+  # 2) grand total (zelfde statusfilter)
+  {
+    SELECT (SUM(?t) AS ?grand)
+    WHERE {
+      {
+        SELECT (COUNT(DISTINCT ?rm) AS ?t)
+        WHERE {
+          GRAPH graph:instanties-rce {
+            ?rm a ceo:Rijksmonument ;
+                ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+                ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+            ?standpunt_functie ceo:hoofdfunctie true ;
+                               ceo:heeftFunctieNaam ?uri .
+          }
+          GRAPH graph:bebouwdeomgeving {
+            <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
+            VALUES (?narrow) {
+              (<https://data.cultureelerfgoed.nl/term/id/rn/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/b8077035-db8f-47f1-ae1d-e64f75344fcf>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/92cda3e4-8c6a-41dc-9a81-02f8aba88b25>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
+              (<https://data.cultureelerfgoed.nl/term/id/rn/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
+            }
+            ?narrow skos:narrower+ ?uri .
+          }
+        }
+      }
+    }
+  }
+
+  # 3) matches met ingevoerd huisnummer per hoofdcategorie (ongewijzigd)
+  OPTIONAL {
+    SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?metHn)
+    WHERE {
+      BIND(CONCAT("^\\s*", STR(?hnInput), "(?:\\s*[-/]?\\s*[a-z0-9].*)?$") AS ?hnPattern)
+      GRAPH graph:instanties-rce {
+        ?rm a ceo:Rijksmonument ;
+            ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+            ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+        ?standpunt_functie ceo:hoofdfunctie true ;
+                           ceo:heeftFunctieNaam ?uri .
+        ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:huisnummer ?hn .
+        FILTER(regex(lcase(str(?hn)), ?hnPattern, "i"))
+      }
+      GRAPH graph:bebouwdeomgeving {
+        <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
+        VALUES (?hoofdcategorie ?narrow) {
+          ("Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
+          ("Boerderijen, molens en bedrijven"                       <https://data.cultureelerfgoed.nl/term/id/rn/b8077035-db8f-47f1-ae1d-e64f75344fcf>)
+          ("Cultuur, gezondheid en wetenschap"                      <https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
+          ("Handelsgebouwen, opslag- en transportgebouwen"          <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
+          ("Kastelen, landhuizen en parken"                         <https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
+          ("Religieuze gebouwen"                                     <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+          ("Sport, recreatie, vereniging en horeca"                 <https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
+          ("Uitvaartcentra en begraafplaatsen"                      <https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
+          ("Verdedigingswerken en militaire gebouwen"               <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
+          ("Voorwerpen op pleinen en dergelijke"                    <https://data.cultureelerfgoed.nl/term/id/rn/92cda3e4-8c6a-41dc-9a81-02f8aba88b25>)
+          ("Weg- en waterbouwkundige werken"                        <https://data.cultureelerfgoed.nl/term/id/rn/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
+          ("Woningen en woningbouwcomplexen"                        <https://data.cultureelerfgoed.nl/term/id/rn/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
+        }
+        ?narrow skos:narrower+ ?uri .
+      }
+    }
+    GROUP BY ?hoofdcategorie
+  }
+
+  # 4) berekeningen
+  BIND(ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * 1000) / 10 AS ?percentage)
+  BIND(ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * xsd:decimal(?poolSize)) AS ?pool)
+}
+ORDER BY desc(?percentage)

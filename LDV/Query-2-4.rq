@@ -13,7 +13,7 @@ SELECT DISTINCT
   ?provincie
   ?functies
   ?adres
-  ?literal              # highlight-snippet uit text:query
+  ?literal
   ?naam
   ?plaats
   ?monumentaard
@@ -24,10 +24,10 @@ SELECT DISTINCT
   ?categorieen
   ?widget
 WHERE {
-  # Full-text zoeken op ALLE begrippen met highlight (één stringliteral)
+  # Full-text zoeken op ALLE begrippen met highlight (één stringliteral!)
   (?choi ?sc ?literal) text:query (
     schema:description
-    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR vanwege OR "beschermd vanwege" OR "onderdeel van" OR "in samenhang met")'
+    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR uitgesloten OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
     'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
   ) .
 
@@ -44,18 +44,17 @@ WHERE {
   OPTIONAL { ?choi schema:name          ?naam  . }
   OPTIONAL { ?choi schema:addressRegion ?provincie . }
 
-  # Classificatie op basis van omschrijving
+  # Classificatie (zonder 'vanwege')
   BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming" AS ?patUitsl)
-  BIND("\\bondergeschikt\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair\\b|weinig\\s+waarde" AS ?patRel)
-  BIND("\\bvanwege\\b|beschermd\\s+vanwege|onderdeel\\s+van|in\\s+samenhang\\s+met" AS ?patReden)
+  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|uitgesloten|niet\\s+meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patUitsl)
+  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patRel)
+  BIND("\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
 
   BIND( REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting )
   BIND( REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering )
   BIND( REGEX(?omslLc, ?patReden) AS ?heeftReden )
 
-  # Primaire categorie: uitsluiting > relatieve waardering > reden
   BIND(
     IF(?heeftUitsluiting, "uitsluiting of beperking",
       IF(?heeftRelatieveWaardering, "relatieve waardering",
@@ -64,7 +63,6 @@ WHERE {
     ) AS ?primaireCategorie
   )
 
-  # Alle categorieën als string
   BIND(CONCAT(
         IF(?heeftUitsluiting, "uitsluiting of beperking|", ""),
         IF(?heeftRelatieveWaardering, "relatieve waardering|", ""),
@@ -72,7 +70,6 @@ WHERE {
       ) AS ?_cats)
   BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
 
-  # Widget met highlight en categorie-info
   BIND(STRDT(
     CONCAT(
       '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></p>',
