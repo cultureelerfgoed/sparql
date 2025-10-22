@@ -1,4 +1,4 @@
-#+ name: Query-2-4
+#+ name: Query-2-4-2
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
 PREFIX text:  <http://jena.apache.org/text#>
@@ -22,12 +22,12 @@ SELECT DISTINCT
   ?heeftReden
   ?primaireCategorie
   ?categorieen
-  ?widget
+
 WHERE {
-  # Full-text zoeken op ALLE begrippen met highlight (één stringliteral!)
+  # Full-text: één stringliteral, zonder dubbele termen
   (?choi ?sc ?literal) text:query (
     schema:description
-    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR uitgesloten OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
+    '("niet beschermd" OR "niet-beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "van weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR "niet-meebeschermd" OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
     'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
   ) .
 
@@ -42,13 +42,15 @@ WHERE {
   }
   OPTIONAL { ?choi schema:address       ?adres . }
   OPTIONAL { ?choi schema:name          ?naam  . }
-  OPTIONAL { ?choi schema:addressRegion ?provincie . }
 
-  # Classificatie (zonder 'vanwege')
+  # Taalfilter (NL of taalloos)
+  FILTER( langMatches(lang(?omschrijving), "nl") || lang(?omschrijving) = "" )
+
+  # Classificatie (zonder 'vanwege'), met hyphen-varianten en extra vormen
   BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|uitgesloten|niet\\s+meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patUitsl)
-  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patRel)
+  BIND("niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patUitsl)
+  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patRel)
   BIND("\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
 
   BIND( REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting )
@@ -69,19 +71,5 @@ WHERE {
         IF(?heeftReden, "verwijzing naar reden van bescherming|", "")
       ) AS ?_cats)
   BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
-
-  BIND(STRDT(
-    CONCAT(
-      '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></p>',
-      '<p>monumentaard: ', COALESCE(STR(?monumentaard), '-'), '</p>',
-      '<p>naam: ', COALESCE(STR(?naam), '-'), '</p>',
-      '<p>functie: ', COALESCE(STR(?functies), '-'), '</p>',
-      '<p>adres: ', COALESCE(STR(?adres), '-'), '</p>',
-      '<p>plaats: ', COALESCE(STR(?plaats), '-'), '</p>',
-      '<p>provincie: ', COALESCE(STR(?provincie), '-'), '</p>',
-      '<p><b>categorieën:</b> ', COALESCE(STR(?categorieen), '-'), '</p>',
-      '<p><b>gevonden in omschrijving:</b><br>', STR(?literal), '</p>'
-    ),
-    rdf:HTML) AS ?widget)
 }
 LIMIT 500
