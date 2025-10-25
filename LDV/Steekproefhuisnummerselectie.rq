@@ -12,7 +12,10 @@ SELECT
    ?percentage
    ?pool
 WHERE {
-  # 1) totaal per hoofdcategorie
+
+  ################################################################
+  # 1) totaal per hoofdcategorie (hele populatie)
+  ################################################################
   {
     SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?totaal)
     WHERE {
@@ -31,7 +34,7 @@ WHERE {
           ("Cultuur, gezondheid en wetenschap"                      <https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
           ("Handelsgebouwen, opslag- en transportgebouwen"          <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
           ("Kastelen, landhuizen en parken"                         <https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
-          ("Religieuze gebouwen"                                     <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+          ("Religieuze gebouwen"                                    <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
           ("Sport, recreatie, vereniging en horeca"                 <https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
           ("Uitvaartcentra en begraafplaatsen"                      <https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
           ("Verdedigingswerken en militaire gebouwen"               <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
@@ -45,7 +48,9 @@ WHERE {
     GROUP BY ?hoofdcategorie
   }
 
-  # 2) grand total (zelfde statusfilter)
+  ################################################################
+  # 2) grand total over alle hoofdcategorieën
+  ################################################################
   {
     SELECT (SUM(?t) AS ?grand)
     WHERE {
@@ -82,19 +87,23 @@ WHERE {
     }
   }
 
-  # 3) matches met ingevoerd huisnummer per hoofdcategorie (ongewijzigd)
+  ################################################################
+  # 3) met huisnummerfilter ^33(?![0-9])
+  ################################################################
   OPTIONAL {
     SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?metHn)
     WHERE {
-      BIND(CONCAT("^\\s*", STR(?hnInput), "(?:\\s*[-/]?\\s*[a-z0-9].*)?$") AS ?hnPattern)
       GRAPH graph:instanties-rce {
         ?rm a ceo:Rijksmonument ;
             ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
-            ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+            ceo:heeftOorspronkelijkeFunctie ?standpunt_functie ;
+            ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:huisnummer ?hn .
+
         ?standpunt_functie ceo:hoofdfunctie true ;
                            ceo:heeftFunctieNaam ?uri .
-        ?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:huisnummer ?hn .
-        FILTER(regex(lcase(str(?hn)), ?hnPattern, "i"))
+
+        # hier de filter voor 33, 33a, 33-1, 33/2, ... maar niet 331
+        FILTER( REGEX(LCASE(STR(?hn)), "^33(?![0-9])", "i") )
       }
       GRAPH graph:bebouwdeomgeving {
         <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
@@ -104,7 +113,7 @@ WHERE {
           ("Cultuur, gezondheid en wetenschap"                      <https://data.cultureelerfgoed.nl/term/id/rn/0be0a6c9-0738-41cc-aaac-550d258c4261>)
           ("Handelsgebouwen, opslag- en transportgebouwen"          <https://data.cultureelerfgoed.nl/term/id/rn/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
           ("Kastelen, landhuizen en parken"                         <https://data.cultureelerfgoed.nl/term/id/rn/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
-          ("Religieuze gebouwen"                                     <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+          ("Religieuze gebouwen"                                    <https://data.cultureelerfgoed.nl/term/id/rn/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
           ("Sport, recreatie, vereniging en horeca"                 <https://data.cultureelerfgoed.nl/term/id/rn/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
           ("Uitvaartcentra en begraafplaatsen"                      <https://data.cultureelerfgoed.nl/term/id/rn/1680dfc0-666a-4a01-9781-59e9af26ec51>)
           ("Verdedigingswerken en militaire gebouwen"               <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783>)
@@ -118,8 +127,17 @@ WHERE {
     GROUP BY ?hoofdcategorie
   }
 
-  # 4) berekeningen
-  BIND(ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * 1000) / 10 AS ?percentage)
-  BIND(ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * xsd:decimal(?poolSize)) AS ?pool)
+  ################################################################
+  # 4) berekeningen met poolSize = 300
+  ################################################################
+  BIND(300 AS ?poolSize)
+  BIND(
+    ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * 1000) / 10 
+    AS ?percentage
+  )
+  BIND(
+    ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * xsd:decimal(?poolSize))
+    AS ?pool
+  )
 }
-ORDER BY desc(?percentage)
+ORDER BY DESC(?percentage)

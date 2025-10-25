@@ -1,0 +1,48 @@
+#+ name: Query-2-4-2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+
+PREFIX text:  <http://jena.apache.org/text#>
+PREFIX schema:<https://schema.org/>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+
+SELECT DISTINCT
+  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+  ?rijksmonumentnummer
+  ?functies
+  ?adres
+  ?literal
+  ?naam
+  ?plaats
+  ?omschrijving
+WHERE {
+  # 1. Alle "vanwege"-monumenten
+  (?choi ?sc ?literal) text:query (
+    schema:description
+    '"vanwege"'
+    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
+  ) .
+
+  ?choi schema:description      ?omschrijving ;
+        schema:identifier       ?rijksmonumentnummer ;
+        schema:addressLocality  ?plaats ;
+        schema:description      ?omschrijving.
+
+  OPTIONAL {
+    ?choi schema:additionalType ?functie .
+    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+  }
+  OPTIONAL { ?choi schema:address       ?adres . }
+  OPTIONAL { ?choi schema:name          ?naam  . }
+
+  # 2. Sluit alles uit dat MSP is
+  FILTER NOT EXISTS {
+    GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/msp_indicatie> {
+      ?mspRes schema:identifier ?rmInMsp .
+    }
+    FILTER( STR(?rmInMsp) = STR(?rijksmonumentnummer) )
+  }
+}
+# LIMIT 1500

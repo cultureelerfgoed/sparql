@@ -10,7 +10,6 @@ PREFIX dc:    <http://purl.org/dc/elements/1.1/>
 
 SELECT DISTINCT
   (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
-  ?provincie
   ?functies
   ?adres
   ?literal
@@ -72,4 +71,3 @@ WHERE {
       ) AS ?_cats)
   BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
 }
-LIMIT 500
