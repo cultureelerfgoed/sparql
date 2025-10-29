@@ -1,0 +1,147 @@
+#+ name: rijksmonumenten-gemeente-provincie-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+
+PREFIX text:  <http://jena.apache.org/text#>
+PREFIX schema:<https://schema.org/>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+SELECT DISTINCT
+  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+  ?rijksmonumentnummer
+  ?naam
+  ?plaats
+  ?functies
+  ?literal
+  ?omschrijving
+  ?datumInschrijving
+  ?jaar
+  ?heeftVanwege
+  ?heeftMetConstructie
+  ?onderdelenGevonden
+  ?primaireRede
+
+WHERE {
+
+  #################################################################
+  # 1. Basis uit de endpoint waar u deze query draait (text:query)
+  #################################################################
+  (?choi ?sc ?literal) text:query (
+    schema:description
+    '("beschermd vanwege" OR "vanwege")'
+    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
+  ) .
+
+  ?choi schema:description      ?omschrijving ;
+        schema:identifier       ?rijksmonumentnummer ;
+        schema:addressLocality  ?plaats ;
+        schema:category         ?monumentaard .
+
+  OPTIONAL {
+    ?choi schema:additionalType ?functie .
+    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+  }
+  OPTIONAL { ?choi schema:name ?naam . }
+
+  # Normaliseer omschrijving voor matching
+  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
+
+  #################################################################
+  # Uitgebreide woordenlijst onderdelen
+  # inclusief kerkje / kerkgebouw varianten
+  #################################################################
+  BIND(
+    "kerkgebouw|kerkgebouwen|kerkje|kerkjes|kerk|kerken|herenbank|herenbanken|preekstoel|preekgestoelte|klok|klokken|bankenplan|preekstoelen|zerk|zerken|doopvont|doopvonten|luidklok|luidklokken|orgel|orgels"
+    AS ?patOnderdelen
+  )
+
+  # Heeft letterlijk 'vanwege'
+  BIND( REGEX(?omslLc, "\\bvanwege\\b") AS ?heeftVanwege )
+
+  #################################################################
+  # Detectie MET-constructie
+  #
+  # We definiëren twee hulpsignalen:
+  # 1. ?heeftMetWoord  -> er staat 'met' ergens
+  # 2. ?heeftOnderdeel -> er staat een relevant onderdeel ergens
+  #
+  # Let op: we staan leestekens direct na het onderdeel toe.
+  # We matchen dus bv "kerk," en "kerk." en "kerkje,".
+  #################################################################
+
+  # bevat 'met' als los woord
+  BIND( REGEX(?omslLc, "\\bmet\\b") AS ?heeftMetWoord )
+
+  # bevat minstens één van de onderdelen
+  BIND(
+    REGEX(
+      ?omslLc,
+      CONCAT("\\b(", ?patOnderdelen, ")(\\b|[,\\.;:\\)])")
+    ) AS ?heeftOnderdeel
+  )
+
+  # combinatie: dit beschouwen we als met-constructie
+  BIND( (?heeftMetWoord && ?heeftOnderdeel) AS ?heeftMetConstructie )
+
+  #################################################################
+  # OnderdelenGevonden als pipe-gescheiden lijst
+  #
+  # We testen varianten expliciet en plakken ze aaneen.
+  # We laten 'kerkgebouw' en 'kerkje' apart zien naast 'kerk'.
+  #################################################################
+  BIND(
+    CONCAT(
+      IF( REGEX(?omslLc, "\\bkerkgebouw(en)?\\b"),          "kerkgebouw|",     "" ),
+      IF( REGEX(?omslLc, "\\bkerkje(s)?\\b"),               "kerkje|",         "" ),
+      IF( REGEX(?omslLc, "\\bkerk(en)?\\b"),                "kerk|",           "" ),
+      IF( REGEX(?omslLc, "\\bherenbank(en)?\\b"),           "herenbank|",      "" ),
+      IF( REGEX(?omslLc, "\\bpreekstoel(en)?\\b"),          "preekstoel|",     "" ),
+      IF( REGEX(?omslLc, "\\bpreekgestoelte(n)?\\b"),       "preekgestoelte|", "" ),
+      IF( REGEX(?omslLc, "\\bbankenplan\\b"),               "bankenplan|",     "" ),
+      IF( REGEX(?omslLc, "\\bzerk(en)?\\b"),                "zerk|",           "" ),
+      IF( REGEX(?omslLc, "\\bdoopvont(en)?\\b"),            "doopvont|",       "" ),
+      IF( REGEX(?omslLc, "\\bluidklok(ken)?\\b"),           "luidklok|",       "" ),
+     IF( REGEX(?omslLc, "\\bklok(ken)?\\b"),           "klok|",       "" ),
+      IF( REGEX(?omslLc, "\\borgel(s)?\\b"),                "orgel|",          "" )
+    ) AS ?_onderdelenTmp
+  )
+  BIND(REPLACE(?_onderdelenTmp, "\\|$", "") AS ?onderdelenGevonden)
+
+  #################################################################
+  # Primaire rede
+  #################################################################
+  BIND(
+    IF(
+      ?heeftMetConstructie,
+      "met-constructie (bijv. 'kerk, met orgel' of 'kerkgebouw met bankenplan')",
+      IF(
+        ?heeftVanwege,
+        "beschermd vanwege / vanwege",
+        ""
+      )
+    ) AS ?primaireRede
+  )
+
+  # Alleen interessante gevallen
+  #FILTER( ?heeftVanwege || ?heeftMetConstructie )
+
+  #################################################################
+  # 2. Federated lookup naar cho-endpoint voor de inschrijfdatum
+  #################################################################
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
+    OPTIONAL {
+      ?choi ceo:datumInschrijvingInMonumentenregister ?datumInschrijving .
+      BIND( year(xsd:dateTime(?datumInschrijving)) AS ?jaar )
+
+      FILTER(
+        BOUND(?jaar) &&
+        ?jaar >= 1961 &&
+        ?jaar <= 1980
+      )
+    }
+  }
+}
+ORDER BY ?rijksmonumentnummer
