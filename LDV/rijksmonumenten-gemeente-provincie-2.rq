@@ -1,0 +1,85 @@
+#+ name: rijksmonumenten-gemeente-provincie-2
+#+ description: Overzicht van gebouwde rijksmonumenten per provincie of gemeente.
+#- Bedoeld om een overzicht in CSV te maken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn:    <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX owms:  <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  # kern
+  ?rijksmonument a ceo:Rijksmonument ;
+                 ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                 ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+                 ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
+                 ceo:heeftMonumentAard    rn:fc966a68-8863-4970-a83e-110f96006c21 ;
+                 ceo:heeftBasisregistratieRelatie ?basisrel ;
+                 rdfs:seeAlso ?monumentenregister .
+
+  # basisregistratie + plaatsbepaling
+  ?basisrel ceo:heeftProvincie ?prov ;
+            ceo:heeftGemeente  ?gem .
+
+  # BAG-gegevens (optioneel)
+  ?basisrel   ceo:heeftBAGRelatie ?bagrelatie .
+  ?bagrelatie ceo:volledigAdres  ?adres .
+  ?bagrelatie ceo:postcode       ?postcode .     # genormaliseerd met spatie
+  ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam .
+
+  # bestuurlijke labels
+  ?prov skos:prefLabel ?provincie .
+  ?gem  skos:prefLabel ?gemeente  .
+
+  # oorspronkelijke functie + schoon label
+  ?rijksmonument      ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+  ?standpunt_functie  ceo:hoofdfunctie true .
+  ?standpunt_functie  ceo:heeftFunctieNaam ?functies .
+  ?functies           skos:prefLabel ?functie .
+}
+WHERE {
+  GRAPH graph:instanties-rce {
+    ?rijksmonument 
+      ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
+      ceo:heeftMonumentAard    rn:fc966a68-8863-4970-a83e-110f96006c21 ;
+      ceo:heeftBasisregistratieRelatie ?basisrel ;
+      ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+    ?standpunt_functie ceo:hoofdfunctie true .
+
+    ?basisrel ceo:heeftProvincie ?prov ;
+              ceo:heeftGemeente  ?gem .
+
+    OPTIONAL {
+      ?basisrel ceo:heeftBAGRelatie ?bagrelatie .
+      OPTIONAL { ?bagrelatie ceo:volledigAdres  ?adres          . }
+      OPTIONAL { ?bagrelatie ceo:postcode       ?postcode_      . }
+      OPTIONAL { ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam . }
+      BIND(REPLACE(STR(?postcode_), "([0-9]{4})([A-Z]{2})", "$1 $2") AS ?postcode)
+    }
+
+    OPTIONAL {
+      ?rijksmonument (ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam) ?functies .
+    }
+  }
+
+  GRAPH owms: {
+    ?prov skos:prefLabel ?provincie .
+    ?gem  skos:prefLabel ?gemeente  .
+  }
+
+  OPTIONAL {
+    GRAPH graph:bebouwdeomgeving {
+      ?functies skos:prefLabel ?functie_ .
+      BIND(REPLACE(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
+    }
+  }
+
+  # link naar register-URL
+  BIND(IRI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+}

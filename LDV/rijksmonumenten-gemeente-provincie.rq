@@ -1,7 +1,7 @@
 #+ name: rijksmonumenten-gemeente-provincie
 #+ description: Overzicht van gebouwde rijksmonumenten per provincie of gemeente.
 #- Bedoeld om een overzicht in CSV te maken.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
@@ -13,8 +13,8 @@ PREFIX owms:  <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 SELECT DISTINCT 
     (IRI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
     ?rijksmonumentnummer 
-    ?straat 
-    ?huisnummer 
+  #  ?straat 
+  #  ?huisnummer 
     ?adres 
     ?provincie 
     ?gemeente 
@@ -31,6 +31,8 @@ WHERE {
       ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
       ceo:heeftMonumentAard    rn:fc966a68-8863-4970-a83e-110f96006c21 ;
       ceo:heeftBasisregistratieRelatie ?basisrel .
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
+      ?standpunt_functie ceo:hoofdfunctie true .
 
     ?basisrel 
       ceo:heeftProvincie ?prov ;
@@ -41,8 +43,8 @@ WHERE {
       OPTIONAL { ?bagrelatie ceo:volledigAdres    ?adres         . }
       OPTIONAL { ?bagrelatie ceo:postcode         ?postcode_     . }
       OPTIONAL { ?bagrelatie ceo:woonplaatsnaam   ?woonplaatsnaam. }
-      OPTIONAL { ?bagrelatie ceo:openbareRuimte   ?straat        . }
-      OPTIONAL { ?bagrelatie ceo:huisnummer       ?huisnummer    . }
+  #    OPTIONAL { ?bagrelatie ceo:openbareRuimte   ?straat        . }
+  #    OPTIONAL { ?bagrelatie ceo:huisnummer       ?huisnummer    . }
 
       BIND(REPLACE(STR(?postcode_), "([0-9]{4})([A-Z]{2})", "$1 $2") AS ?postcode)
     }
@@ -63,30 +65,5 @@ WHERE {
       BIND(REPLACE(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functie)
     }
   }
-
-  # 1) Provincies:
-  VALUES ?provFilter { 
-    "Drenthe" 
-    "Fryslân" 
-    "Gelderland" 
-    "Groningen" 
-    "Limburg" 
-    "Noord-Brabant" 
-    "Noord-Holland" 
-    "Overijssel" 
-    "Utrecht" 
-    "Zeeland" 
-    "Zuid-Holland" 
-    UNDEF
-  }
-
-  # 2) Gemeenten: hier uw hele lijst, plus UNDEF.
-  VALUES ?gemFilter  { 
-    "Aa en Hunze"@nl
-    "Zwolle"@nl
-    UNDEF
-  }
-
-  FILTER (!BOUND(?provFilter) || ?provincie = ?provFilter)
-  FILTER (!BOUND(?gemFilter)  || ?gemeente  = ?gemFilter)
 }
+
