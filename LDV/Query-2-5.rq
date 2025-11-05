@@ -1,12 +1,90 @@
 #+ name: Query-2-5
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/sparql
 
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT distinct * WHERE {
-  ?s a ceo:Rijksmonument.
-  ?s ceo:heeftOmschrijving/ceo:omschrijving ?oms .
-  FILTER (strlen(?oms) >= 1500 && STRLEN(?oms) <= 2000) 
-  
-} LIMIT 10
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+PREFIX dct:   <http://purl.org/dc/terms/>
+PREFIX geo:   <http://www.opengis.net/ont/geosparql#>
+PREFIX lpo:   <http://linkedpasts.org/ontology#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+CONSTRUCT {
+ # GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/departementen> {
+
+    # ----- Place -------------------------------------------------
+    ?pit  a lpo:Place ;
+          lpo:hasTitle          ?title ;
+          lpo:sourceId          ?ident ;
+          lpo:sourceDataset     "RCE departementen" ;
+          lpo:sourceDatasetURI  "https://linkeddata.cultureelerfgoed.nl/graph/departementen"^^xsd:anyURI ;
+          lpo:hasName           ?prefName ;
+          lpo:hasType           ?placeType .
+
+    # Optioneel: alt-namen
+    ?pit  lpo:hasName ?altName .
+
+    # Geometrie indien aanwezig
+    ?pit  lpo:hasGeom ?geom .
+
+
+    # ----- PlaceName (pref) --------------------------------------
+    ?prefName a lpo:PlaceName ;
+              lpo:toponym  ?title ;
+              lpo:language ?titleLang .
+
+    # ----- PlaceName (alt) ---------------------------------------
+    ?altName  a lpo:PlaceName ;
+              lpo:toponym  ?alt ;
+              lpo:language ?altLang .
+
+
+    # ----- PlaceType ---------------------------------------------
+    ?placeType a lpo:PlaceType ;
+               lpo:identifier    <http://vocab.getty.edu/aat/300000772> ;
+               lpo:typeLabel     "departement" ;
+               lpo:hasSourceLabel ?srcLabel .
+
+    ?srcLabel a lpo:SourceLabel ;
+              lpo:labelValue    "departement" ;
+              lpo:labelLanguage "nl" .
+
+
+    # ----- PlaceGeom ---------------------------------------------
+    ?geom a lpo:PlaceGeom ;
+          lpo:wktValue ?wkt ;
+          geo:asWKT    ?wkt .
+  }
+#}
+WHERE {
+
+  GRAPH graph:departementen {
+
+    # bron-PIT voor departement
+    ?pit a <http://rdf.histograph.io/PlaceInTime> ;
+         dc:identifier ?ident ;
+         dc:title      ?title .
+
+    # eventuele alternatieve naam
+    OPTIONAL {
+      ?pit dct:alternative ?alt .
+      BIND( LANG(?alt) AS ?altLang )
+      BIND( IRI(CONCAT(STR(?pit), "/name/alt")) AS ?altName )
+    }
+
+    # geometrie (asWKT op PIT)
+    OPTIONAL {
+      ?pit geo:asWKT ?wkt .
+      BIND( IRI(CONCAT(STR(?pit), "/geom/1")) AS ?geom )
+    }
+
+    # taal van de hoofdnaam (als aanwezig)
+    BIND( LANG(?title) AS ?titleLang )
+  }
+
+  # afgeleide IRIs (buiten GRAPH-blok)
+  BIND( IRI(CONCAT(STR(?pit), "/name/pref"))        AS ?prefName )
+  BIND( IRI(CONCAT(STR(?pit), "/type/departement")) AS ?placeType )
+  BIND( IRI(CONCAT(STR(?pit), "/sourcelabel/1"))    AS ?srcLabel )
+}

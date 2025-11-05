@@ -1,0 +1,24 @@
+#+ name: Query-51-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+
+select ?provincie
+  ?label
+  ?afkorting
+  ?organisatiecode
+  ?officieleNaamExclSoort
+  ?owms
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graphs/default-provincies> {
+    ?provincie rdf:type          tooi:Provincie ;
+      rdfs:label        ?label ;
+      tooi:afkorting ?afkorting ;
+      tooi:organisatiecode ?organisatiecode ;
+      tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
+      tooi:owmsId ?owms.
+  }
+
+}

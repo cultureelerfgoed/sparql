@@ -1,48 +1,112 @@
 #+ name: Query-3-3
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/sparql
 
-prefix bif: <http://www.openlinksw.com/schemas/bif#>
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix geo: <http://www.opengis.net/ont/geosparql#>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix schema: <http://schema.org/>
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
-prefix owms: <http://standaarden.overheid.nl/owms/terms/>
-select ?rijksmonumentWkt ?rijksmonumentWktLabel {
-  
-  #  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql> {
-    ?rijksmonument
-      ceo:heeftBasisregistratieRelatie/ceo:heeftGemeente/owms:CBSCode ?gemeenteCode;
-      ceo:heeftGeometrie/geo:asWKT ?rijksmonumentWkt;
-      ceo:rijksmonumentnummer ?rijksmonumentnummer.
-    optional { ?rijksmonument ceo:heeftNaam/ceo:naam ?rijksmonumentNaam. }
-    optional { ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie. }
-    optional { ?rijksmonument ceo:heeftStijlEnCultuur/ceo:heeftStijlEnCultuurNaam/skos:prefLabel ?stijlEnCultuur. }
-    optional { ?rijksmonument ceo:heeftType/ceo:heeftTypeNaam/skos:prefLabel ?type. }
-  
-  SERVICE <https://api.labs.kadaster.nl/datasets/cbs/wbk/services/default/sparql>{
-  ?gemeente
-    rdfs:label ?gemeenteNaam;
-    schema:identifier ?_gemeenteCode.
-  ?wijk geo:sfWithin ?gemeente.
-  ?buurt
-    rdfs:label ?buurtNaam;
-    geo:hasGeometry/geo:asWKT ?buurtWkt;
-    geo:sfWithin ?wijk.
-  bind(strafter(str(?_gemeenteCode),'GM') as ?gemeenteCode)
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+PREFIX dct:   <http://purl.org/dc/terms/>
+PREFIX geo:   <http://www.opengis.net/ont/geosparql#>
+PREFIX schema: <http://schema.org/>
+PREFIX lpo:   <http://linkedpasts.org/ontology#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+CONSTRUCT {
+
+  # Als je de output in een aparte named graph wilt:
+  # GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/gemeentegeschiedenis-lpo> {
+
+    # ----- Place -------------------------------------------------
+    ?pit  a lpo:Place ;
+          lpo:hasTitle          ?title ;
+          lpo:sourceId          ?ident ;
+          lpo:sourceDataset     "Gemeentegeschiedenis" ;
+          lpo:sourceDatasetURI  "https://linkeddata.cultureelerfgoed.nl/graph/gemeentegeschiedenis"^^xsd:anyURI ;
+          lpo:hasName           ?prefName ;
+          lpo:hasType           ?placeType .
+
+    # Optioneel: alt-namen
+    ?pit  lpo:hasName ?altName .
+
+    # Geometrie indien aanwezig
+    ?pit  lpo:hasGeom ?geom .
+
+    # Tijd indien aanwezig
+    ?pit  lpo:hasWhen ?when .
+
+
+    # ----- PlaceName (pref) --------------------------------------
+    ?prefName a lpo:PlaceName ;
+              lpo:toponym  ?title ;
+              lpo:language ?titleLang .
+
+    # ----- PlaceName (alt) ---------------------------------------
+    ?altName  a lpo:PlaceName ;
+              lpo:toponym  ?alt ;
+              lpo:language ?altLang .
+
+
+    # ----- PlaceType ---------------------------------------------
+    ?placeType a lpo:PlaceType ;
+               lpo:identifier    <http://vocab.getty.edu/aat/300265612> ;
+               lpo:typeLabel     "gemeente" ;
+               lpo:hasSourceLabel ?srcLabel .
+
+    ?srcLabel a lpo:SourceLabel ;
+              lpo:labelValue    "gemeente" ;
+              lpo:labelLanguage "nl" .
+
+
+    # ----- PlaceGeom ---------------------------------------------
+    ?geom a lpo:PlaceGeom ;
+          lpo:wktValue ?wkt ;
+          geo:asWKT    ?wkt .
+
+
+    # ----- When --------------------------------------------------
+    ?when a lpo:When ;
+          lpo:start ?startStr ;
+          lpo:end   ?endStr .
+  # }
+}
+WHERE {
+
+  GRAPH graph:gemeentegeschiedenis {
+
+    # bron-PIT voor gemeente
+    ?pit a <https://rdf.histograph.io/PlaceInTime> ;
+         a <http://rdf.histograph.io/Municipality> ;
+         dc:identifier ?ident ;
+         dc:title      ?title .
+
+    # eventuele alternatieve naam
+    OPTIONAL {
+      ?pit dct:alternative ?alt .
+      BIND( LANG(?alt) AS ?altLang )
+      BIND( IRI(CONCAT(STR(?pit), "/name/alt")) AS ?altName )
+    }
+
+    # geometrie (asWKT op PIT)
+    OPTIONAL {
+      ?pit geo:asWKT ?wkt .
+      BIND( IRI(CONCAT(STR(?pit), "/geom/1")) AS ?geom )
+    }
+
+    # start / end jaar → When
+    OPTIONAL {
+      ?pit schema:startDate ?startYear .
+      ?pit schema:endDate   ?endYear .
+      BIND( IRI(CONCAT(STR(?pit), "/when/1")) AS ?when )
+      BIND( STR(?startYear) AS ?startStr )
+      BIND( STR(?endYear)   AS ?endStr )
+    }
+
+    # taal van de hoofdnaam (als aanwezig; hier waarschijnlijk leeg)
+    BIND( LANG(?title) AS ?titleLang )
   }
 
-  
-  filter(bif:st_intersects(?rijksmonumentWkt, ?buurtWkt))
-  bind(strdt(concat(
-    '<dl>',
-      '<dt>Buurt naam</dt><dd>',str(?buurtNaam),'</dd>',
-      if(bound(?functie),concat('<dt>Monument functie</dt><dd>',str(?functie),'</dd>'),''),
-      if(bound(?rijksmonumentNaam),concat('<dt>Monument naam</dt><dd>',str(?rijksmonumentNaam),'</dd>'),''),
-      '<dt>Monument nummer</dt><dd>',?rijksmonumentnummer,'</dd>',
-      if(bound(?stijlEnCultuur),concat('<dt>Stijl & cultuur</dt><dd>',str(?stijlEnCultuur),'</dd>'),''),
-      if(bound(?type),concat('<dt>Monument type</dt><dd>',str(?type),'</dd>'),''),
-    '</dl>'),rdf:HTML) as ?rijksmonumentWktLabel)
+  # afgeleide IRIs (buiten GRAPH-blok)
+  BIND( IRI(CONCAT(STR(?pit), "/name/pref"))        AS ?prefName )
+  BIND( IRI(CONCAT(STR(?pit), "/type/gemeente"))    AS ?placeType )
+  BIND( IRI(CONCAT(STR(?pit), "/sourcelabel/1"))    AS ?srcLabel )
 }
-limit 100
