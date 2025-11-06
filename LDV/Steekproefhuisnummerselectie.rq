@@ -17,7 +17,7 @@ WHERE {
   # 1) totaal per hoofdcategorie (hele populatie)
   ################################################################
   {
-    SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?totaal)
+    SELECT ?hoofdcategorie (COUNT(DISTINCT ?rm) AS ?totaal_)
     WHERE {
       GRAPH graph:instanties-rce {
         ?rm a ceo:Rijksmonument ;
@@ -25,6 +25,7 @@ WHERE {
             ceo:heeftOorspronkelijkeFunctie ?standpunt_functie .
         ?standpunt_functie ceo:hoofdfunctie true ;
                            ceo:heeftFunctieNaam ?uri .
+
       }
       GRAPH graph:bebouwdeomgeving {
         <https://data.cultureelerfgoed.nl/term/id/rn/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
@@ -132,12 +133,13 @@ WHERE {
   ################################################################
   BIND(300 AS ?poolSize)
   BIND(
-    ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * 1000) / 10 
+    ROUND((xsd:decimal(?totaal_) / xsd:decimal(?grand)) * 1000) / 10 
     AS ?percentage
   )
   BIND(
-    ROUND((xsd:decimal(?totaal) / xsd:decimal(?grand)) * xsd:decimal(?poolSize))
+    ROUND((xsd:decimal(?totaal_) / xsd:decimal(?grand)) * xsd:decimal(?poolSize))
     AS ?pool
   )
+          BIND(str(?totaal_) as ?totaal)
 }
 ORDER BY DESC(?percentage)
