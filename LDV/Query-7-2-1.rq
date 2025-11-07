@@ -1,0 +1,70 @@
+#+ name: Query-7-2-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/sparql
+
+prefix graph:  <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix dc:     <http://purl.org/dc/elements/1.1/>
+prefix geo:    <http://www.opengis.net/ont/geosparql#>
+prefix skos:   <http://www.w3.org/2004/02/skos/core#>
+prefix schema: <http://schema.org/>
+prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+select
+  ?s ?identifier ?geometrie ?geometrieLabel ?naam ?einddatum ?startdatum
+  ?geometrieColor
+  ?eventStart ?eventEnd ?eventLabel ?eventDescription ?eventType ?eventColor
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/graph/gemeentegeschiedenis> {
+
+    # geometrie
+    ?s geo:asWKT ?geometrie .
+
+    # basisgegevens
+    ?s dc:identifier    ?identifier ;
+       dc:title         ?naam ;
+       schema:endDate   ?einddatum ;
+       schema:startDate ?startdatum .
+
+    # label voor de kaart
+    bind(
+      strdt(concat(
+        '<table>',
+        '<tr><td><b>Naam: </b>', str(?naam), '</td></tr>',
+        '<tr><td><b>Periode: </b>', str(?startdatum), ' – ', str(?einddatum), '</td></tr>',
+        '</table>'
+      ), rdf:HTML) as ?geometrieLabel
+    )
+
+    # kleuren per blok van 10 jaar (op basis van startjaar)
+    bind(xsd:integer(substr(str(?startdatum), 1, 4)) as ?startYear)
+
+    bind(
+      if(?startYear < 1820, "red",
+      if(?startYear < 1830, "orange",
+      if(?startYear < 1840, "yellow",
+      if(?startYear < 1850, "green",
+      if(?startYear < 1860, "blue",
+      if(?startYear < 1870, "purple",
+      "gray")))))) as ?geometrieColor
+    )
+
+    # timeline-velden
+    bind(?startdatum as ?eventStart)
+    bind(?einddatum  as ?eventEnd)
+
+    # korte titel voor in de timeline
+    bind(
+      concat(str(?naam), ?geometrie, " (", str(?startdatum), " – ", str(?einddatum), ")")
+      as ?eventLabel
+    )
+
+    # beschrijving in de timeline: hergebruik het HTML-label
+    bind(?geometrieLabel as ?eventDescription)
+
+    # type om events te groeperen (bijvoorbeeld in de legend)
+    bind("Gemeente" as ?eventType)
+
+    # timeline-kleur gelijk aan kaartkleur
+    bind(?geometrieColor as ?eventColor)
+  }
+}
