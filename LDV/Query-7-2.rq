@@ -7,33 +7,40 @@ prefix geo:    <http://www.opengis.net/ont/geosparql#>
 prefix skos:   <http://www.w3.org/2004/02/skos/core#>
 prefix schema: <http://schema.org/>
 prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix xsd:    <http://www.w3.org/2001/XMLSchema#>
 
-select ?geometrie ?geometrieLabel   ?s  ?naam
-  ?einddatum
-  ?startdatum
+select ?s ?identifier ?geometrie ?geometrieLabel ?naam ?einddatum ?startdatum ?geometrieColor
 where {
   graph <https://linkeddata.cultureelerfgoed.nl/graph/gemeentegeschiedenis> {
 
     # geometrie
     ?s geo:asWKT ?geometrie .
 
-    # gegevens die u in het label gebruikt
+    # basisgegevens
+    ?s dc:identifier   ?identifier ;
+       dc:title        ?naam ;
+       schema:endDate  ?einddatum ;
+       schema:startDate ?startdatum .
 
-    ?s dc:title           ?naam .
-    ?s schema:endDate     ?einddatum .
-    ?s schema:startDate   ?startdatum .
+    # kleuren per blok van 10 jaar
+    bind(
+      if(xsd:integer(?startdatum) < 1820, "red",
+      if(xsd:integer(?startdatum) < 1830, "orange",
+      if(xsd:integer(?startdatum) < 1840, "yellow",
+      if(xsd:integer(?startdatum) < 1850, "green",
+      if(xsd:integer(?startdatum) < 1860, "blue",
+      if(xsd:integer(?startdatum) < 1870, "purple",
+      "gray")))))) as ?geometrieColor
+    )
 
-
-
+    # label met naam en periode
     bind(
       strdt(concat(
         '<table>',
-         '<tr><td><b>Naam: </b>', str(?naam), '</td></tr>',
+        '<tr><td><b>Naam: </b>', str(?naam), '</td></tr>',
         '<tr><td><b>Periode: </b>', str(?startdatum), ' – ', str(?einddatum), '</td></tr>',
         '</table>'
       ), rdf:HTML) as ?geometrieLabel
     )
   }
 }
-
-

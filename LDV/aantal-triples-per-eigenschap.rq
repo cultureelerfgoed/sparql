@@ -1,4 +1,6 @@
 #+ name: aantal-triples-per-eigenschap
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/services/cho-acceptance/sparql
+
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>

@@ -5,7 +5,7 @@ prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
 prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos:  <http://www.w3.org/2004/02/skos/core#>
-prefix rn:    <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix rn:    <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 
 select
   (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) 
@@ -14,8 +14,17 @@ select
   (sample(?postcode)       as ?postcode1)
   (sample(?woonplaatsnaam) as ?woonplaatsnaam1)
   #(sample(?huisnummer)     as ?huisnummer1)
-  (sample(?omschrijving) as ?omschrijving1)
-  (group_concat(distinct ?functie; separator=", ") as ?functiesSamengevoegd1)
+  (sample(?omschrijving)   as ?omschrijving1)
+
+  # nieuwe kolom: hoofdcategorie
+  (sample(?hoofdcategorie) as ?hoofdcategorie1)
+
+  # opgeschoonde functies (zonder haakjes)
+  (group_concat(distinct ?functie;     separator=", ") as ?functiesSamengevoegd1)
+
+  # originele functies (met haakjes)
+  (group_concat(distinct ?functieRaw;  separator=", ") as ?functiesOrigineelSamengevoegd1)
+
 where {
 
   graph graph:instanties-rce {
@@ -29,7 +38,6 @@ where {
       ceo:heeftOmschrijving/ceo:heeftOmschrijvingstype rn:0273a12d-7259-4391-aee2-5dac264aebe9 ;
       ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
      
-      
     ?standpunt_functie
       ceo:hoofdfunctie true ;
       ceo:heeftFunctieNaam ?functiesIRI .
@@ -46,11 +54,34 @@ where {
   }
 
   graph graph:bebouwdeomgeving {
+
+    # originele functie-label + opgeschoonde versie
     ?functiesIRI skos:prefLabel ?functieRaw .
     bind(replace(?functieRaw, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+
+    # koppeling functie -> hoofdcategorie (zelfde als in uw eerste query)
+    <https://data.cultureelerfgoed.nl/term/id/rn/2/1eeb48df-adbb-44b2-bcf1-33e3fe902413> skos:narrower ?narrow .
+
+    VALUES (?hoofdcategorie ?narrow) {
+      ("Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/2/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
+      ("Boerderijen, molens en bedrijven"                       <https://data.cultureelerfgoed.nl/term/id/rn/2/b8077035-db8f-47f1-ae1d-e64f75344fcf>)
+      ("Cultuur, gezondheid en wetenschap"                      <https://data.cultureelerfgoed.nl/term/id/rn/2/0be0a6c9-0738-41cc-aaac-550d258c4261>)
+      ("Handelsgebouwen, opslag- en transportgebouwen"          <https://data.cultureelerfgoed.nl/term/id/rn/2/e88ccbf4-e41d-49bf-9876-0f71db0e6646>)
+      ("Kastelen, landhuizen en parken"                         <https://data.cultureelerfgoed.nl/term/id/rn/2/b2511baf-3b70-4667-98dd-1b850c7ea53f>)
+      ("Religieuze gebouwen"                                    <https://data.cultureelerfgoed.nl/term/id/rn/2/25fac0f1-77a2-4587-ab04-dfcb66959dd8>)
+      ("Sport, recreatie, vereniging en horeca"                 <https://data.cultureelerfgoed.nl/term/id/rn/2/b797b89c-1e0a-4ce7-869b-817cd98259b0>)
+      ("Uitvaartcentra en begraafplaatsen"                      <https://data.cultureelerfgoed.nl/term/id/rn/2/1680dfc0-666a-4a01-9781-59e9af26ec51>)
+      ("Verdedigingswerken en militaire gebouwen"               <https://data.cultureelerfgoed.nl/term/id/rn/2/5013dcbc-1090-42e9-bc22-92de47e43783>)
+      ("Voorwerpen op pleinen en dergelijke"                    <https://data.cultureelerfgoed.nl/term/id/rn/2/92cda3e4-8c6a-41dc-9a81-02f8aba88b25>)
+      ("Weg- en waterbouwkundige werken"                        <https://data.cultureelerfgoed.nl/term/id/rn/2/11c897ed-d35e-4191-9254-7ab95d9d63bc>)
+      ("Woningen en woningbouwcomplexen"                        <https://data.cultureelerfgoed.nl/term/id/rn/2/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
+    }
+
+    ?narrow skos:narrower+ ?functiesIRI .
   }
 
+  # zelfde huisnummerfilter als in uw voorbeeld
   filter(regex(lcase(str(?huisnummer)), "^33(?![0-9])", "i"))
 }
 group by ?rijksmonumentnummer ?monumentenregister
-
+order by ?rijksmonumentnummer

@@ -11,7 +11,7 @@ SELECT (COUNT(?cho) AS ?aantal)
 WHERE {
   GRAPH graph:instanties-rce {
     ?cho a ceo:Rijksmonument ;
-         ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
-         ceo:heeftMonumentAard     <https://data.cultureelerfgoed.nl/term/id/rn/fc966a68-8863-4970-a83e-110f96006c21> .
+         ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864> ;
+         ceo:heeftMonumentAard     <https://data.cultureelerfgoed.nl/term/id/rn/2/fc966a68-8863-4970-a83e-110f96006c21> .
   }
 }

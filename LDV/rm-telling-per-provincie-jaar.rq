@@ -1,0 +1,66 @@
+#+ name: rm-telling-per-provincie-jaar
+#+ description: DO NOT DELETE
+#- Deze query telt het aantal geldige rijksmonumenten per provincie en per monumentaard (onroerend gebouwd of archeologisch) voor een opgegeven jaar. 
+#- In de telling worden alleen monumenten meegenomen die:
+#- - in of vóór het opgegeven jaar zijn ingeschreven in het monumentenregister;
+#- - een geldige juridische status hebben (ceo:heeftJuridischeStatus met waarde “rijksmonument”);
+#- - of pas na het opgegeven jaar zijn afgevoerd (zodat de telling voor dat jaar historisch correct blijft).
+#- 
+#- De parameter ?jaar wordt buiten de query meegegeven (bijvoorbeeld vanuit de API), en bepaalt de stand van de telling.
+#- Optioneel kan ook de parameter ?monumentAard van buitenaf worden toegevoegd om op één type monument te filteren.
+#- 
+#- De resultaten worden gegroepeerd per provincie en monumentaard, en geven per combinatie het totale aantal rijksmonumenten in het opgegeven jaar.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+# Resultaat per provincie en monumentaard, en aantal rijksmonumenten
+
+select ?provincie ?monumentAard (count(?rijksmonument) as ?aantal)
+where {
+  # LET OP: ?jaar wordt van buiten de query als variabele meegegeven (API-parameter)
+  # Zorg dat dit een xsd:integer is (bijv. 2024)
+
+  graph graph:instanties-rce {
+    # Basisselectie van rijksmonumenten en hun basisregistratie-relatie
+    ?rijksmonument a ceo:Rijksmonument ;
+      ceo:heeftBasisregistratieRelatie ?basisrel ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus ?juridischeStatus ;
+      ceo:registratiedatum ?datumRegistratie ;
+      ceo:heeftMonumentAard ?monumentAard_ .
+    # Label van de monumentaard (bijv. "onroerend gebouwd", "archeologisch")
+    ?monumentAard_ skos:prefLabel ?monumentAard .
+
+    # Jaar van inschrijving en laatste registratiedatum
+    bind(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
+    bind(year(xsd:dateTime(?datumRegistratie))  as ?jaarRegistratie)
+
+    # Provincie
+    ?basisrel ceo:heeftProvincie ?prov .
+
+    # Filter logica:
+    # 1) monument bestaat al in of vóór ?jaar
+    # 2) én: óf juridische status is "geldig rijksmonument"
+    #    óf de laatste registratiedatum ligt na ?jaar
+    #    (dus: in ?jaar was het nog geldig, ook als het later is afgevoerd)
+    filter(
+      (?jaarInschrijving <= ?jaar) &&
+      (
+        ?juridischeStatus = <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864>
+        || (?jaarRegistratie > ?jaar)
+      )
+    )
+  }
+
+  graph <https://linkeddata.cultureelerfgoed.nl/graph/owms> {
+    # Nederlandstalige provincienaam ophalen
+    ?prov skos:prefLabel ?provincie .
+
+  }
+}
+group by ?provincie ?monumentAard
+order by ?provincie ?monumentAard

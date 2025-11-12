@@ -1,5 +1,7 @@
 #+ name: totaal-aantal-triples
 #+ description: Deze query selecteert het aantal triples (subject-predicate-object-triplets) in de rce instanties graph van de CHO dataset en geeft dit weer als het resultaat.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho-acceptance/services/cho-acceptance/sparql
+
 #+ https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 # Definieer het PREFIX graph, dat de URL van de endpoint voorstelt.
 PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
