@@ -7,7 +7,7 @@ PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
-PREFIX rn:    <https://data.cultureelerfgoed.nl/term/id/rn/>
+PREFIX rn:    <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 PREFIX owms:  <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 
