@@ -24,11 +24,9 @@ SELECT DISTINCT
 
 WHERE {
   # Full-text: één stringliteral, zonder dubbele termen
-  (?choi ?sc ?literal) text:query (
-    schema:description
-    '("niet beschermd" OR "niet-beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "van weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR "niet-meebeschermd" OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
-    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
-  ) .
+(?choi ?sc ?literal) text:query (
+  schema:description
+'("niet beschermd" OR "niet-beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "van weinig waarde" OR "onderdeel van" OR "in samenhang met" OR "niet meebeschermd" OR "niet-meebeschermd" OR "niet in aanmerking" OR "buiten bescherming" OR "niet nader te beschermen" OR "niet oorspronkelijk" OR "niet originele" OR "niet origineel" OR "in recente tijd" OR "ondergeschikte betekenis" OR "sterk gewijzigd" OR "ingrijpend gewijzigd" OR "aanzienlijk gewijzigd")'  ) .
 
   # Basisgegevens
   ?choi schema:description      ?omschrijving ;
@@ -48,9 +46,20 @@ WHERE {
   # Classificatie (zonder 'vanwege'), met hyphen-varianten en extra vormen
   BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-  BIND("niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patUitsl)
-  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patRel)
-  BIND("\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
+BIND(
+  "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+  AS ?patUitsl
+)
+BIND(
+  "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|niet\\s+oorspronkelijk(e)?|niet\\s+origineel|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+  AS ?patRel
+)
+
+BIND(
+  "\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+  AS ?patReden
+)
+
 
   BIND( REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting )
   BIND( REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering )
