@@ -19,8 +19,6 @@ prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
 prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 prefix owms: <http://standaarden.overheid.nl/owms/terms/>
-prefix corop: <https://example.org/id/corop/>
-prefix ex:    <https://example.org/id/>
 
 # Resultaat per provincie, gemeente, monumentaard en hoofdcategorie
 # inclusief het aantal rijksmonumenten binnen het gekozen jaar
@@ -31,7 +29,6 @@ select
   ?gemeente
   ?gemeentecode
   ?hoofdcategorie
-   ?coropLabel
 
   (count(?rijksmonument) as ?aantal)
 where {
@@ -42,16 +39,17 @@ where {
   graph graph:instanties-rce {
 
     # Rijksmonument met zijn basisregistratie-relatie
-    ?rijksmonument a ceo:Rijksmonument ;
-      ceo:heeftBasisregistratieRelatie ?basisrel ;
-      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
-      ceo:heeftJuridischeStatus ?juridischeStatus ;
-      ceo:registratiedatum ?datumRegistratie ;
-      ceo:heeftOorspronkelijkeFunctie ?functie ;
-      ceo:heeftMonumentAard ?monumentAard_ .
+  ?rijksmonument a ceo:Rijksmonument ;
+    ceo:heeftBasisregistratieRelatie ?basisrel ;
+    ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+    ceo:heeftJuridischeStatus ?juridischeStatus ;
+    ceo:registratiedatum ?datumRegistratie ;
+    ceo:heeftOorspronkelijkeFunctie ?functie ;
+    ceo:heeftMonumentAard ?monumentAard_ .
 
-    # Functie → verbindingspunt naar hoofdcategorie
-    ?functie ceo:heeftFunctieNaam ?uri .
+  # Pak alleen de hoofdfunctie
+  ?functie ceo:hoofdfunctie true ;
+           ceo:heeftFunctieNaam ?uri .
 
     # Monumentaard label (onroerend e.d.)
     ?monumentAard_ skos:prefLabel ?monumentAard .
@@ -115,18 +113,17 @@ filter(!bound(?hoofdcategorieFilter) || ?hoofdcategorie = ?hoofdcategorieFilter)
     # Officiële CBS-gemeentecode
     ?gem owms:CBSCode ?gemeentecode .
   }
-  # 4. COROP-gebied ophalen via skos:broader
-  graph <https://example.org/id/coropGraph> {
-    ?gem skos:broader ?corop .
-    ?corop skos:prefLabel ?coropLabel .
-  }
+  # # 4. COROP-gebied ophalen via skos:broader
+  # graph <https://example.org/id/coropGraph> {
+  #   ?gem skos:broader ?corop .
+  #   ?corop skos:prefLabel ?coropLabel .
+  # }
 }
 
 group by
   ?provincie
   ?gemeente
   ?gemeentecode
-   ?coropLabel
   ?monumentAard
   ?hoofdcategorie
 

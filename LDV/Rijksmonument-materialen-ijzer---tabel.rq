@@ -7,12 +7,13 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 
 select distinct (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister) ?provincie ?functie ?categorieenfunctie (group_concat(distinct ?material) as ?gevondenMaterialen) ?omschrijving
 where {
   graph graph:instanties-rce {
     ?choi a ceo:Rijksmonument.
-    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
     ?choi ceo:heeftOmschrijving ?standpunt_omschrijving.

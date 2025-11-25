@@ -4,7 +4,7 @@
 #- De kolom `gn_male_ratio` geeft aan hoe vaak deze naam procentueel aan een man is toegewezen als eerste voornaam. Hoe dichter deze waarde ligt bij de 100 of 0, hoe zekerder een naam is toe te wijzen aan respectievelijk een man of vrouw. De `n` geeft de absolute aantallen uit de dataset.
 #- 
 #- N.B.: wil je regular expressions toepassen op een naam, dan dien je de query te openen d.m.v. `View populated query` en vervolgens zelf te bewerken. Meer hierover in deze  [wiki](https://en.wikibooks.org/wiki/SPARQL/Expressions_and_Functions#Functions_on_strings).
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/CLARIAH-Given-Names/services/CLARIAH-Given-Names/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/CLARIAH-Given-Names/sparql
 
 PREFIX schema: <https://schema.org/>
 PREFIX names: <https://linkeddata.cultureelerfgoed.nl/clariahnames/vocab/>

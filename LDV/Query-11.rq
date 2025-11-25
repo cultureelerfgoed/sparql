@@ -1,5 +1,5 @@
 #+ name: Query-11
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/joop-van-der-heiden/test-rm-omschrijvingen/services/test-rm-omschrijvingen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
 PREFIX text: <http://jena.apache.org/text#>
 PREFIX schema: <https://schema.org/>

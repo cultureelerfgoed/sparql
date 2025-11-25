@@ -1,6 +1,6 @@
 #+ name: Query-2
 #+ description: do not delete
-#- oudere qury ebruikt en aangepast
+#- oudere query gebruikt en aangepast
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/sparql
 
 prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
@@ -39,7 +39,7 @@ construct {
             ?monument_uri a ceo:Rijksmonument .
             ?monument_uri ceo:rijksmonumentnummer ?rijksmonumentnummer .
             ?monument_uri ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
-            ?monument_uri ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+            ?monument_uri ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
 
             optional {
               ?monument_uri ceo:heeftNaam/ceo:naam ?naam

@@ -1,5 +1,5 @@
 #+ name: Query-25
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/services/erfgeo/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/erfgeo/sparql
 
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>

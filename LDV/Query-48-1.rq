@@ -38,7 +38,7 @@ select distinct
 where {
   graph graph:instanties-rce {
     ?choi rdf:type ceo:Rijksmonument.
-    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?choi ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?choi ceo:rijksmonumentnummer ?rijksmonumentnummer .
     #   ?choi ceo:heeftGeometrie/geo:asWKT ?geometrie.
     ?choi ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving_ .
