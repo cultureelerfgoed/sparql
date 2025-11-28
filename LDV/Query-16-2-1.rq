@@ -10,10 +10,10 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT distinct * WHERE  {
-SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/rn> {
-  {<https://data.cultureelerfgoed.nl/term/id/rn/4cbdb812-a515-473f-bbdf-989ed004a37f> skos:broader ?narrow.}
+SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/rn/2> {
+  {<https://data.cultureelerfgoed.nl/term/id/rn/2/4cbdb812-a515-473f-bbdf-989ed004a37f> skos:broader ?narrow.}
   UNION{
-  <https://data.cultureelerfgoed.nl/term/id/rn/5013dcbc-1090-42e9-bc22-92de47e43783> skos:narrower+ ?narrow.
+  <https://data.cultureelerfgoed.nl/term/id/rn/2/5013dcbc-1090-42e9-bc22-92de47e43783> skos:narrower+ ?narrow.
   }
   }
   ?complex a ceo:Complex .
@@ -21,12 +21,12 @@ SERVICE <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/rn> {
   ?complex ceo:heeftOmschrijving/ceo:omschrijving ?omschrijving.
   ?complex ceo:heeftNaam/ceo:naam ?naam.
   ?complex ceo:heeftRijksmonument ?rijksmonument.
-  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>}
    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
   OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape.}
   ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.
     OPTIONAL {?rijksmonument ceo:heeftGebeurtenis ?gebeurtenis .
-  ?gebeurtenis ceo:heeftGebeurtenisNaam <https://data.cultureelerfgoed.nl/term/id/rn/a88b115d-ad65-4403-99aa-31210af8bd6d>. 
+  ?gebeurtenis ceo:heeftGebeurtenisNaam <https://data.cultureelerfgoed.nl/term/id/rn/2/a88b115d-ad65-4403-99aa-31210af8bd6d>. 
       ?gebeurtenis ceo:heeftDatering ?datering .
      ?datering ceo:heeftBeginDatering ?beginDatering .
       ?datering ceo:heeftEindDatering ?eindDatering .

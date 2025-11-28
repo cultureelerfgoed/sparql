@@ -16,12 +16,12 @@ PREFIX bag: <http://bag.basisregistraties.overheid.nl/def/bag#>
 
 SELECT DISTINCT * WHERE {
 
-  SERVICE  <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/rn>
+  SERVICE  <https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/rn/2>
  {
-  {<https://data.cultureelerfgoed.nl/term/id/rn/a0bc1f8c-f225-4134-b161-730628805d70> skos:broader ?narrow.}
+  {<https://data.cultureelerfgoed.nl/term/id/rn/2/a0bc1f8c-f225-4134-b161-730628805d70> skos:broader ?narrow.}
   UNION
   {
- <https://data.cultureelerfgoed.nl/term/id/rn/05606ed7-8375-401d-965d-9300010fc6c1> skos:narrower+ ?narrow.}
+ <https://data.cultureelerfgoed.nl/term/id/rn/2/05606ed7-8375-401d-965d-9300010fc6c1> skos:narrower+ ?narrow.}
     ?narrow skos:prefLabel ?label.
   }
  
@@ -30,7 +30,7 @@ SELECT DISTINCT * WHERE {
   OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape .}
   ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?narrow.
    ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:pandIdentificatie ?id .
-  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>}
 
 SERVICE <https://api.labs.kadaster.nl/datasets/dst/kkg/services/default/sparql>
   {

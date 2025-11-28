@@ -21,7 +21,7 @@ WHERE
   ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
   ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
   ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?prov .
-  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
+  MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>}
 
     OPTIONAL {?rijksmonument ceo:heeftGeometrie/geo:asWKT ?shape.}
   #  OPTIONAL {?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaats.}
@@ -41,9 +41,9 @@ WHERE
      # ?prov overheid:CBSCode ?code .
    }  
   GRAPH graph:bebouwdeomgeving {
-  {<https://data.cultureelerfgoed.nl/term/id/rn/fea024ba-83a0-4418-afbe-3b7b4588797e> skos:broader ?uri.}
+  {<https://data.cultureelerfgoed.nl/term/id/rn/2/fea024ba-83a0-4418-afbe-3b7b4588797e> skos:broader ?uri.}
   UNION{  
-  {<https://data.cultureelerfgoed.nl/term/id/rn/a3dbebf9-a237-4caa-9ee6-347c9d30dd9e> skos:narrower ?uri . }
+  {<https://data.cultureelerfgoed.nl/term/id/rn/2/a3dbebf9-a237-4caa-9ee6-347c9d30dd9e> skos:narrower ?uri . }
       }
      ?uri skos:prefLabel ?uriSub.
      
