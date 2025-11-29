@@ -1,38 +1,142 @@
 #+ name: Query-2-4-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
 
-PREFIX text:  <http://jena.apache.org/text#>
 PREFIX schema:<https://schema.org/>
 
-SELECT ?primaireCategorie (COUNT(DISTINCT ?choi) AS ?aantal)
+SELECT
+  ?primaireCategorie
+  ?aantal
+  (SUM(?aantal2) AS ?cumulatief)
 WHERE {
-  # Full-text filter met ALLE begrippen (zonder "vanwege") + highlight
-  (?choi ?sc ?literal) text:query (
-    schema:description
-    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR uitgesloten OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
-    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
-  ) .
-  ?choi schema:description ?omschrijving .
 
-  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
+  ############################################
+  # 1. Telling per primaire categorie
+  ############################################
+  {
+    SELECT
+      ?primaireCategorie
+      ?ord
+      (COUNT(DISTINCT ?choi) AS ?aantal)
+    WHERE {
+      ?choi schema:description ?omschrijving .
+      BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-  # Categoriepatronen
-  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|uitgesloten|niet\\s+meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patU)
-  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patR)
-  BIND("\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b" AS ?patV)
+      VALUES ?zoekterm {
+        "niet beschermd" "niet-beschermd" "niet van waarde" "geen monumentale waarde"
+        "ondergeschikte waarde" "geen onderdeel" "uitgesloten" "uitgezonderd"
+        "niet opgenomen" "niet onder bescherming" "ondergeschikt"
+        "van ondergeschikt belang" "secundair" "onderdeel van" "in samenhang met"
+        "niet meebeschermd" "niet-meebeschermd" "niet in aanmerking"
+        "buiten bescherming" "niet nader te beschermen" "niet oorspronkelijk"
+        "niet originele" "niet origineel" "in recente tijd" "ondergeschikte betekenis"
+        "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
+      }
 
-  BIND(REGEX(?omslLc, ?patU) AS ?heeftUitsluiting)
-  BIND(REGEX(?omslLc, ?patR) AS ?heeftRelatieveWaardering)
-  BIND(REGEX(?omslLc, ?patV) AS ?heeftReden)
+      FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
-  # Primaire categorie (prioriteit: uitsluiting > relatieve waardering > reden)
-  BIND(
-    IF(?heeftUitsluiting, "uitsluiting of beperking",
-      IF(?heeftRelatieveWaardering, "relatieve waardering",
-        IF(?heeftReden, "verwijzing naar reden van bescherming", "niet geclassificeerd")
+      BIND(
+        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+        AS ?patUitsl
       )
-    ) AS ?primaireCategorie
-  )
+
+      BIND(
+        "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+        AS ?patRel
+      )
+
+      BIND(
+        "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        AS ?patReden
+      )
+
+      BIND(REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting)
+      BIND(REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering)
+      BIND(REGEX(?omslLc, ?patReden) AS ?heeftReden)
+
+      FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
+
+      BIND(
+        IF(?heeftUitsluiting, "uitsluiting of beperking",
+          IF(?heeftRelatieveWaardering, "relatieve waardering",
+            "verwijzing naar reden van bescherming"
+          )
+        ) AS ?primaireCategorie
+      )
+
+      # Vaste volgorde voor cumulatieve lijn
+      VALUES (?primaireCategorie ?ord) {
+        ("verwijzing naar reden van bescherming" 1)
+        ("relatieve waardering"                   2)
+        ("uitsluiting of beperking"               3)
+      }
+    }
+    GROUP BY ?primaireCategorie ?ord
+  }
+
+  ############################################
+  # 2. Zelfde telling nog een keer, voor cumulatie
+  ############################################
+  {
+    SELECT
+      ?ord2
+      (COUNT(DISTINCT ?choi2) AS ?aantal2)
+    WHERE {
+      ?choi2 schema:description ?omschrijving2 .
+      BIND(LCASE(STR(?omschrijving2)) AS ?omslLc2)
+
+      VALUES ?zoekterm2 {
+        "niet beschermd" "niet-beschermd" "niet van waarde" "geen monumentale waarde"
+        "ondergeschikte waarde" "geen onderdeel" "uitgesloten" "uitgezonderd"
+        "niet opgenomen" "niet onder bescherming" "ondergeschikt"
+        "van ondergeschikt belang" "secundair" "onderdeel van" "in samenhang met"
+        "niet meebeschermd" "niet-meebeschermd" "niet in aanmerking"
+        "buiten bescherming" "niet nader te beschermen" "niet oorspronkelijk"
+        "niet originele" "niet origineel" "in recente tijd" "ondergeschikte betekenis"
+        "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
+      }
+
+      FILTER(CONTAINS(?omslLc2, LCASE(?zoekterm2)))
+
+      BIND(
+        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+        AS ?patUitsl2
+      )
+
+      BIND(
+        "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+        AS ?patRel2
+      )
+
+      BIND(
+        "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        AS ?patReden2
+      )
+
+      BIND(REGEX(?omslLc2, ?patUitsl2) AS ?hU2)
+      BIND(REGEX(?omslLc2, ?patRel2)   AS ?hR2)
+      BIND(REGEX(?omslLc2, ?patReden2) AS ?hV2)
+
+      FILTER(?hU2 || ?hR2 || ?hV2)
+
+      BIND(
+        IF(?hU2, "uitsluiting of beperking",
+          IF(?hR2, "relatieve waardering",
+            "verwijzing naar reden van bescherming"
+          )
+        ) AS ?primaireCategorie2
+      )
+
+      VALUES (?primaireCategorie2 ?ord2) {
+        ("verwijzing naar reden van bescherming" 1)
+        ("relatieve waardering"                   2)
+        ("uitsluiting of beperking"               3)
+      }
+    }
+    GROUP BY ?ord2
+  }
+
+  # 3. Cumulatieve som over ord
+  FILTER(?ord2 <= ?ord)
 }
-GROUP BY ?primaireCategorie
-ORDER BY DESC(?aantal)
+GROUP BY ?primaireCategorie ?aantal ?ord
+ORDER BY ?ord

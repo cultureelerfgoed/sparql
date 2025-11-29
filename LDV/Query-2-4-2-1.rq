@@ -32,7 +32,7 @@ WHERE {
 
   OPTIONAL {
     ?choi schema:additionalType ?functie .
-    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+
   }
   OPTIONAL { ?choi schema:address       ?adres . }
   OPTIONAL { ?choi schema:name          ?naam  . }

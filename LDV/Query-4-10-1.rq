@@ -1,0 +1,78 @@
+#+ name: Query-4-10-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+
+prefix schema:<https://schema.org/>
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix edm:   <http://www.europeana.eu/schemas/edm/>
+prefix dc:    <http://purl.org/dc/elements/1.1/>
+
+select
+  ?primaireCategorie
+  (count(distinct ?rijksmonumentnummer) as ?aantalMonumenten)
+where {
+
+  # letterlijk hetzelfde WHERE-blok als in query 2
+  # (van ?choi schema:description ... t/m bind(replace(?_cats...) as ?categorieen))
+
+  ?choi schema:description      ?omschrijving ;
+        schema:identifier       ?rijksmonumentnummer ;
+        schema:category         ?monumentaard .
+
+  optional {
+    ?choi schema:additionalType ?functie .
+    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
+  }
+
+  bind(?omschrijving as ?literal)
+  bind(lcase(str(?omschrijving)) as ?omslLc)
+
+  values ?zoekterm {
+    "niet beschermd" "niet-beschermd" "niet van waarde"
+    "geen monumentale waarde" "ondergeschikte waarde"
+    "geen onderdeel" "uitgesloten" "uitgezonderd"
+    "niet opgenomen" "niet onder bescherming"
+    "ondergeschikt" "van ondergeschikt belang" "secundair"
+    "onderdeel van" "in samenhang met"
+    "niet meebeschermd" "niet-meebeschermd"
+    "niet in aanmerking" "buiten bescherming"
+    "niet nader te beschermen"
+    "niet oorspronkelijk" "niet originele" "niet origineel"
+    "in recente tijd" "ondergeschikte betekenis"
+    "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
+  }
+
+  bind(
+    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+    as ?patUitsl
+  )
+
+  bind(
+    "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+    as ?patRel
+  )
+
+  bind(
+    "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+    as ?patReden
+  )
+
+  bind( regex(?omslLc, ?patUitsl) as ?heeftUitsluiting )
+  bind( regex(?omslLc, ?patRel)   as ?heeftRelatieveWaardering )
+  bind( regex(?omslLc, ?patReden) as ?heeftReden )
+
+  bind(
+    if(?heeftUitsluiting, "uitsluiting of beperking",
+      if(?heeftRelatieveWaardering, "relatieve waardering",
+        if(?heeftReden, "verwijzing naar reden van bescherming", "")
+      )
+    ) as ?primaireCategorie
+  )
+
+  filter( ?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden )
+  filter( contains(?omslLc, lcase(?zoekterm)) )
+  filter( !regex(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van") )
+
+}
+group by ?primaireCategorie
+order by ?primaireCategorie
