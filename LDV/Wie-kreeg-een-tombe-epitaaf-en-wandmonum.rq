@@ -1,6 +1,4 @@
 #+ name: Wie-kreeg-een-tombe-epitaaf-en-wandmonum
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/services/grafmonumenten/sparql
-
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
