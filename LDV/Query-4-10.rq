@@ -61,7 +61,7 @@ bind(
 )
 
 bind(
-  "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+  "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
   as ?patReden
 )
 

@@ -1,4 +1,6 @@
 #+ name: Query-11-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+
 PREFIX text:  <http://jena.apache.org/text#>
 PREFIX schema:<https://schema.org/>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

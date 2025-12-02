@@ -4,21 +4,22 @@
 PREFIX schema:<https://schema.org/>
 
 SELECT
-  ?primaireCategorie
-  ?aantal
-  (SUM(?aantal2) AS ?cumulatief)
+  ?provincie
+  (SUM(?isReden)      AS ?aantalReden)
+  (SUM(?isRelatief)   AS ?aantalRelatief)
+  (SUM(?isUitsluiting) AS ?aantalUitsluiting)
+  (SUM(?isReden + ?isRelatief + ?isUitsluiting) AS ?totaal)
 WHERE {
 
-  ############################################
-  # 1. Telling per primaire categorie
-  ############################################
+  # 1. Eerst per provincie + primaireCategorie tellen
   {
     SELECT
+      ?provincie
       ?primaireCategorie
-      ?ord
       (COUNT(DISTINCT ?choi) AS ?aantal)
     WHERE {
-      ?choi schema:description ?omschrijving .
+      ?choi schema:description   ?omschrijving ;
+            schema:addressRegion ?provincie .
       BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
       VALUES ?zoekterm {
@@ -45,7 +46,7 @@ WHERE {
       )
 
       BIND(
-        "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
         AS ?patReden
       )
 
@@ -62,81 +63,14 @@ WHERE {
           )
         ) AS ?primaireCategorie
       )
-
-      # Vaste volgorde voor cumulatieve lijn
-      VALUES (?primaireCategorie ?ord) {
-        ("verwijzing naar reden van bescherming" 1)
-        ("relatieve waardering"                   2)
-        ("uitsluiting of beperking"               3)
-      }
     }
-    GROUP BY ?primaireCategorie ?ord
+    GROUP BY ?provincie ?primaireCategorie
   }
 
-  ############################################
-  # 2. Zelfde telling nog een keer, voor cumulatie
-  ############################################
-  {
-    SELECT
-      ?ord2
-      (COUNT(DISTINCT ?choi2) AS ?aantal2)
-    WHERE {
-      ?choi2 schema:description ?omschrijving2 .
-      BIND(LCASE(STR(?omschrijving2)) AS ?omslLc2)
-
-      VALUES ?zoekterm2 {
-        "niet beschermd" "niet-beschermd" "niet van waarde" "geen monumentale waarde"
-        "ondergeschikte waarde" "geen onderdeel" "uitgesloten" "uitgezonderd"
-        "niet opgenomen" "niet onder bescherming" "ondergeschikt"
-        "van ondergeschikt belang" "secundair" "onderdeel van" "in samenhang met"
-        "niet meebeschermd" "niet-meebeschermd" "niet in aanmerking"
-        "buiten bescherming" "niet nader te beschermen" "niet oorspronkelijk"
-        "niet originele" "niet origineel" "in recente tijd" "ondergeschikte betekenis"
-        "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
-      }
-
-      FILTER(CONTAINS(?omslLc2, LCASE(?zoekterm2)))
-
-      BIND(
-        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
-        AS ?patUitsl2
-      )
-
-      BIND(
-        "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
-        AS ?patRel2
-      )
-
-      BIND(
-        "\\bals\\s+onderdeel\\s+van\\b|\\bonderdeel\\s+van\\s+(een\\s+)?(complex|ensemble|begraafplaats|stadsgezicht)|in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
-        AS ?patReden2
-      )
-
-      BIND(REGEX(?omslLc2, ?patUitsl2) AS ?hU2)
-      BIND(REGEX(?omslLc2, ?patRel2)   AS ?hR2)
-      BIND(REGEX(?omslLc2, ?patReden2) AS ?hV2)
-
-      FILTER(?hU2 || ?hR2 || ?hV2)
-
-      BIND(
-        IF(?hU2, "uitsluiting of beperking",
-          IF(?hR2, "relatieve waardering",
-            "verwijzing naar reden van bescherming"
-          )
-        ) AS ?primaireCategorie2
-      )
-
-      VALUES (?primaireCategorie2 ?ord2) {
-        ("verwijzing naar reden van bescherming" 1)
-        ("relatieve waardering"                   2)
-        ("uitsluiting of beperking"               3)
-      }
-    }
-    GROUP BY ?ord2
-  }
-
-  # 3. Cumulatieve som over ord
-  FILTER(?ord2 <= ?ord)
+  # 2. Per rij bepalen in welke kolom het hoort
+  BIND(IF(?primaireCategorie = "verwijzing naar reden van bescherming", ?aantal, 0) AS ?isReden)
+  BIND(IF(?primaireCategorie = "relatieve waardering", ?aantal, 0)                   AS ?isRelatief)
+  BIND(IF(?primaireCategorie = "uitsluiting of beperking", ?aantal, 0)               AS ?isUitsluiting)
 }
-GROUP BY ?primaireCategorie ?aantal ?ord
-ORDER BY ?ord
+GROUP BY ?provincie
+ORDER BY ?provincie
