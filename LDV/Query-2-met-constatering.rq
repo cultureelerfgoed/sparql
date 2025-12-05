@@ -53,33 +53,37 @@ where {
     "niet in aanmerking" "buiten bescherming"
     "niet nader te beschermen"
     "niet oorspronkelijk" "niet originele" "niet origineel"
-    "in recente tijd"
+    "in recente tijd" "van latere datum"
     "ondergeschikte betekenis"
     "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
   }
 
+
   ########################################################
-  # 2) classificatie via regex zoals u al had
+  # 2) classificatie via regex – aangepast
   ########################################################
 
+  # Uitsluiting of beperking
   bind(
     "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
     as ?patUitsl
   )
 
+  # Relatieve waardering (modern / niet oorspronkelijk / in recente tijd hier UIT)
   bind(
-    "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
     as ?patRel
   )
 
+  # Verwijzing naar reden van bescherming (bewust smal gehouden)
   bind(
     "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
     as ?patReden
   )
 
-  # NIEUW: poging tot constatering (feitelijke wijziging zonder harde waardering)
+  # Constatering: feitelijke wijziging of latere toevoeging
   bind(
-    "\\bverbouw(d|d[e]?|ing)?\\b|\\bvernieuwd(e)?\\b|\\bvervangen(e)?\\b|\\bgereconstrueerd(e)?\\b|\\bgerestaureerd(e)?\\b|\\bgerenoveerd(e)?\\b"
+    "\\bverbouw(d|d[e]?|ing)?\\b|\\bvernieuwd(e)?\\b|\\bvervangen(e)?\\b|\\bgereconstrueerd(e)?\\b|\\bgerestaureerd(e)?\\b|\\bgerenoveerd(e)?\\b|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|van\\s+latere\\s+datum"
     as ?patConst
   )
 
@@ -120,6 +124,7 @@ group by
   ?heeftUitsluiting
   ?heeftRelatieveWaardering
   ?heeftReden
-  ?heeftConstatering      # NIEUW
+  ?heeftConstatering      
   ?primaireCategorie
   ?categorieen
+order by ?heeftConstatering

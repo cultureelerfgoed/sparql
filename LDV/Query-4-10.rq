@@ -1,5 +1,5 @@
 #+ name: Query-4-10
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
 prefix schema:<https://schema.org/>
 prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
