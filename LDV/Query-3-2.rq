@@ -1,65 +1,124 @@
 #+ name: Query-3-2
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-#benodigde prefixen
-#resultaat is een kaart
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX schema: <http://schema.org/>
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX lxr: <https://linkeddata.cultureelerfgoed.nl/def/lxr#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-prefix gsp: <http://www.opengis.net/ont/geosparql#>
-PREFIX bif: <http://www.openlinksw.com/schemas/bif#>
-PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
-PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>
+# benodigde prefixen
+# resultaat is een kaart
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX schema:<https://schema.org/>
+PREFIX mag:   <https://linkeddata.cultureelerfgoed.nl/def/seismo#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:   <http://www.opengis.net/ont/geosparql#>
+PREFIX geof:  <http://www.opengis.net/def/function/geosparql/>
+PREFIX uom:   <http://www.opengis.net/def/uom/OGC/1.0/>
+PREFIX wdt:   <http://www.wikidata.org/prop/direct/>
+PREFIX bif:   <http://www.openlinksw.com/schemas/bif#>
 
-#selecteer voorlopig alles
-SELECT (GROUP_CONCAT(?link; SEPARATOR = ", ") AS ?links) ?event ?eventLabel ?eventStart ?date ?tijd ?shape ?diepte ?magnitude ?plaatsnaam ?rm ?rmn ?eventMedia ?afstand ?new_date ?geoColor ?shapeColor ?shapeLabel
+SELECT (GROUP_CONCAT(?link; SEPARATOR = ", ") AS ?links)
+       ?event ?eventLabel ?eventStart ?date ?tijd
+       ?shape ?diepte ?magnitude ?plaatsnaam
+       ?rm ?rmn ?eventMedia ?afstand ?new_date
+       ?geoColor ?shapeColor ?shapeLabel
 {
+  #################################################################
+  # 1. aardbevingen uit de rce/aardbevingen dataset
+  #################################################################
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/aardbevingen/sparql> {
 
-#start de service naar de dataset aardbevingen  
-SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/aardbeving/services/aardbeving/sparql> {  
-  
-?event a schema:Event.
-?event schema:name ?eventLabel.
-?event schema:startDate ?eventStart.
-?event schema:date ?date. 
-?event schema:startTime ?tijd.
-?event gsp:asWKT ?shape.  
-?event lxr:diepte ?diepte.
-?event lxr:magnitude ?magnitude.
-?event ceox:woonplaatsnaam ?plaatsnaam .
+    ?event a schema:Event ;
+           schema:startDate ?eventStart ;
+           schema:category ?cat ;
+           schema:location ?place ;
+           schema:depth ?depthNode ;
+           mag:magnitude ?magNode ;
+           geo:asWKT ?shape .
+
+    # label van het type (geïnduceerde aardbevingen)
+    ?cat skos:prefLabel ?eventLabel .
+
+    # plaatsnaam uit de Place
+    ?place schema:name ?plaatsLabel .
+
+    # diepte als QuantitativeValue
+    ?depthNode a schema:QuantitativeValue ;
+               schema:value ?diepte ;
+               schema:unitText ?depthUnit .
+
+    # magnitude als QuantitativeValue
+    ?magNode a schema:QuantitativeValue ;
+             schema:value ?magnitude ;
+             schema:unitText ?magUnit .
+
+    # datum en tijd uit schema:startDate halen
+    BIND(STR(?eventStart) AS ?dt)
+    BIND(SUBSTR(?dt,1,10)  AS ?date)          # YYYY-MM-DD
+    BIND(SUBSTR(?dt,12,8)  AS ?tijd)          # hh:mm:ss
+
+    # plaatsnaam als “kale” string (zonder taalcode)
+    BIND(STR(?plaatsLabel) AS ?plaatsnaam)
   }
-#einde service
-#vraag nu met ceox:woonplaatsnaam ?plaatsnaam de vergelijkbare monumenten op in de cho database  
-?rm a ceo:Rijksmonument.
-?rm ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaatsnaam.
-?rm ceo:rijksmonumentnummer ?rmn.
-?rm ceo:heeftGeometrie/gsp:asWKT ?geo.
 
-#start een nieuwe service om met de opgehaalde rijkmonumentnummers afbeeldingen op te halen uit wikidata  
-    SERVICE <https://query.wikidata.org/sparql>
-{
-  ?wikirm wdt:P18 ?eventMedia.
-  ?wikirm wdt:P359 ?rmn.
+  #################################################################
+  # 2. Rijksmonumenten met dezelfde plaatsnaam
+  #################################################################
+  ?rm a ceo:Rijksmonument ;
+      ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?plaatsRm ;
+      ceo:rijksmonumentnummer ?rmn ;
+      ceo:heeftGeometrie/geo:asWKT ?geo .
+
+  # gelijk trekken van plaatsnaam (literal vs @nl)
+  FILTER(STR(?plaatsRm) = ?plaatsnaam)
+
+  #################################################################
+  # 3. Wikidata-afbeeldingen van RCE-rijksmonumenten
+  #################################################################
+  SERVICE <https://query.wikidata.org/sparql> {
+    ?wikirm wdt:P18  ?eventMedia ;
+            wdt:P359 ?rmn .
   }
 
-#hier volgen enkele binds en filters voor het eindresultaat  
-bind(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/",uri(?rmn)) as ?link)
-Bind("100"^^<http://www.w3.org/2001/XMLSchema#integer> as ?afstand)
-FILTER((geof:distance(?geo,?shape, uom:meter)) < ?afstand )
-bind ("red" as ?geoColor)
-bind ("orange" as ?shapeColor)
-#de date is amerikaans dus die zetten we ff om naar "normale" weergave  
-BIND(concat(substr(str(?date), 9, 2), "-", substr(str(?date), 6, 2), "-", substr(str(?date), 1, 4)) AS ?new_date)
+  #################################################################
+  # 4. binds / filters voor kaartweergave
+  #################################################################
+  BIND(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/",
+              STR(?rmn)) AS ?link)
 
-#dit is de bind om het shapeLabel mogelijk te maken. NB shapeLabel gaat uit van de aardbeving en het monument in de buurt. Monumenten hebben geen shapeLabel.
+  BIND("100"^^xsd:integer AS ?afstand)
 
-BIND(strdt(concat('<div style="position: relative;">','<img src="',str(?eventMedia),'" style="max-width: 100px;">','</a>','</p>',"Op ", ?new_date, " om ", ?tijd, " was er een ", ?eventLabel," van magnitude ", ?magnitude, " op een diepte van ", ?diepte, " bij de plaats ", ?plaatsnaam, " op ", ?afstand, " meter van rijksmonument ",'<a href="',str(?links),'" target="_blank">',uri(?rmn),'</a>'),rdf:HTML) as ?shapeLabel)
+  FILTER( geof:distance(?geo, ?shape, uom:meter) < ?afstand )
 
+  BIND("red"    AS ?geoColor)
+  BIND("orange" AS ?shapeColor)
+
+  # datum draaien naar DD-MM-YYYY
+  BIND(CONCAT(SUBSTR(STR(?date), 9, 2), "-",
+              SUBSTR(STR(?date), 6, 2), "-",
+              SUBSTR(STR(?date), 1, 4)) AS ?new_date)
+
+  # beschrijving voor de marker (shapeLabel)
+  BIND(
+    STRDT(
+      CONCAT(
+        '<div style="position: relative;">',
+        '<img src="', STR(?eventMedia), '" style="max-width: 100px;">',
+        '</a></p>',
+        "Op ", ?new_date, " om ", ?tijd,
+        " was er een ", ?eventLabel,
+        " van magnitude ", STR(?magnitude),
+        " op een diepte van ", STR(?diepte), " km",
+        " bij de plaats ", ?plaatsnaam,
+        " op ", STR(?afstand), " meter van rijksmonument ",
+        '<a href="', STR(?links), '" target="_blank">', STR(?rmn), '</a>'
+      ),
+      rdf:HTML
+    ) AS ?shapeLabel
+  )
 }
-order By ?eventStart
+GROUP BY ?eventStart
+       ?event ?eventLabel ?eventStart ?date ?tijd
+       ?shape ?diepte ?magnitude ?plaatsnaam
+       ?rm ?rmn ?eventMedia ?afstand ?new_date
+       ?geoColor ?shapeColor ?shapeLabel
 LIMIT 150

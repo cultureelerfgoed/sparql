@@ -1,0 +1,47 @@
+#+ name: aardbevingen-in-nl-be-du
+#+ description: 1e Query voor de story Aardbevingen en Rijksmonumenten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/aardbevingen/sparql
+
+PREFIX schema: <https://schema.org/>
+PREFIX geo:    <http://www.opengis.net/ont/geosparql#>
+PREFIX mag:    <https://linkeddata.cultureelerfgoed.nl/def/seismo#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?event ?start ?place ?placeName ?countryName
+       ?wkt
+       ?depthValue ?depthUnit
+       ?magValue ?magUnit
+       ?evalMode
+WHERE {
+  # het event zelf
+  ?event a schema:Event ;
+         schema:startDate ?start ;
+         schema:location ?place ;
+         schema:depth ?depthNode ;
+         mag:magnitude ?magNode ;
+         schema:additionalProperty ?evalNode .
+
+  # locatie + land
+  ?place schema:name ?placeName ;
+         schema:addressCountry ?country .
+  ?country schema:name ?countryName .
+
+  # geometrie (optioneel, voor het geval er eens geen wkt is)
+  OPTIONAL { ?event geo:asWKT ?wkt }
+
+  # diepte als QuantitativeValue
+  ?depthNode a schema:QuantitativeValue ;
+             schema:value ?depthValue ;
+             schema:unitText ?depthUnit .
+
+  # magnitude als QuantitativeValue
+  ?magNode a schema:QuantitativeValue ;
+           schema:value ?magValue ;
+           schema:unitText ?magUnit .
+
+  # evaluatiemodus
+  ?evalNode a schema:PropertyValue ;
+            schema:name "evaluationMode"@en ;
+            schema:value ?evalMode .
+}
+#ORDER BY ?start

@@ -1,5 +1,5 @@
 #+ name: Aardbevingen-en-rijksmonumenten-in-Groni
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Aardbevingen/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/aardbevingen/sparql
 
 #DECLAREER PREFIXES
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
