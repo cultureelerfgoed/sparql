@@ -1,4 +1,4 @@
-#+ name: Query-2-met-constatering
+#+ name: Query-2-met-constatering-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
 
 prefix schema:<https://schema.org/>
@@ -22,7 +22,7 @@ select distinct
 where {
 
   ########################################################
-  # Basisgegevens
+  # Basisgegevens (zelfde als 12a)
   ########################################################
 
   ?choi schema:description      ?omschrijving ;
@@ -42,6 +42,7 @@ where {
 
   ########################################################
   # 1) zoektermen als VALUES, in plaats van text:query
+  #    (zelfde lijst als in 12a)
   ########################################################
 
   values ?zoekterm {
@@ -71,6 +72,7 @@ where {
 
   ########################################################
   # 2) classificatie via regex – met constatering
+  #    (zelfde patronen als in 12a)
   ########################################################
 
   # Uitsluiting of beperking
@@ -110,6 +112,9 @@ where {
     ?heeftConstatering
   )
 
+  # EXTRA: Query 12b – alleen omschrijvingen met uitsluiting of beperking
+  filter( ?heeftUitsluiting )
+
   # Primaire categorie: alleen gebaseerd op de drie hoofdgroepen
   bind(
     if(?heeftUitsluiting, "uitsluiting of beperking",
@@ -122,7 +127,7 @@ where {
   # bekende ruis uitsluiten
   filter( !regex(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van") )
 
-  # alle geldige categorieën in één veld
+  # alle geldige categorieën in één veld (incl. constatering)
   bind(concat(
     if(?heeftUitsluiting,         "uitsluiting of beperking|",              ""),
     if(?heeftRelatieveWaardering, "relatieve waardering|",                  ""),

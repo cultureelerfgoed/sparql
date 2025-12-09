@@ -28,8 +28,6 @@ WHERE {
         "niet meebeschermd" "niet-meebeschermd"
         "niet in aanmerking" "buiten bescherming"
         "niet nader te beschermen"
-        "niet oorspronkelijk" "niet originele" "niet origineel"
-        "in recente tijd"
         "ondergeschikte betekenis"
         "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
       }
@@ -37,13 +35,22 @@ WHERE {
       FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
       # Uitsluiting of beperking
-      BIND("niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen" AS ?patUitsl)
+      BIND(
+        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+        AS ?patUitsl
+      )
 
-      # Relatieve waardering
-      BIND("\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b" AS ?patRel)
+      # Relatieve waardering (zonder constateringstermen)
+      BIND(
+        "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+        AS ?patRel
+      )
 
       # Verwijzing naar reden van bescherming
-      BIND("in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
+      BIND(
+        "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        AS ?patReden
+      )
 
       BIND(REGEX(?omslLc, ?patUitsl) AS ?hU)
       BIND(REGEX(?omslLc, ?patRel)   AS ?hR)
@@ -75,8 +82,6 @@ WHERE {
         "niet meebeschermd" "niet-meebeschermd"
         "niet in aanmerking" "buiten bescherming"
         "niet nader te beschermen"
-        "niet oorspronkelijk" "niet originele" "niet origineel"
-        "in recente tijd"
         "ondergeschikte betekenis"
         "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
       }
@@ -84,13 +89,22 @@ WHERE {
       FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
       # Uitsluiting of beperking
-      BIND("niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen" AS ?patUitsl)
+      BIND(
+        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+        AS ?patUitsl
+      )
 
-      # Relatieve waardering
-      BIND("\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b" AS ?patRel)
+      # Relatieve waardering (zonder constateringstermen)
+      BIND(
+        "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+        AS ?patRel
+      )
 
       # Verwijzing naar reden van bescherming
-      BIND("in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
+      BIND(
+        "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        AS ?patReden
+      )
 
       BIND(REGEX(?omslLc, ?patUitsl) AS ?hU)
       BIND(REGEX(?omslLc, ?patRel)   AS ?hR)
