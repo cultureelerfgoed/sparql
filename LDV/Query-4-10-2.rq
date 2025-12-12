@@ -1,16 +1,18 @@
-#+ name: Query-4-10
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
+#+ name: Query-4-10-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
 PREFIX schema:<https://schema.org/>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
 PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+PREFIX text:  <http://jena.apache.org/text#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 
 SELECT DISTINCT
   (IRI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
   (GROUP_CONCAT(DISTINCT ?functies; SEPARATOR=" | ") AS ?functies_)
-  ?literal
+  ?literal      # snippet met highlight (of fallback)
   ?monumentaard
   ?heeftUitsluiting
   ?heeftRelatieveWaardering
@@ -32,14 +34,11 @@ WHERE {
     BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
   }
 
-  # voor compatibiliteit met de oude query: literal = omschrijving
-  BIND(?omschrijving AS ?literal)
-
-  # Omschrijving in lowercase
+  # omschrijving in lowercase (voor prefilter + regex)
   BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
   ########################################################
-  # 1) zoektermen als VALUES (snelle voorfilter)
+  # 1) PREFILTER: EXACT ALS UW OUDE QUERY
   ########################################################
 
   VALUES ?zoekterm {
@@ -56,11 +55,10 @@ WHERE {
     "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
   }
 
-  # eerst eenvoudige substring-filter (sneller dan regex op alles)
   FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
   ########################################################
-  # 2) classificatie via regex (Virtuoso-proof)
+  # 2) CLASSIFICATIE: UW OORSPRONKELIJKE REGEX
   ########################################################
 
   BIND(
@@ -82,10 +80,9 @@ WHERE {
   BIND(REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering)
   BIND(REGEX(?omslLc, ?patReden) AS ?heeftReden)
 
-  # minstens één van de drie booleans moet waar zijn
   FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
 
-  # primaire categorie (vaste prioriteit)
+  # primaire categorie
   BIND(
     IF(?heeftUitsluiting, "uitsluiting of beperking",
       IF(?heeftRelatieveWaardering, "relatieve waardering",
@@ -94,10 +91,10 @@ WHERE {
     ) AS ?primaireCategorie
   )
 
-  # uitsluiten van een bekende ruisformulering
+  # ruisformulering uitsluiten
   FILTER(!REGEX(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
 
-  # alle geldige categorieën in één veld
+  # alle categorieën in één veld
   BIND(CONCAT(
     IF(?heeftUitsluiting,         "uitsluiting of beperking|",              ""),
     IF(?heeftRelatieveWaardering, "relatieve waardering|",                  ""),
@@ -105,6 +102,24 @@ WHERE {
   ) AS ?_cats)
 
   BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
+
+  ########################################################
+  # 3) HIGHLIGHT-SNIPPET (OPTIONEEL, GEEN FILTER)
+  ########################################################
+
+  OPTIONAL {
+    (?choi ?sc ?hlRaw) text:query (
+      schema:description
+      '"niet beschermd" OR "niet-beschermd" OR "niet van waarde" OR "geen monumentale waarde" OR "ondergeschikte waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "onderdeel van" OR "in samenhang met" OR "niet meebeschermd" OR "niet-meebeschermd" OR "niet in aanmerking" OR "buiten bescherming" OR "niet nader te beschermen" OR "ondergeschikte betekenis" OR "sterk gewijzigd" OR "ingrijpend gewijzigd" OR "aanzienlijk gewijzigd"'
+      'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
+    ) .
+  }
+
+  # fallback: als om wat voor reden dan ook geen highlight binnenkomt
+  BIND(
+    COALESCE(?hlRaw, ?omschrijving)  # desnoods volle tekst, maar hits blijven gelijk
+    AS ?literal
+  )
 }
 GROUP BY
   ?monumentenregister
