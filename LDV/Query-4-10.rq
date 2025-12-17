@@ -42,19 +42,46 @@ WHERE {
   # 1) zoektermen als VALUES (snelle voorfilter)
   ########################################################
 
-  VALUES ?zoekterm {
-    "niet beschermd" "niet-beschermd" "niet van waarde"
-    "geen monumentale waarde" "ondergeschikte waarde"
-    "geen onderdeel" "uitgesloten" "uitgezonderd"
-    "niet opgenomen" "niet onder bescherming"
-    "ondergeschikt" "van ondergeschikt belang" "secundair"
-    "onderdeel van" "in samenhang met"
-    "niet meebeschermd" "niet-meebeschermd"
-    "niet in aanmerking" "buiten bescherming"
-    "niet nader te beschermen"
-    "ondergeschikte betekenis"
-    "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
-  }
+VALUES ?zoekterm {
+  ########################################################
+  # 1) Uitsluiting of beperking
+  ########################################################
+  "niet beschermd"
+  "niet-beschermd"
+  "niet van waarde"
+  "geen onderdeel"
+  "uitgesloten"
+  "uitgezonderd"
+  "niet opgenomen"
+  "niet onder bescherming"
+  "geen monumentale waarde"
+  "niet meebeschermd"
+  "niet-meebeschermd"
+  "niet in aanmerking"
+  "buiten bescherming"
+  "niet nader te beschermen"
+
+  ########################################################
+  # 2) Relatieve waardering
+  ########################################################
+  "ondergeschikt"
+  "van ondergeschikt belang"
+  "ondergeschikte waarde"
+  "ondergeschikte betekenis"
+  "secundair"
+  "geringe waarde"
+  "weinig waarde"
+  "storend"
+
+  ########################################################
+  # 3) Verwijzing naar reden van bescherming
+  ########################################################
+  "onderdeel van"
+  "in samenhang met"
+  "aanmerking"
+  "aanmerking voor"
+}
+
 
   # eerst eenvoudige substring-filter (sneller dan regex op alles)
   FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
@@ -73,10 +100,11 @@ WHERE {
     AS ?patRel
   )
 
-  BIND(
-    "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
-    AS ?patReden
-  )
+BIND(
+  "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+  AS ?patReden
+)
+
 
   BIND(REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting)
   BIND(REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering)

@@ -1,153 +1,90 @@
 #+ name: Query-2-met-constatering-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
 
-prefix schema:<https://schema.org/>
-prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix edm:   <http://www.europeana.eu/schemas/edm/>
-prefix dc:    <http://purl.org/dc/elements/1.1/>
+PREFIX schema:<https://schema.org/>
 
-select distinct
-  (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-  (group_concat(distinct ?functies; separator=" | ") as ?functies_)
-  ?literal
-  ?monumentaard
+SELECT DISTINCT
+  ?choi
+  ?omschrijving
   ?heeftUitsluiting
   ?heeftRelatieveWaardering
   ?heeftReden
   ?heeftConstatering
   ?primaireCategorie
   ?categorieen
+WHERE {
+  ?choi schema:description ?omschrijving .
+  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-where {
-
-  ########################################################
-  # Basisgegevens (zelfde als 12a)
-  ########################################################
-
-  ?choi schema:description      ?omschrijving ;
-        schema:identifier       ?rijksmonumentnummer ;
-        schema:category         ?monumentaard .
-
-  optional {
-    ?choi schema:additionalType ?functie .
-    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
-  }
-
-  # voor compatibiliteit met de oude query: literal = omschrijving
-  bind(?omschrijving as ?literal)
-
-  # Omschrijving in lowercase
-  bind(lcase(str(?omschrijving)) as ?omslLc)
-
-  ########################################################
-  # 1) zoektermen als VALUES, in plaats van text:query
-  #    (zelfde lijst als in 12a)
-  ########################################################
-
-  values ?zoekterm {
+  VALUES ?zoekterm {
     "niet beschermd" "niet-beschermd" "niet van waarde"
-    "geen monumentale waarde" "ondergeschikte waarde"
-    "geen onderdeel" "uitgesloten" "uitgezonderd"
+    "geen monumentale waarde" "geen onderdeel"
+    "uitgesloten" "uitgezonderd"
     "niet opgenomen" "niet onder bescherming"
-    "ondergeschikt" "van ondergeschikt belang" "secundair"
-    "onderdeel van" "in samenhang met"
     "niet meebeschermd" "niet-meebeschermd"
     "niet in aanmerking" "buiten bescherming"
     "niet nader te beschermen"
 
-    # constatering / wijziging
-    "niet oorspronkelijk" "niet originele" "niet origineel"
-    "in recente tijd" "van latere datum" "van recente datum"
+    "ondergeschikt" "van ondergeschikt belang"
+    "ondergeschikte waarde" "ondergeschikte betekenis"
+    "secundair" "geringe waarde" "weinig waarde" "storend"
+
+    "onderdeel van" "in samenhang met"
+    "aanmerking" "aanmerking voor"
+
     "verbouwd" "vernieuwd" "vervangen"
     "gereconstrueerd" "gerestaureerd" "gerenoveerd"
     "modern" "moderne" "recent" "recente"
-
-    "ondergeschikte betekenis"
+    "van latere datum" "van recente datum" "in recente tijd"
+    "niet oorspronkelijk" "niet origineel"
+    "niet meer in oorspronkelijke staat"
     "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
   }
+  FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
-  # snelle prefilter op substring
-  filter( contains(?omslLc, lcase(?zoekterm)) )
+  BIND(
+    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|\\buitgesloten\\b|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen|geen\\s+monumentale\\s+waarde"
+    AS ?patUitsl
+  )
+  BIND(
+    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+waarde|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|weinig\\s+waarde|van\\s+weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b"
+    AS ?patRel
+  )
+  BIND(
+    "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+    AS ?patReden
+  )
+  BIND(
+    "\\bverbouw(d|d[e]?|ing)?\\b|\\bvernieuwd(e)?\\b|\\bvervangen(e)?\\b|\\bgereconstrueerd(e)?\\b|\\bgerestaureerd(e)?\\b|\\bgerenoveerd(e)?\\b|\\bmodern(e)?\\b|\\brecent(e|ere)?\\b|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|niet\\s+meer\\s+in\\s+oorspronkelijke?\\s+staat|in\\s+recente\\s+tijd|van\\s+latere\\s+datum|van\\s+recente\\s+datum|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+    AS ?patConst
+  )
+
+  BIND(REGEX(?omslLc, ?patUitsl)  AS ?heeftUitsluiting)
+  BIND(REGEX(?omslLc, ?patRel)    AS ?heeftRelatieveWaardering)
+  BIND(REGEX(?omslLc, ?patReden)  AS ?heeftReden)
+  BIND(REGEX(?omslLc, ?patConst)  AS ?heeftConstatering)
+
+  FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden || ?heeftConstatering)
+  FILTER(!REGEX(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
 
   ########################################################
-  # 2) classificatie via regex – met constatering
-  #    (zelfde patronen als in 12a)
+  # 12b: alleen uitsluiting in de selectie
   ########################################################
+  FILTER(?heeftUitsluiting)
 
-  # Uitsluiting of beperking
-  bind(
-    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
-    as ?patUitsl
-  )
-
-  # Relatieve waardering (zonder pure constateringen)
-  bind(
-    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
-    as ?patRel
-  )
-
-  # Verwijzing naar reden van bescherming (bewust smal)
-  bind(
-    "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
-    as ?patReden
-  )
-
-  # Constatering: feitelijke wijziging of latere toevoeging
-  bind(
-    "\\bverbouw(d|d[e]?|ing)?\\b|\\bvernieuwd(e)?\\b|\\bvervangen(e)?\\b|\\bgereconstrueerd(e)?\\b|\\bgerestaureerd(e)?\\b|\\bgerenoveerd(e)?\\b|\\bmodern(e)?\\b|\\brecent(e|ere)?\\b|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|niet\\s+meer\\s+in\\s+oorspronkelijke?\\s+staat|in\\s+recente\\s+tijd|van\\s+latere\\s+datum|van\\s+recente\\s+datum"
-    as ?patConst
-  )
-
-  bind( regex(?omslLc, ?patUitsl)  as ?heeftUitsluiting )
-  bind( regex(?omslLc, ?patRel)    as ?heeftRelatieveWaardering )
-  bind( regex(?omslLc, ?patReden)  as ?heeftReden )
-  bind( regex(?omslLc, ?patConst)  as ?heeftConstatering )
-
-  # minstens één van de vier booleans moet waar zijn
-  filter(
-    ?heeftUitsluiting ||
-    ?heeftRelatieveWaardering ||
-    ?heeftReden ||
-    ?heeftConstatering
-  )
-
-  # EXTRA: Query 12b – alleen omschrijvingen met uitsluiting of beperking
-  filter( ?heeftUitsluiting )
-
-  # Primaire categorie: alleen gebaseerd op de drie hoofdgroepen
-  bind(
-    if(?heeftUitsluiting, "uitsluiting of beperking",
-      if(?heeftRelatieveWaardering, "relatieve waardering",
-        if(?heeftReden, "verwijzing naar reden van bescherming", "")
+  BIND(
+    IF(?heeftUitsluiting, "uitsluiting of beperking",
+      IF(?heeftRelatieveWaardering, "relatieve waardering",
+        IF(?heeftReden, "verwijzing naar reden van bescherming", "")
       )
-    ) as ?primaireCategorie
+    ) AS ?primaireCategorie
   )
 
-  # bekende ruis uitsluiten
-  filter( !regex(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van") )
-
-  # alle geldige categorieën in één veld (incl. constatering)
-  bind(concat(
-    if(?heeftUitsluiting,         "uitsluiting of beperking|",              ""),
-    if(?heeftRelatieveWaardering, "relatieve waardering|",                  ""),
-    if(?heeftReden,               "verwijzing naar reden van bescherming|", ""),
-    if(?heeftConstatering,        "constatering|",                          "")
-  ) as ?_cats)
-
-  bind(replace(?_cats, "\\|$", "") as ?categorieen)
+  BIND(CONCAT(
+    IF(?heeftUitsluiting,         "uitsluiting of beperking|",              ""),
+    IF(?heeftRelatieveWaardering, "relatieve waardering|",                  ""),
+    IF(?heeftReden,               "verwijzing naar reden van bescherming|", ""),
+    IF(?heeftConstatering,        "constatering|",                          "")
+  ) AS ?_cats)
+  BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
 }
-
-group by
-  ?monumentenregister
-  ?rijksmonumentnummer
-  ?literal
-  ?monumentaard
-  ?heeftUitsluiting
-  ?heeftRelatieveWaardering
-  ?heeftReden
-  ?heeftConstatering
-  ?primaireCategorie
-  ?categorieen
-
-order by ?heeftConstatering

@@ -5,13 +5,12 @@ PREFIX schema:<https://schema.org/>
 
 SELECT
   ?provincie
-  (SUM(?isReden)      AS ?aantalReden)
-  (SUM(?isRelatief)   AS ?aantalRelatief)
+  (SUM(?isReden)       AS ?aantalReden)
+  (SUM(?isRelatief)    AS ?aantalRelatief)
   (SUM(?isUitsluiting) AS ?aantalUitsluiting)
   (SUM(?isReden + ?isRelatief + ?isUitsluiting) AS ?totaal)
 WHERE {
 
-  # 1. Eerst per provincie + primaireCategorie tellen
   {
     SELECT
       ?provincie
@@ -22,31 +21,46 @@ WHERE {
             schema:addressRegion ?provincie .
       BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
+      ########################################
+      # VALUES (Project 33: Query 2-schoon)
+      ########################################
       VALUES ?zoekterm {
-        "niet beschermd" "niet-beschermd" "niet van waarde" "geen monumentale waarde"
-        "ondergeschikte waarde" "geen onderdeel" "uitgesloten" "uitgezonderd"
-        "niet opgenomen" "niet onder bescherming" "ondergeschikt"
-        "van ondergeschikt belang" "secundair" "onderdeel van" "in samenhang met"
-        "niet meebeschermd" "niet-meebeschermd" "niet in aanmerking"
-        "buiten bescherming" "niet nader te beschermen" "niet oorspronkelijk"
-        "niet originele" "niet origineel" "in recente tijd" "ondergeschikte betekenis"
-        "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
+        # Uitsluiting of beperking
+        "niet beschermd" "niet-beschermd" "niet van waarde"
+        "geen monumentale waarde" "geen onderdeel"
+        "uitgesloten" "uitgezonderd"
+        "niet opgenomen" "niet onder bescherming"
+        "niet meebeschermd" "niet-meebeschermd"
+        "niet in aanmerking" "buiten bescherming"
+        "niet nader te beschermen"
+
+        # Relatieve waardering
+        "ondergeschikt" "van ondergeschikt belang"
+        "ondergeschikte waarde" "ondergeschikte betekenis"
+        "secundair" "geringe waarde" "weinig waarde" "storend"
+
+        # Verwijzing naar reden van bescherming
+        "onderdeel van" "in samenhang met"
+        "aanmerking" "aanmerking voor"
       }
 
       FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
+      ########################################
+      # Patronen (Project 33-conform)
+      ########################################
       BIND(
-        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+        "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|\\buitgesloten\\b|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen|geen\\s+monumentale\\s+waarde"
         AS ?patUitsl
       )
 
       BIND(
-        "\\bondergeschikt(e)?\\b|\\bmodern(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|niet\\s+oorspronkelijk(e)?|niet\\s+origineel(e)?|in\\s+recente\\s+tijd|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+        "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+waarde|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|weinig\\s+waarde|van\\s+weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b"
         AS ?patRel
       )
 
       BIND(
-        "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+        "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
         AS ?patReden
       )
 
@@ -55,6 +69,9 @@ WHERE {
       BIND(REGEX(?omslLc, ?patReden) AS ?heeftReden)
 
       FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
+
+      # (optioneel) ruisfilter
+      FILTER(!REGEX(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
 
       BIND(
         IF(?heeftUitsluiting, "uitsluiting of beperking",
@@ -67,7 +84,6 @@ WHERE {
     GROUP BY ?provincie ?primaireCategorie
   }
 
-  # 2. Per rij bepalen in welke kolom het hoort
   BIND(IF(?primaireCategorie = "verwijzing naar reden van bescherming", ?aantal, 0) AS ?isReden)
   BIND(IF(?primaireCategorie = "relatieve waardering", ?aantal, 0)                   AS ?isRelatief)
   BIND(IF(?primaireCategorie = "uitsluiting of beperking", ?aantal, 0)               AS ?isUitsluiting)

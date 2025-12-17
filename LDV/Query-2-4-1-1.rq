@@ -12,45 +12,56 @@ WHERE {
   ?choi schema:description ?omschrijving .
   BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
+  ########################################
+  # VALUES – Query 2-schoon
+  ########################################
   VALUES ?zoekterm {
+    # Uitsluiting of beperking
     "niet beschermd" "niet-beschermd" "niet van waarde"
-    "geen monumentale waarde" "ondergeschikte waarde"
-    "geen onderdeel" "uitgesloten" "uitgezonderd"
+    "geen monumentale waarde" "geen onderdeel"
+    "uitgesloten" "uitgezonderd"
     "niet opgenomen" "niet onder bescherming"
-    "ondergeschikt" "van ondergeschikt belang" "secundair"
-    "onderdeel van" "in samenhang met"
     "niet meebeschermd" "niet-meebeschermd"
     "niet in aanmerking" "buiten bescherming"
     "niet nader te beschermen"
-    "ondergeschikte betekenis"
-    "sterk gewijzigd" "ingrijpend gewijzigd" "aanzienlijk gewijzigd"
+
+    # Relatieve waardering
+    "ondergeschikt" "van ondergeschikt belang"
+    "ondergeschikte waarde" "ondergeschikte betekenis"
+    "secundair" "geringe waarde" "weinig waarde" "storend"
+
+    # Verwijzing naar reden van bescherming
+    "onderdeel van" "in samenhang met"
+    "aanmerking" "aanmerking voor"
   }
 
   FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
-  # Uitsluiting of beperking
+  ########################################
+  # Patronen
+  ########################################
   BIND(
-    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|\\buitgesloten\\b|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen"
+    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|\\buitgesloten\\b|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen|geen\\s+monumentale\\s+waarde"
     AS ?patUitsl
   )
 
-  # Relatieve waardering (alle constateringstermen verwijderd!)
   BIND(
-    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|van\\s+weinig\\s+waarde|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b|geen\\s+monumentale\\s+waarde|\\b(sterk|ingrijpend|aanzienlijk)\\s+gewijzigd\\b"
+    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+waarde|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|weinig\\s+waarde|van\\s+weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b"
     AS ?patRel
   )
 
-  # Verwijzing naar reden van bescherming
   BIND(
-    "in\\s+samenhang\\s+met\\s+de\\s+bescherming|aanmerking\\s+voor|\\baanmerking\\b"
+    "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
     AS ?patReden
   )
 
+  ########################################
+  # Detectie
+  ########################################
   BIND(REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting)
   BIND(REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering)
   BIND(REGEX(?omslLc, ?patReden) AS ?heeftReden)
 
   FILTER(!REGEX(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
-
   FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
 }
