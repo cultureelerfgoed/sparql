@@ -1,15 +1,13 @@
 #+ name: Query-2-4
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
 
-PREFIX text:  <http://jena.apache.org/text#>
-PREFIX schema:<https://schema.org/>
-PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
-PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+prefix text:  <http://jena.apache.org/text#>
+prefix schema:<https://schema.org/>
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix geo:   <http://www.opengis.net/ont/geosparql#>
 
-SELECT DISTINCT
-  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+select distinct
+  (uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
   ?provincie
   ?functies
   ?adres
@@ -22,66 +20,116 @@ SELECT DISTINCT
   ?heeftReden
   ?primaireCategorie
   ?categorieen
-  ?widget
-WHERE {
-  # Full-text zoeken op ALLE begrippen met highlight (één stringliteral!)
+  ?geometrieLabel
+  ?geometrie
+  ?geometrieColor
+where {
+
+  ############################################################
+  # 1) Jena Text: één stringliteral + highlight
+  #    Robuust: AND + frase + frase~slop + (waar zinvol) wildcard/fuzzy
+  ############################################################
   (?choi ?sc ?literal) text:query (
     schema:description
-    '("niet beschermd" OR "niet van waarde" OR "geen onderdeel" OR uitgesloten OR uitgezonderd OR "niet opgenomen" OR "niet onder bescherming" OR ondergeschikt OR "van ondergeschikt belang" OR secundair OR "weinig waarde" OR "onderdeel van" OR "in samenhang met" OR gering OR geringe OR geringere OR "van geringe waarde" OR storend OR "niet meebeschermd" OR uitgesloten OR afgebroken OR "niet in aanmerking" OR "aanmerking voor" OR aanmerking)'
+    '(("niet" AND "beschermd") OR "niet beschermd" OR "niet beschermd"~3 OR "niet-beschermd" OR "niet-beschermd"~1 OR ("niet" AND "van" AND "waarde") OR "niet van waarde" OR "niet van waarde"~3 OR ("geen" AND "monumentale" AND "waarde") OR "geen monumentale waarde" OR "geen monumentale waarde"~4 OR ("geen" AND "onderdeel") OR "geen onderdeel" OR "geen onderdeel"~3 OR uitgesloten OR uitgesloten~1 OR uitgezonderd OR uitgezonderd~1 OR ("niet" AND "opgenomen") OR "niet opgenomen" OR "niet opgenomen"~3 OR ("niet" AND "onder" AND "bescherming") OR "niet onder bescherming" OR "niet onder bescherming"~4 OR ("niet" AND "meebeschermd") OR "niet meebeschermd" OR "niet meebeschermd"~3 OR "niet-meebeschermd" OR "niet-meebeschermd"~1 OR ("niet" AND "in" AND "aanmerking") OR "niet in aanmerking" OR "niet in aanmerking"~4 OR ("buiten" AND "bescherming") OR "buiten bescherming" OR "buiten bescherming"~3 OR ("niet" AND "nader" AND "beschermen") OR "niet nader te beschermen" OR "niet nader te beschermen"~5 OR ondergeschikt OR ondergeschikt* OR ("van" AND "ondergeschikt" AND "belang") OR "van ondergeschikt belang" OR "van ondergeschikt belang"~4 OR ("ondergeschikte" AND "waarde") OR "ondergeschikte waarde" OR "ondergeschikte waarde"~3 OR ("ondergeschikte" AND "betekenis") OR "ondergeschikte betekenis" OR "ondergeschikte betekenis"~3 OR secundair OR secundair* OR ("geringe" AND "waarde") OR "geringe waarde" OR "geringe waarde"~3 OR ("weinig" AND "waarde") OR "weinig waarde" OR "weinig waarde"~3 OR storend OR storend~1 OR ("onderdeel" AND "van") OR "onderdeel van" OR "onderdeel van"~3 OR ("in" AND "samenhang" AND "met") OR "in samenhang met" OR "in samenhang met"~4 OR aanmerking OR aanmerking~1 OR "aanmerking voor" OR "aanmerking voor"~3)'
     'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
   ) .
 
-  # Basisgegevens
-  ?choi schema:description      ?omschrijving ;
-        schema:identifier       ?rijksmonumentnummer ;
-        schema:addressLocality  ?plaats ;
-        schema:category         ?monumentaard .
-  OPTIONAL {
+  ############################################################
+  # 2) Basisgegevens
+  ############################################################
+  ?choi schema:description ?omschrijving ;
+        schema:identifier  ?rijksmonumentnummer ;
+        schema:category    ?monumentaard .
+  ?choi geo:asWKT ?geometrie .
+
+  optional {
     ?choi schema:additionalType ?functie .
-    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+    bind(replace(?functie, "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
   }
-  OPTIONAL { ?choi schema:address       ?adres . }
-  OPTIONAL { ?choi schema:name          ?naam  . }
-  OPTIONAL { ?choi schema:addressRegion ?provincie . }
+  optional { ?choi schema:address         ?adres     . }
+  optional { ?choi schema:name            ?naam      . }
+  optional { ?choi schema:addressLocality ?plaats    . }
+  optional { ?choi schema:addressRegion   ?provincie . }
 
-  # Classificatie (zonder 'vanwege')
-  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
+  ############################################################
+  # 3) Classificatie (Project 33: Query 2-schoon)
+  ############################################################
+  bind(lcase(str(?omschrijving)) as ?omslLc)
 
-  BIND("niet\\s+beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|uitgesloten|niet\\s+meebeschermd|niet\\s+in\\s+aanmerking|\\bafgebroken\\b" AS ?patUitsl)
-  BIND("\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|\\bsecundair(e)?\\b|weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bstorend\\b" AS ?patRel)
-  BIND("\\bonderdeel\\s+van\\b|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b" AS ?patReden)
-
-  BIND( REGEX(?omslLc, ?patUitsl) AS ?heeftUitsluiting )
-  BIND( REGEX(?omslLc, ?patRel)   AS ?heeftRelatieveWaardering )
-  BIND( REGEX(?omslLc, ?patReden) AS ?heeftReden )
-
-  BIND(
-    IF(?heeftUitsluiting, "uitsluiting of beperking",
-      IF(?heeftRelatieveWaardering, "relatieve waardering",
-        IF(?heeftReden, "verwijzing naar reden van bescherming", "")
-      )
-    ) AS ?primaireCategorie
+  bind(
+    "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|\\buitgesloten\\b|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen|geen\\s+monumentale\\s+waarde"
+    as ?patUitsl
+  )
+  bind(
+    "\\bondergeschikt(e)?\\b|van\\s+ondergeschikt\\s+belang|ondergeschikte\\s+waarde|ondergeschikte\\s+betekenis|\\bsecundair(e)?\\b|weinig\\s+waarde|van\\s+weinig\\s+waarde|\\bgering(e|ere)?\\b|van\\s+geringe\\s+waarde|\\bgeringe\\s+waarde\\b|\\bstorend\\b"
+    as ?patRel
+  )
+  bind(
+    "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+    as ?patReden
   )
 
-  BIND(CONCAT(
-        IF(?heeftUitsluiting, "uitsluiting of beperking|", ""),
-        IF(?heeftRelatieveWaardering, "relatieve waardering|", ""),
-        IF(?heeftReden, "verwijzing naar reden van bescherming|", "")
-      ) AS ?_cats)
-  BIND(REPLACE(?_cats, "\\|$", "") AS ?categorieen)
+  bind(regex(?omslLc, ?patUitsl) as ?heeftUitsluiting)
+  bind(regex(?omslLc, ?patRel)   as ?heeftRelatieveWaardering)
+  bind(regex(?omslLc, ?patReden) as ?heeftReden)
 
-  BIND(STRDT(
-    CONCAT(
-      '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', STR(?rijksmonumentnummer), '" target="_blank">', STR(?rijksmonumentnummer), '</a></p>',
-      '<p>monumentaard: ', COALESCE(STR(?monumentaard), '-'), '</p>',
-      '<p>naam: ', COALESCE(STR(?naam), '-'), '</p>',
-      '<p>functie: ', COALESCE(STR(?functies), '-'), '</p>',
-      '<p>adres: ', COALESCE(STR(?adres), '-'), '</p>',
-      '<p>plaats: ', COALESCE(STR(?plaats), '-'), '</p>',
-      '<p>provincie: ', COALESCE(STR(?provincie), '-'), '</p>',
-      '<p><b>categorieën:</b> ', COALESCE(STR(?categorieen), '-'), '</p>',
-      '<p><b>gevonden in omschrijving:</b><br>', STR(?literal), '</p>'
+  # ruisfilter (zelfde als Query 2)
+  filter(!regex(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
+
+  # alleen records met minimaal één categorie (voorkomt "text-hit maar geen match" ruis)
+  filter(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
+
+  bind(
+    if(?heeftUitsluiting, "uitsluiting of beperking",
+      if(?heeftRelatieveWaardering, "relatieve waardering",
+        if(?heeftReden, "verwijzing naar reden van bescherming", "")
+      )
+    ) as ?primaireCategorie
+  )
+
+  bind(concat(
+    if(?heeftUitsluiting, "uitsluiting of beperking|", ""),
+    if(?heeftRelatieveWaardering, "relatieve waardering|", ""),
+    if(?heeftReden, "verwijzing naar reden van bescherming|", "")
+  ) as ?_cats)
+  bind(replace(?_cats, "\\|$", "") as ?categorieen)
+
+  ############################################################
+  # 4) Kaartkleur volgens uw legenda
+  #    - exact de 2-combinaties krijgen een mix-kleur
+  #    - alle 3 waar (of anders) wordt grey
+  ############################################################
+  bind(
+    if(?heeftUitsluiting && ?heeftRelatieveWaardering && !?heeftReden, "green",
+      if(?heeftRelatieveWaardering && ?heeftReden && !?heeftUitsluiting, "purple",
+        if(?heeftUitsluiting && ?heeftReden && !?heeftRelatieveWaardering, "black",
+          if(?heeftUitsluiting && !?heeftRelatieveWaardering && !?heeftReden, "red",
+            if(?heeftRelatieveWaardering && !?heeftUitsluiting && !?heeftReden, "blue",
+              if(?heeftReden && !?heeftUitsluiting && !?heeftRelatieveWaardering, "orange",
+                "grey"
+              )
+            )
+          )
+        )
+      )
+    ) as ?geometrieColor
+  )
+
+  ############################################################
+  # 5) Popup
+  ############################################################
+  bind(strdt(
+    concat(
+      '<p><b>Rijksmonument: </b><a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/', str(?rijksmonumentnummer), '" target="_blank">', str(?rijksmonumentnummer), '</a></p>',
+      '<p>monumentaard: ', coalesce(str(?monumentaard), '-'), '</p>',
+      '<p>naam: ', coalesce(str(?naam), '-'), '</p>',
+      '<p>functie: ', coalesce(str(?functies), '-'), '</p>',
+      '<p>adres: ', coalesce(str(?adres), '-'), '</p>',
+      '<p>plaats: ', coalesce(str(?plaats), '-'), '</p>',
+      '<p>provincie: ', coalesce(str(?provincie), '-'), '</p>',
+      '<p><b>categorieën:</b> ', coalesce(str(?categorieen), '-'), '</p>',
+      '<p><b>gevonden in omschrijving:</b><br>', str(?literal), '</p>'
     ),
-    rdf:HTML) AS ?widget)
+    rdf:HTML) as ?geometrieLabel)
 }
-LIMIT 500
