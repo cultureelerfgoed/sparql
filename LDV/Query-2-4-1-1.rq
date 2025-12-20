@@ -31,7 +31,7 @@ WHERE {
     "secundair" "geringe waarde" "weinig waarde" "storend"
 
     # Verwijzing naar reden van bescherming
-    "onderdeel van" "in samenhang met"
+    "in samenhang met"
     "aanmerking" "aanmerking voor"
   }
 
@@ -51,7 +51,7 @@ WHERE {
   )
 
   BIND(
-    "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+    "in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
     AS ?patReden
   )
 

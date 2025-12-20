@@ -76,7 +76,6 @@ VALUES ?zoekterm {
   ########################################################
   # 3) Verwijzing naar reden van bescherming
   ########################################################
-  "onderdeel van"
   "in samenhang met"
   "aanmerking"
   "aanmerking voor"
@@ -101,7 +100,7 @@ VALUES ?zoekterm {
   )
 
 BIND(
-  "onderdeel\\s+van|in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
+  "in\\s+samenhang\\s+met|aanmerking\\s+voor|\\baanmerking\\b"
   AS ?patReden
 )
 
