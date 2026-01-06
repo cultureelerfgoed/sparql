@@ -10,7 +10,6 @@ SELECT
   (SUM(?isUitsluiting) AS ?aantalUitsluiting)
   (SUM(?isReden + ?isRelatief + ?isUitsluiting) AS ?totaal)
 WHERE {
-
   {
     SELECT
       ?provincie
@@ -21,9 +20,7 @@ WHERE {
             schema:addressRegion ?provincie .
       BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
 
-      ########################################
-      # VALUES (Project 33: Query 2-schoon)
-      ########################################
+      # VALUES: maak dit 100% identiek aan uw (gefixte) Query 3
       VALUES ?zoekterm {
         # Uitsluiting of beperking
         "niet beschermd" "niet-beschermd" "niet van waarde"
@@ -46,9 +43,7 @@ WHERE {
 
       FILTER(CONTAINS(?omslLc, LCASE(?zoekterm)))
 
-      ########################################
-      # Patronen (Project 33-conform)
-      ########################################
+      # Patronen: idem, één set regels
       BIND(
         "niet-?\\s*beschermd|niet\\s+van\\s+waarde|geen\\s+onderdeel|uitgezonderd|\\buitgesloten\\b|niet\\s+opgenomen|niet\\s+onder\\s+bescherming|niet-?\\s*meebeschermd|niet\\s+in\\s+aanmerking|buiten\\s+bescherming|niet\\s+nader\\s+te\\s+beschermen|geen\\s+monumentale\\s+waarde"
         AS ?patUitsl
@@ -70,7 +65,7 @@ WHERE {
 
       FILTER(?heeftUitsluiting || ?heeftRelatieveWaardering || ?heeftReden)
 
-      # (optioneel) ruisfilter
+      # ruisfilter
       FILTER(!REGEX(?omslLc, "van\\s+belang\\s+als\\s+onderdeel\\s+van"))
 
       BIND(
