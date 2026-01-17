@@ -15,7 +15,7 @@ select distinct ?datumInschrijving (group_concat(distinct ?fullAddress; separato
 where {
   graph graph:instanties-rce {
     ?cho a ceo:Rijksmonument.
-    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
+    ?cho ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864>.
     ?cho ceo:rijksmonumentnummer ?rijksmonumentnummer .
     ?cho ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
     ?cho ceo:heeftBasisregistratieRelatie ?brr.

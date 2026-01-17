@@ -1,0 +1,57 @@
+#+ name: diff-cho--dagelijkse-vergelijking
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/diff-cho/sparql
+
+PREFIX dct:  <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX ceo:  <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+SELECT
+  ?item
+  (COALESCE(?count_today, 0)     AS ?vandaag)
+  (COALESCE(?count_yesterday, 0) AS ?gisteren)
+  (COALESCE(?count_today, 0) - COALESCE(?count_yesterday, 0) AS ?verschil)
+WHERE {
+
+  # 1. Bepaal automatisch vandaag en gisteren
+  {
+    SELECT ?today ?yesterday
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?today dct:date ?datum ;
+               prov:wasDerivedFrom ?yesterday .
+      }
+    }
+    ORDER BY DESC(?datum)
+    LIMIT 1
+  }
+
+  # 2. Verzamel alle items die in een van beide snapshots voorkomen
+  {
+    SELECT DISTINCT ?item
+    WHERE {
+      {
+        GRAPH ?today { ?item ceo:aantalInstanties ?n . }
+      }
+      UNION
+      {
+        GRAPH ?yesterday { ?item ceo:aantalInstanties ?n . }
+      }
+    }
+  }
+
+  # 3. Haal tellingen op (elk exact één keer gebonden)
+  OPTIONAL {
+    GRAPH ?today {
+      ?item ceo:aantalInstanties ?count_today .
+    }
+  }
+
+  OPTIONAL {
+    GRAPH ?yesterday {
+      ?item ceo:aantalInstanties ?count_yesterday .
+    }
+  }
+}
+ORDER BY DESC(ABS(
+  COALESCE(?count_today, 0) - COALESCE(?count_yesterday, 0)
+))

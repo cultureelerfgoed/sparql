@@ -1,0 +1,57 @@
+#+ name: RM-basisdata-geo
+#+ description: Rijksmonumenten met basisdata, inclusief geo-coordinaten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
+prefix owms: <http://standaarden.overheid.nl/owms/terms/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+select distinct ?rijksmonument ?rijksmonumentnummer ?datumInschrijving ?naam ?adres ?woonplaatsnaam ?provincie ?geo ?functie ?omschrijving
+
+
+where
+{
+  graph graph:instanties-rce {
+    ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
+    optional {
+      ?rijksmonument ceo:heeftOmschrijving ?omschrijving1 .
+      ?omschrijving1 ceo:omschrijving ?omschrijving  ;
+        ceo:formeelStandpunt "1"^^xsd:boolean.
+    }
+    optional {
+      ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
+    }
+    optional {
+      ?rijksmonument ceo:heeftNaam/ceo:naam ?naam.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:volledigAdres ?adres.
+    }
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie ?provincie.
+    }
+
+    optional {
+      ?rijksmonument ceo:heeftGeometrie/geo:asWKT ?geo .
+    }
+
+    optional {
+      ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?woonplaatsnaam.
+    }
+    optional {
+      ?rijksmonument ceo:heeftOmschrijving ?omschrijving_ .
+      ?omschrijving_ ceo:omschrijving ?omschrijving  ;
+        ceo:formeelStandpunt "1"^^xsd:boolean.
+    }
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functienaam.
+      ?functienaam skos:prefLabel ?functie .
+    }
+  }
+}

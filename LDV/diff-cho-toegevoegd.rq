@@ -1,0 +1,29 @@
+#+ name: diff-cho-toegevoegd
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/diff-cho/sparql
+
+PREFIX dct:  <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT (COUNT(*) AS ?toegevoegd)
+WHERE {
+  {
+    SELECT ?today ?yesterday
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?today dct:date ?datum ;
+               prov:wasDerivedFrom ?yesterday .
+      }
+    }
+    ORDER BY DESC(?datum)
+    LIMIT 1
+  }
+
+  GRAPH ?today {
+    ?s ?p ?o .
+  }
+  FILTER NOT EXISTS {
+    GRAPH ?yesterday {
+      ?s ?p ?o .
+    }
+  }
+}
