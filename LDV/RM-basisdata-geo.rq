@@ -1,5 +1,5 @@
 #+ name: RM-basisdata-geo
-#+ description: Rijksmonumenten met basisdata, inclusief geo-coordinaten
+#+ description: Rijksmonumenten met basisdata, inclusief geo-coordinaten, en afvoeringsdatum (waar relevant)
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
 prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
@@ -12,7 +12,7 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 prefix owms: <http://standaarden.overheid.nl/owms/terms/>
 prefix geo: <http://www.opengis.net/ont/geosparql#>
 
-select distinct ?rijksmonument ?rijksmonumentnummer ?datumInschrijving ?naam ?adres ?woonplaatsnaam ?provincie ?geo ?functie ?omschrijving
+select distinct ?rijksmonument ?rijksmonumentnummer ?datumInschrijving ?registratiedatum ?statusLabel ?naam ?adres ?woonplaatsnaam ?provincie ?geo ?functie ?omschrijving
 
 
 where
@@ -27,6 +27,11 @@ where
     optional {
       ?rijksmonument ceo:datumInschrijvingInMonumentenregister ?datumInschrijving.
     }
+    optional {
+      ?rijksmonument ceo:registratiedatum ?registratiedatum.
+    }
+    optional { ?rijksmonument ceo:heeftJuridischeStatus ?status.
+  ?status skos:prefLabel ?statusLabel. }
     optional {
       ?rijksmonument ceo:heeftNaam/ceo:naam ?naam.
     }
