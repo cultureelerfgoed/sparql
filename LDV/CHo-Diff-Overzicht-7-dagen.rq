@@ -1,0 +1,106 @@
+#+ name: CHo-Diff-Overzicht-7-dagen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/diff-cho/sparql
+
+PREFIX dct:  <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX diff: <https://linkeddata.cultureelerfgoed.nl/def/cho-diff#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+# Titel: DIFF CHO – verschillen over de laatste 4 dagen (per item)
+#
+# Wat doet deze query?
+# - Haalt de 4 meest recente diff-graphs op uit de index-graph (met OFFSET 0..3).
+# - Leest per diff-graph het diff:verschil per item.
+# - Zet de 4 verschillen naast elkaar.
+# - Toont alleen items waar minstens één dag een verschil heeft.
+#
+# Kolommen:
+# - diff_1 = nieuwste dag (bijv. 2026-01-19_2026-01-18)
+# - diff_2 = 1 dag ouder
+# - diff_3 = 2 dagen ouder
+# - diff_4 = 3 dagen ouder
+
+SELECT
+  ?item
+  ?datum_1 (COALESCE(?diff_1, 0) AS ?verschil_1)
+  ?datum_2 (COALESCE(?diff_2, 0) AS ?verschil_2)
+  ?datum_3 (COALESCE(?diff_3, 0) AS ?verschil_3)
+  ?datum_4 (COALESCE(?diff_4, 0) AS ?verschil_4)
+WHERE {
+  # 1) Nieuwste diff-graph
+  {
+    SELECT ?g1 ?datum_1
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?g1 dct:date ?datum_1 ;
+            prov:used ?snapshot .
+      }
+    }
+    ORDER BY DESC(?datum_1)
+    LIMIT 1
+    OFFSET 0
+  }
+
+  # 2) Eén dag ouder
+  OPTIONAL {
+    SELECT ?g2 ?datum_2
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?g2 dct:date ?datum_2 ;
+            prov:used ?snapshot .
+      }
+    }
+    ORDER BY DESC(?datum_2)
+    LIMIT 1
+    OFFSET 1
+  }
+
+  # 3) Twee dagen ouder
+  OPTIONAL {
+    SELECT ?g3 ?datum_3
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?g3 dct:date ?datum_3 ;
+            prov:used ?snapshot .
+      }
+    }
+    ORDER BY DESC(?datum_3)
+    LIMIT 1
+    OFFSET 2
+  }
+
+  # 4) Drie dagen ouder
+  OPTIONAL {
+    SELECT ?g4 ?datum_4
+    WHERE {
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/diff-cho/graph/index> {
+        ?g4 dct:date ?datum_4 ;
+            prov:used ?snapshot .
+      }
+    }
+    ORDER BY DESC(?datum_4)
+    LIMIT 1
+    OFFSET 3
+  }
+
+  # Lees verschillen uit de 4 diff-graphs
+  GRAPH ?g1 { ?item diff:verschil ?diff_1 . }
+  OPTIONAL { GRAPH ?g2 { ?item diff:verschil ?diff_2 . } }
+  OPTIONAL { GRAPH ?g3 { ?item diff:verschil ?diff_3 . } }
+  OPTIONAL { GRAPH ?g4 { ?item diff:verschil ?diff_4 . } }
+
+  # Alleen items met ten minste één wijziging
+  FILTER(
+    COALESCE(?diff_1, 0) != 0 ||
+    COALESCE(?diff_2, 0) != 0 ||
+    COALESCE(?diff_3, 0) != 0 ||
+    COALESCE(?diff_4, 0) != 0
+  )
+}
+ORDER BY DESC(
+  ABS(xsd:integer(COALESCE(?diff_1,0))) +
+  ABS(xsd:integer(COALESCE(?diff_2,0))) +
+  ABS(xsd:integer(COALESCE(?diff_3,0))) +
+  ABS(xsd:integer(COALESCE(?diff_4,0)))
+)
+LIMIT 200
