@@ -1,32 +1,20 @@
 #+ name: Query-6
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/services/gebedshuizen/sparql
+#+ description: Query om te zoeken of er een " ." in een tekst voor komt
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/joop-van-der-heiden/gebedshuizen/graphs/>
 PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
 
-SELECT distinct* WHERE {
-  ?reliGebouw ceox:heeftAdresgegevens/ceox:woonplaats ?woonplaats.
-  ?reliGebouw ceox:rijksmonumentnummer ?rmnr.
-  ?reliGebouw ceox:heeftNaam/ceox:naam ?naam.  
-  ?reliGebouw ceox:heeftGeometrie/wgs84:asWKT ?destination.
-  
-  { select ?rmnr ?eventMedia where { SERVICE <https://query.wikidata.org/sparql> {
-        ?item  wdt:P31 wd:Q16970 . 
-        ?item wdt:P359  ?rmnr 
-        ; wdt:P5775 ?eventMedia .
-      }}
-  }
-  
-     BIND(strdt(concat('<img src="',str(?eventMedia),'" style="max-width: 100px;">','</a>','</p>',"Titel: ",?naam,'</p>','</p>', "Rm: ",'<a href="https://monumentenregister.cultureelerfgoed.nl/monumenten/',uri(?rmnr),'" target="_blank">',str(?rmnr),'</a>'),rdf:HTML) AS ?widget)
+SELECT ?rm ?description (COUNT(?s) AS ?count)
+WHERE {
+  GRAPH graph:instanties-rce {
+  ?s ceo:heeftOmschrijving/ceo:omschrijving ?description.
+  ?s ceo:rijksmonumentnummer ?rm.
 
-} 
+    FILTER (
+      REGEX(?description, " \\.$", "i"))
+    }
+}
+GROUP BY ?rm ?description
+ORDER BY ?rm
