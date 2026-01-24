@@ -11,8 +11,8 @@ prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 select distinct 
   ?rijksmonument
   ?nummer
-  ?functielabel
-  (replace(?omschrijvingen, "\n", " ") as ?omschrijvingen_schoon)
+   (group_concat(distinct ?functiesLabel; separator=" | ") as ?gecombineerdeFuncties) 
+  ?omschrijvingen
 where
 {
   graph graph:instanties-rce {
@@ -24,9 +24,13 @@ where
 
     ?rijksmonument ceo:heeftJuridischeStatus ?status .
     ?status skos:prefLabel ?statusLabel.
-    ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functie.
-   ?functie skos:prefLabel ?functielabel.
+    ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie_.
+    ?functie_ ceo:heeftFunctieNaam ?functie.
+   ?functie skos:prefLabel ?functies.
+    ?functie_ ceo:formeelStandpunt "1"^^<http://www.w3.org/2001/XMLSchema#boolean> 
+        BIND(REPLACE(?functies, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functiesLabel)
 
     filter(strlen(?omschrijvingen) >= ?min && strlen(?omschrijvingen) <= ?max)
   }
 }
+GROUP By ?gecombineerdeFuncties  ?rijksmonument  ?nummer  ?omschrijvingen
