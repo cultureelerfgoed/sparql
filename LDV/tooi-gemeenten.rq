@@ -1,0 +1,32 @@
+#+ name: tooi-gemeenten
+#+ description: "gemeente": = "https://identifier.overheid.nl/tooi/id/gemeente/gm0003"
+#- "label" = "gemeente Appingedam"
+#- "gemeentecode" = "0003"
+#- "organisatiecode" = "gm0003"
+#- "officieleNaamExclSoort" = "Appingedam"
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+
+select distinct ?gemeente
+  ?label
+  ?gemeentecode
+  ?organisatiecode
+  ?officieleNaamExclSoort
+  ?owms
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/gemeenten> {
+    ?gemeente rdf:type          tooi:Gemeente ;
+      rdfs:label        ?label ;
+      tooi:gemeentecode ?gemeentecode ;
+      tooi:organisatiecode ?organisatiecode ;
+      tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
+      tooi:owmsId ?owms.
+    optional {
+      ?gemeente tooi:einddatum ?einddatum
+    }
+    filter (!bound(?einddatum))
+  }
+}

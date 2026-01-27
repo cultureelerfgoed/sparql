@@ -1,0 +1,32 @@
+#+ name: tooi-ministeries
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+
+select distinct
+  ?ministerie
+  ?label
+  ?organisatiecode
+  ?ministeriecode
+  ?officieleNaamExclSoort
+  ?afkorting
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/ministeries> {
+
+    ?ministerie
+      rdf:type                   tooi:Ministerie ;
+      rdfs:label                 ?label ;
+      tooi:organisatiecode       ?organisatiecode ;
+      tooi:ministeriecode        ?ministeriecode ;
+      tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
+      tooi:afkorting             ?afkorting ;
+      tooi:owmsId                ?owms .
+
+    # Sluit historische versies expliciet uit
+    FILTER NOT EXISTS {
+      ?ministerie rdf:type tooi:HistorischeVersie
+    }
+  }
+}

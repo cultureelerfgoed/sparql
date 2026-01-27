@@ -1,0 +1,42 @@
+#+ name: tooi-waterschappen
+#+ description: Per waterschap zijn onder andere de volgende velden beschikbaar:
+#- •	waterschap
+#- Bijvoorbeeld: https://identifier.overheid.nl/tooi/id/waterschap/ws0155
+#- •	label
+#- Bijvoorbeeld: waterschap Amstel, Gooi en Vecht
+#- •	organisatiecode
+#- Bijvoorbeeld: ws0155
+#- •	waterschapscode
+#- Bijvoorbeeld: 0155
+#- •	officieleNaamExclSoort
+#- Bijvoorbeeld: Amstel, Gooi en Vecht
+#- Opmerking over naamvarianten
+#- Voor sommige waterschappen komen meerdere URI’s voor, bijvoorbeeld een reguliere vorm en een vorm met Hoogheemraadschap. Deze verwijzen naar dezelfde organisatie en delen dezelfde organisatiecode en waterschapscode. Voor functioneel gebruik kan worden uitgegaan van de organisatiecode (ws####) als stabiele identificatie.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+
+select
+  ?waterschap
+  ?label
+  ?organisatiecode
+  ?waterschapscode
+  ?officieleNaamExclSoort
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/waterschappen> {
+    ?waterschap
+      rdf:type                          tooi:Waterschap ;
+      rdfs:label                        ?label ;
+      tooi:organisatiecode              ?organisatiecode ;
+      tooi:waterschapscode              ?waterschapscode ;
+      tooi:officieleNaamExclSoort        ?officieleNaamExclSoort .
+    optional {
+      ?waterschap tooi:einddatum ?einddatum
+    }
+    filter (!bound(?einddatum))
+
+  }
+
+}
