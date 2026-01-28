@@ -1,0 +1,36 @@
+#+ name: rijksmonument-in-gezicht
+#+ description: Het nummer van het beschermd stads- en dorpsgezicht opvragen bij een rijksmonumentnummer - als het monument in een gezicht ligt.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+# Definieer prefixen
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix units: <https://eulersharp.sourceforge.net/2003/03swap/units#>
+prefix uom: <http://www.opengis.net/def/uom/OGC/1.0/>
+
+# Selecteer de gewenste variabelen
+select ?rijksmonument ?rijksmonumentnummer ?gezicht ?gezichtnummer
+
+where {
+  # Specificeer de grafiek waarin gezocht wordt
+  graph graph:instanties-rce {
+    # Definieer een rijksmonument en zijn eigenschappen
+    ?rijksmonument a ceo:Rijksmonument ;
+                   ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+                   ceo:heeftGeometrie/geo:asWKT ?rmGeometry .
+
+    # Optioneel blok voor gezichtsgeometrie
+    optional {
+      ?gezicht a ceo:Gezicht ;
+               ceo:gezichtsnummer ?gezichtnummer ;
+               ceo:heeftGeometrie/geo:asWKT ?geogez .
+      filter(geof:sfWithin(?rmGeometry, ?geogez))
+    }
+  }
+  bind(concat("Rijksmonument: ", str(?rijksmonumentnummer)) as ?rmGeometryLabel)
+  bind(concat("Gezicht: ", str(?gezichtnummer)) as ?geogezLabel)
+
+}
