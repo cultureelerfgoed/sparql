@@ -1,0 +1,15 @@
+#+ name: archis2Waarnemingsnummer-vondstlocatie
+#+ description: Query om bij een CHO objectnummer het archis2waarnemingsnummer van een vondstlocatie. Maar ook om bij een archis2waarnemingsnummer van een vondstlocatie bij een CHO objectnummer te zoeken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+select * where {
+  graph graph:instanties-rce {
+    ?cho a ceo:Vondstlocatie;
+      ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ;
+      ceo:archis2Waarnemingsnummer ?archis2waarnemingsnummer .
+  }
+} limit 10

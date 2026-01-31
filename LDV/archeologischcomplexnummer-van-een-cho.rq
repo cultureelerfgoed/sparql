@@ -1,0 +1,15 @@
+#+ name: archeologischcomplexnummer-van-een-cho
+#+ description: Query om bij een CHO objectnummer het archis2complexnummer te vinden. Maar ook om bij een archis2complexnummer een CHO objectnummer te zoeken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+select * where {
+  graph graph:instanties-rce {
+    ?cho a ceo:ArcheologischComplex;
+                   ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ;
+                   ceo:archis2Complexnummer ?archis2complexnummer .
+  }
+} limit 10
