@@ -1,4 +1,6 @@
 #+ name: Totaal-aantal-graven-per-graftype
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/sablina-vis/grafmonumenten/sparql
+
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
