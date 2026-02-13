@@ -1,0 +1,12 @@
+#+ name: Genid-nodes-per-class
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/sparql
+
+SELECT ?class (COUNT(DISTINCT ?node) AS ?aantal)
+WHERE {
+  GRAPH ?g {
+    ?node a ?class .
+    FILTER(STRSTARTS(STR(?node), "https://linkeddata.cultureelerfgoed.nl/.well-known/genid/"))
+  }
+}
+GROUP BY ?class
+ORDER BY DESC(?aantal)

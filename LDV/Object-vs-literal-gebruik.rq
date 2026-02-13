@@ -1,0 +1,10 @@
+#+ name: Object-vs-literal-gebruik
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?p
+       (SUM(IF(isLiteral(?o),1,0)) AS ?literalGebruik)
+       (SUM(IF(!isLiteral(?o),1,0)) AS ?resourceGebruik)
+WHERE { GRAPH ?g { ?s ?p ?o } }
+GROUP BY ?p
+ORDER BY DESC(?resourceGebruik)
+

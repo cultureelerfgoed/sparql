@@ -1,0 +1,11 @@
+#+ name: Namespaces-van-properties
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?namespace (COUNT(*) AS ?gebruik)
+  
+WHERE {
+  GRAPH ?g { ?s ?p ?o }
+  BIND(REPLACE(STR(?p), "(.*/).*", "$1") AS ?namespace)
+}
+GROUP BY ?namespace
+ORDER BY DESC(?gebruik)

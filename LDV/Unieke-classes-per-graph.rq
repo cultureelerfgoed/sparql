@@ -1,0 +1,13 @@
+#+ name: Unieke-classes-per-graph
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/sparql
+
+SELECT (REPLACE(STR(?g), "^urn:graph:", "") AS ?graphNaam)
+       ?class
+       (COUNT(*) AS ?gebruik)
+WHERE {
+  GRAPH ?g {
+    ?s a ?class .
+  }
+}
+GROUP BY ?g ?class
+ORDER BY ?g DESC(?gebruik)

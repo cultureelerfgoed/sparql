@@ -1,0 +1,10 @@
+#+ name: Aantal-Genid-nodes
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/sparql
+
+SELECT (COUNT(DISTINCT ?node) AS ?aantalGenidNodes)
+WHERE {
+  GRAPH ?g {
+    ?node ?p ?o .
+    FILTER(STRSTARTS(STR(?node), "https://linkeddata.cultureelerfgoed.nl/.well-known/genid/"))
+  }
+}

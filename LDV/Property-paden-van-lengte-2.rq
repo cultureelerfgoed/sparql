@@ -1,0 +1,12 @@
+#+ name: Property-paden-van-lengte-2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?s ?p1 ?m ?p2 ?o
+WHERE {
+  GRAPH ?g {
+    ?s ?p1 ?m .
+    ?m ?p2 ?o .
+  }
+}
+LIMIT 50
+

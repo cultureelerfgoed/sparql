@@ -1,0 +1,11 @@
+#+ name: Namespaces-van-classes
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?namespace (COUNT(*) AS ?gebruik)
+WHERE {
+  GRAPH ?g { ?s a ?class }
+  BIND(REPLACE(STR(?class), "(.*/).*", "$1") AS ?namespace)
+}
+GROUP BY ?namespace
+ORDER BY DESC(?gebruik)
+

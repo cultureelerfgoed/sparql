@@ -1,0 +1,11 @@
+#+ name: Unieke-properties-gebruiksfrequentie
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?property (COUNT(*) AS ?gebruik)
+WHERE {
+  GRAPH ?g {
+    ?s ?property ?o .
+  }
+}
+GROUP BY ?property
+ORDER BY DESC(?gebruik)

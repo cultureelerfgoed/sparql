@@ -1,0 +1,14 @@
+#+ name: Unieke-properties-per-graph
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT (REPLACE(STR(?g), "^urn:graph:", "") AS ?graphNaam)
+       ?property
+       (COUNT(*) AS ?gebruik)
+WHERE {
+  GRAPH ?g {
+    ?s ?property ?o
+  }
+}
+GROUP BY ?g ?property
+ORDER BY ?g DESC(?gebruik)
+

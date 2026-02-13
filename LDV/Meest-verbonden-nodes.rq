@@ -1,0 +1,15 @@
+#+ name: Meest-verbonden-nodes
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+
+SELECT ?node (COUNT(*) AS ?verbindingen)
+WHERE {
+  GRAPH ?g {
+    { ?node ?p ?o }
+    UNION
+    { ?s ?p ?node }
+  }
+}
+GROUP BY ?node
+ORDER BY DESC(?verbindingen)
+LIMIT 25
+
