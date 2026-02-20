@@ -1,5 +1,5 @@
 #+ name: Property-paden-van-lengte-2
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties-kc-2/services/kunstcollecties-kc-2/sparql
 
 SELECT ?s ?p1 ?m ?p2 ?o
 WHERE {

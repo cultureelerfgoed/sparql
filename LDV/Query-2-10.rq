@@ -1,5 +1,5 @@
 #+ name: Query-2-10
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties-kc-2/services/kunstcollecties-kc-2/sparql
 
 SELECT ?class ?property (COUNT(*) AS ?gebruik)
 WHERE {

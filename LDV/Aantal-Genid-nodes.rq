@@ -1,5 +1,5 @@
 #+ name: Aantal-Genid-nodes
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties-kc-2/services/kunstcollecties-kc-2/sparql
 
 SELECT (COUNT(DISTINCT ?node) AS ?aantalGenidNodes)
 WHERE {

@@ -1,5 +1,5 @@
 #+ name: Aantal-triples-per-graph
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties-kc-2/services/kunstcollecties-kc-2/sparql
 
 SELECT (REPLACE(STR(?graph), "^urn:graph:", "") AS ?graphNaam)
        (COUNT(*) AS ?triples)

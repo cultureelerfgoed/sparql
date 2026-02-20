@@ -1,5 +1,5 @@
 #+ name: Meest-verbonden-nodes
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties/services/kunstcollecties/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/kunstcollecties-kc-2/services/kunstcollecties-kc-2/sparql
 
 SELECT ?node (COUNT(*) AS ?verbindingen)
 WHERE {
