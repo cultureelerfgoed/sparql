@@ -14,7 +14,7 @@ WHERE {
     WHERE {
       GRAPH graph:instanties-rce {
         ?cho a ceo:Rijksmonument ;
-             ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+             ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
              ceo:heeftBasisregistratieRelatie [ ceo:heeftGemeente ?gemURI ] .
       }
       GRAPH graph:owms {
@@ -28,7 +28,7 @@ WHERE {
     WHERE {
       GRAPH graph:instanties-rce {
         ?rm a ceo:Rijksmonument ;
-            ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> .
+            ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227> .
       }
     }
   }

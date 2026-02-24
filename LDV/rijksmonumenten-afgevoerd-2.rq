@@ -16,7 +16,7 @@ where {
     select ?functie (count(distinct ?pair) as ?n)
     where {
       graph graph:instanties-rce {
-        ?rm  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+        ?rm  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
              ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?funNaam .
         ?funNaam skos:prefLabel ?lbl .
         bind(replace(?lbl, "\\s*\\(.*?\\)", "") as ?functie)
@@ -31,7 +31,7 @@ where {
     select (count(distinct ?pair2) as ?totaal)
     where {
       graph graph:instanties-rce {
-        ?rm2  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+        ?rm2  ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
               ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?funNaam2 .
         bind(concat(str(?rm2), "||", str(?funNaam2)) as ?pair2)
       }

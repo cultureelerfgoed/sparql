@@ -15,7 +15,7 @@ prefix geo: <http://www.opengis.net/ont/geosparql#>
 select ?jaar (count(distinct ?rm) as ?aantalAfgevoerd)
 where {
   graph graph:instanties-rce {
-    ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
+    ?rm ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227> ;
         ceo:registratiedatum ?afvoerdatum .
 
     # Pak altijd de eerste 4 tekens als jaar, werkt voor zowel date, dateTime als string

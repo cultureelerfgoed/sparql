@@ -35,7 +35,7 @@ select distinct  ?geometrie (group_concat(distinct ?functieNorm; separator="; ")
 where
 {
   graph graph:instanties-rce {
-    ?afgevoerd_rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>.
+    ?afgevoerd_rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>.
     ?afgevoerd_rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
 
     optional {
