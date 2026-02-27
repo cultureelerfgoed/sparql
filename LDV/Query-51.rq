@@ -1,23 +1,23 @@
 #+ name: Query-51
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
 
-prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 
-select DISTINCT ?gemeente
-  ?label
-  ?gemeentecode
-  ?organisatiecode
-  ?officieleNaamExclSoort
-  ?owms
-where {
-  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graphs/default-gemeenten> {
-    ?gemeente rdf:type          tooi:Gemeente ;
-      rdfs:label        ?label ;
-      tooi:gemeentecode ?gemeentecode ;
-      tooi:organisatiecode ?organisatiecode ;
-      tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
-      tooi:owmsId ?owms.
-  }
+SELECT ?geometryType (COUNT(*) AS ?aantal)
+  
+WHERE {
+  graph graph:instanties-rce {
+  ?rijksmonument a ceo:Rijksmonument ;
+                 ceo:heeftGeometrie ?geom .
+
+  ?geom geo:asWKT ?wkt .
 }
+  BIND(
+    UCASE(STRBEFORE(STR(?wkt), "("))
+    AS ?geometryType
+  )
+}
+GROUP BY ?geometryType
+ORDER BY DESC(?aantal)

@@ -1,0 +1,94 @@
+#+ name: rijksmonumenten-gemeente-provincie-3
+#+ description: Overzicht van gebouwde rijksmonumenten per provincie of gemeente.
+#- Bedoeld om een overzicht in CSV te maken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+
+select distinct ?rijksmonument
+  (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+  ?rijksmonumentnummer ?monumentaard ?straat ?huisnummer ?adres ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie ?datumInschrijving
+where {
+
+  graph graph:instanties-rce {
+
+    ?rijksmonument
+      ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
+      ceo:heeftMonumentAard ?aard;
+      ceo:heeftBasisregistratieRelatie ?basisrel .
+
+    ?basisrel ceo:heeftProvincie ?prov .
+    ?basisrel ceo:heeftGemeente  ?gem .
+    ?aard skos:prefLabel ?monumentaard.
+
+    # ---- Kies 1 BAGRelatie per monument (uit 2 paden) ----
+    optional {
+      {
+        select ?rijksmonument (sample(?bag) as ?bagrelatie)
+        where {
+          # pad 1: direct onder rijksmonument
+          {
+            ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag .
+          }
+          union
+          # pad 2: via bevatObject (archeologie)
+          {
+            ?rijksmonument ceo:bevatObject/ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag .
+          }
+        }
+        group by ?rijksmonument
+      }
+
+      optional {
+        ?bagrelatie ceo:volledigAdres ?adres.
+      }
+      optional {
+        ?bagrelatie ceo:postcode ?postcode_.
+      }
+      optional {
+        ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
+      }
+      optional {
+        ?bagrelatie ceo:openbareRuimte ?straat.
+      }
+      optional {
+        ?bagrelatie ceo:huisnummer ?huisnummer.
+      }
+    }
+
+    bind(
+      if(bound(?postcode_),
+        replace(str(?postcode_), "([0-9]{4})([A-Z]{2})", "$1 $2"),
+        ""
+      ) as ?postcode
+    )
+
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .
+    }
+  }
+
+  graph owms: {
+    ?prov skos:prefLabel ?provincie .
+    ?gem  skos:prefLabel ?gemeente .
+  }
+
+  optional {
+    graph graph:bebouwdeomgeving {
+      ?functies skos:prefLabel ?functie_ .
+      ?functie_ ceo:formeelStandpunt true .
+      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+    }
+  }
+
+  # ---- test: zet aan als je 45593 wilt controleren ----
+  # FILTER(?rijksmonumentnummer = "45593")
+}
+limit 20000
