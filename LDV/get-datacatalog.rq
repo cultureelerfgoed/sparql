@@ -1,0 +1,10 @@
+#+ name: get-datacatalog
+#+ description: This query serves as the endoint for harvesting the RCE Datacatalog.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/datacatalog/sparql
+
+CONSTRUCT { ?s ?p ?o . } 
+WHERE { 
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/graphs/datacatalog-latest-graph> { 
+    ?s ?p ?o . 
+  } 
+} 
