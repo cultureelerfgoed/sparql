@@ -1,0 +1,25 @@
+#+ name: overige-eigenaren
+#+ description: skos:prefLabel
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
+
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+select distinct ?uri ?eigenaar ?uri_subgroep_eigenaar ?subgroep_eigenaar
+
+where {
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/hoofdgroepeigenaren> {
+    ?uri a skos:Concept ;
+      skos:prefLabel ?eigenaar .
+
+    optional {
+      ?uri skos:broader ?uri_subgroep_eigenaar.
+      ?uri_subgroep_eigenaar skos:prefLabel ?subgroep_eigenaar.
+    }
+
+    filter (lang(?eigenaar) = "nl")
+  }
+}
+
