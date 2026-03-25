@@ -7,4 +7,4 @@ WHERE {
   GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/graphs/datacatalog-latest-graph> { 
     ?s ?p ?o . 
   } 
-} 
+} limit 300
