@@ -1,83 +1,52 @@
 #+ name: Query-2
-#+ description: do not delete
-#- oudere query gebruikt en aangepast
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/RCE-Knowledge-Graph/RCE-Knowledge-Graph/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
 
-prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix ceosp: <https://linkeddata.cultureelerfgoed.nl/def/ceosp/>
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-prefix schema: <https://schema.org/>
-prefix geo: <http://www.opengis.net/ont/geosparql#>
-prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-construct {
-  ?monument_uri a schema:LandmarksOrHistoricalBuildings ;
-                schema:name ?naam ;
-                schema:identifier ?rijksmonumentnummer ;
-                schema:category ?monumentaard ;
-                schema:address ?adres ;
-                schema:postalCode ?postcode ;
-                schema:additionalType ?functie ;
-                schema:addressLocality ?woonplaats ;
-                schema:addressRegion ?provincie ;
-                geo:asWKT ?geometrie ;
-                schema:description ?omschrijving_label ;
-                schema:sameAs ?monument_url ;
-                schema:keywords ?subject_concept ;
-                schema:about ?subject_label .
-}
-  where {
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
-      {
-        select distinct  ?provincie ?postcode ?monument_uri ?naam ?rijksmonumentnummer ?monumentaard ?adres ?functie ?woonplaats ?geometrie ?omschrijving_label ?monument_url
-        where {
-          graph graph:instanties-rce {
-            ?monument_uri a ceo:Rijksmonument .
-            ?monument_uri ceo:rijksmonumentnummer ?rijksmonumentnummer .
-            ?monument_uri ceo:heeftMonumentAard/skos:prefLabel ?monumentaard .
-            ?monument_uri ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/b2d9a59a-fe1e-4552-9a05-3c2acddff864> .
+SELECT DISTINCT 
+  ?concept 
+  ?prefLabel 
+  ?altLabel 
+  ?broaderLabel 
+  ?scopeNote
+WHERE {
 
-            optional {
-              ?monument_uri ceo:heeftNaam/ceo:naam ?naam
-            } .
-            optional {
-              ?monument_uri ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam/skos:prefLabel ?functie
-            } .
-            optional {
-              ?monument_uri ceo:heeftOmschrijving ?omschrijving_ .
-              ?omschrijving_ ceo:omschrijving ?omschrijving_label .
-              ?omschrijving_ ceo:formeelStandpunt "1"^^xsd:boolean .
-            }
-            optional {
-              ?monument_uri ceo:heeftGeometrie/geo:asWKT ?geometrie.
-            }
-            optional {
-              ?monument_uri ceo:isOnderdeelVanComplex/ceo:heeftHoofdobject/ceo:rijksmonumentnummer ?rijksmonumentnummer_hoofdobject
-            }
-          }
-          bind(uri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monument_url)
 
-          optional {
-            ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?br .
-            ?br ceo:volledigAdres ?adres .
-            ?br ceo:woonplaatsnaam ?woonplaats .
-            ?br ceo:postcode ?postcode .
-            ?monument_uri ceo:heeftBasisregistratieRelatie/ceo:heeftProvincie/skos:prefLabel ?provincie .
-          }
-          optional {
-            graph <https://linkeddata.cultureelerfgoed.nl/graph/OmschrijvingenOnderwerp> {
-              ?omschrijving_ ceox:heeftOmschrijvingOnderwerp ?subject_concept .
-              ?subject_concept skos:prefLabel ?subject_label .
-            }
 
-          }
-        }
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
 
-      }
+    ?concept a skos:Concept .
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    # Labels
+    OPTIONAL { 
+      ?concept skos:prefLabel ?prefLabel .
+      FILTER (lang(?prefLabel) = "nl")
     }
+
+    OPTIONAL { 
+      ?concept skos:altLabel ?altLabel .
+      FILTER (lang(?altLabel) = "nl")
+    }
+
+    # Broader + label
+    OPTIONAL { 
+      ?concept skos:broader ?broader .
+      ?broader skos:prefLabel ?broaderLabel .
+      FILTER (lang(?broaderLabel) = "nl")
+    }
+
+    # Scope note
+    OPTIONAL { 
+      ?concept skos:scopeNote ?scopeNote .
+      FILTER (lang(?scopeNote) = "nl")
+    }
+
+    # Zoek op prefLabel OF altLabel
+    FILTER (
+      CONTAINS(LCASE(STR(?prefLabel)), LCASE(STR(?zoektermlabel))) ||
+      CONTAINS(LCASE(STR(?altLabel)), LCASE(STR(?zoektermlabel)))
+    )
   }
-#Limit 10
+}
+LIMIT 100

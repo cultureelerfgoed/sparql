@@ -1,0 +1,65 @@
+#+ name: Uitgebreid-zoeken-in-de-CHT
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT 
+  ?concept 
+  ?prefLabel 
+  (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR=", ") AS ?synoniemen)
+  ?scopeNote 
+  ?broaderLabel
+WHERE {
+
+  # Testwaarde (verwijderen in LDV)
+  VALUES ?zoektermlabel { "objecten" }
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+
+    {
+      ?concept skos:prefLabel ?prefLabelFilter .
+      FILTER (lang(?prefLabelFilter) = "nl")
+      FILTER (
+        CONTAINS(LCASE(STR(?prefLabelFilter)), LCASE(STR(?zoektermlabel)))
+      )
+    }
+    UNION
+    {
+      ?concept skos:altLabel ?altLabelFilter .
+      FILTER (lang(?altLabelFilter) = "nl")
+      FILTER (
+        CONTAINS(LCASE(STR(?altLabelFilter)), LCASE(STR(?zoektermlabel)))
+      )
+    }
+
+    # Beperk tot juiste thesaurus
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    ?concept a skos:Concept .
+
+    # PrefLabel
+    ?concept skos:prefLabel ?prefLabel .
+    FILTER (lang(?prefLabel) = "nl")
+
+    # AltLabels
+    OPTIONAL {
+      ?concept skos:altLabel ?altLabel .
+      FILTER (lang(?altLabel) = "nl")
+    }
+
+    # ScopeNote
+    OPTIONAL {
+      ?concept skos:scopeNote ?scopeNote .
+      FILTER (lang(?scopeNote) = "nl")
+    }
+
+    # Broader
+    OPTIONAL {
+      ?concept skos:broader ?broader .
+      ?broader skos:prefLabel ?broaderLabel .
+      FILTER (lang(?broaderLabel) = "nl")
+    }
+  }
+}
+GROUP BY ?concept ?prefLabel ?scopeNote ?broaderLabel
+LIMIT 50

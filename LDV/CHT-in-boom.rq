@@ -1,0 +1,54 @@
+#+ name: CHT-in-boom
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT 
+  ?node
+  ?parent
+  (SAMPLE(?tooltipRaw) AS ?tooltip)
+WHERE {
+
+ # VALUES ?zoektermlabel { "objecten" }
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+
+    {
+      ?startConcept skos:prefLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (CONTAINS(LCASE(STR(?label)), LCASE(STR(?zoektermlabel))))
+    }
+    UNION
+    {
+      ?startConcept skos:altLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (CONTAINS(LCASE(STR(?label)), LCASE(STR(?zoektermlabel))))
+    }
+
+    ?startConcept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    ?concept skos:broader* ?startConcept .
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    ?concept skos:prefLabel ?childLabel .
+    FILTER (lang(?childLabel) = "nl")
+
+    OPTIONAL {
+      ?concept skos:broader ?parentConcept .
+      ?parentConcept skos:prefLabel ?parentLabel .
+      FILTER (lang(?parentLabel) = "nl")
+    }
+
+    OPTIONAL {
+      ?concept skos:scopeNote ?scopeNote .
+      FILTER (lang(?scopeNote) = "nl")
+    }
+
+    # ==== CRUCIAAL VOOR CHART ====
+    BIND(STR(?childLabel) AS ?node)
+    BIND(COALESCE(STR(?parentLabel), "") AS ?parent)
+    BIND(STR(?scopeNote) AS ?tooltipRaw)
+  }
+}
+GROUP BY ?node ?parent
+LIMIT 5000
