@@ -1,0 +1,51 @@
+#+ name: Exacte-match-CHT-
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT 
+  ?concept
+  ?prefLabel
+  (GROUP_CONCAT(DISTINCT ?altLabel; SEPARATOR=", ") AS ?synoniemen)
+  ?scopeNote
+  ?zoektermlabel
+  
+WHERE {
+
+  # # Testwaarde (verwijderen in LDV)
+  # VALUES ?zoektermlabel { "kerk" }
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+
+    # Exacte match op prefLabel
+    {
+      ?concept skos:prefLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (LCASE(STR(?label)) = LCASE(STR(?zoektermlabel)))
+    }
+    UNION
+    # Fallback: exacte match op altLabel
+    {
+      ?concept skos:altLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (LCASE(STR(?label)) = LCASE(STR(?zoektermlabel)))
+    }
+
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    ?concept skos:prefLabel ?prefLabel .
+    FILTER (lang(?prefLabel) = "nl")
+
+    OPTIONAL {
+      ?concept skos:altLabel ?altLabel .
+      FILTER (lang(?altLabel) = "nl")
+    }
+
+    OPTIONAL {
+      ?concept skos:scopeNote ?scopeNote .
+      FILTER (lang(?scopeNote) = "nl")
+    }
+  }
+}
+GROUP BY ?concept ?prefLabel ?scopeNote ?zoektermlabel
+LIMIT 10

@@ -1,0 +1,51 @@
+#+ name: relatiekaart-cht
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT {
+
+  ?concept skos:prefLabel ?prefLabel .
+
+  ?concept skos:broader ?broader .
+  ?broader skos:prefLabel ?broaderLabel .
+
+  ?concept skos:narrower ?narrower .
+  ?narrower skos:prefLabel ?narrowerLabel .
+
+}
+WHERE {
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/cht/thesaurus> {
+
+    # Zoek eerst het concept via user input
+    {
+      ?concept skos:prefLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (CONTAINS(LCASE(STR(?label)), LCASE(STR(?zoektermlabel))))
+    }
+    UNION
+    {
+      ?concept skos:altLabel ?label .
+      FILTER (lang(?label) = "nl")
+      FILTER (CONTAINS(LCASE(STR(?label)), LCASE(STR(?zoektermlabel))))
+    }
+
+    ?concept skos:inScheme <https://data.cultureelerfgoed.nl/term/id/cht/b532325c-dc08-49db-b4f1-15e53b037ec3> .
+
+    ?concept skos:prefLabel ?prefLabel .
+    FILTER (lang(?prefLabel) = "nl")
+
+    OPTIONAL {
+      ?concept skos:broader ?broader .
+      ?broader skos:prefLabel ?broaderLabel .
+      FILTER (lang(?broaderLabel) = "nl")
+    }
+
+    OPTIONAL {
+      ?concept skos:narrower ?narrower .
+      ?narrower skos:prefLabel ?narrowerLabel .
+      FILTER (lang(?narrowerLabel) = "nl")
+    }
+  }
+}
