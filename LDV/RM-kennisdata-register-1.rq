@@ -102,7 +102,7 @@ where {
             ?actorUri skos:prefLabel ?actorLiteral.
           }
 
-          service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+          service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/referentienetwerk/sparql> {
             optional {
               ?actorUri skos:exactMatch ?actorMatchUri.
               filter strstarts(str(?actorMatchUri), "https://data.rkd.nl/")
@@ -131,7 +131,7 @@ where {
       optional { ?typeConcept ceo:kennisregistratieToelichting ?typeToelichting. }
     }
 
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk/sparql> {
       optional {
         ?typeConcept skos:exactMatch ?typeMatch.
       }
@@ -154,7 +154,7 @@ where {
       }
     }
 
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk/sparql> {
       optional {
         ?stijlConcept skos:exactMatch ?stijlMatch.
       }
@@ -169,7 +169,7 @@ where {
       ?functieConcept skos:prefLabel ?functieLabel.
     }
 
-    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk-1/sparql> {
+    service <https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/Referentienetwerk/sparql> {
       optional {
         ?functieConcept skos:exactMatch ?functieMatch.
       }

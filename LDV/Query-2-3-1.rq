@@ -11,7 +11,6 @@ prefix owms:   <https://linkeddata.cultureelerfgoed.nl/graph/owms>
 select
   ?rijksmonument
   (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-  (iri(concat("https://download.memorix.nl/maior/rce/",replace(replace(str(?image),".*fullsize/",""),"\\.jpg.*",""))) as ?downloadUrl)
   ?rijksmonumentnummer
   ?image
   ?monumentaard
