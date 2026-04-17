@@ -1,6 +1,6 @@
 #+ name: complex-en-onderdeel
 #+ description: Rijksmonumentcomplexen en onderdelen
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
