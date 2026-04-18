@@ -1,152 +1,75 @@
 #+ name: Query-2-3-1
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 prefix schema: <https://schema.org/>
-prefix skos:   <http://www.w3.org/2004/02/skos/core#>
-prefix ceo:    <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix xsd:    <http://www.w3.org/2001/XMLSchema#>
-prefix graph:  <https://linkeddata.cultureelerfgoed.nl/graph/>
-prefix owms:   <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix edm: <http://www.europeana.eu/schemas/edm/>
 
-select
+select distinct
   ?rijksmonument
   (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
   ?rijksmonumentnummer
-  ?image
   ?monumentaard
-  ?juridischeStatus
   ?provincie
   ?gemeente
-  ?straat
-  ?huisnummer
   ?adres
   ?postcode
   ?woonplaatsnaam
   ?functie
   ?datumInschrijving
+  ?afbeeldingTitel
+  ?contentUrl
+  ?beeldbank
 where {
-
-  ########################################
-  # BASIS: rijksmonument
-  ########################################
   graph graph:instanties-rce {
-
-    ?rijksmonument
+    ?rijksmonument a ceo:Rijksmonument ;
       ceo:rijksmonumentnummer ?rijksmonumentnummer ;
-#      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
-     ceo:heeftJuridischeStatus ?status ;
-      ceo:heeftMonumentAard ?aard ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus rn:b2d9a59a-fe1e-4552-9a05-3c2acddff864 ;
+      ceo:heeftMonumentAard/skos:prefLabel ?monumentaard ;
       ceo:heeftBasisregistratieRelatie ?basisrel .
 
-    ?basisrel ceo:heeftProvincie ?prov ;
-      ceo:heeftGemeente  ?gem .
+    # ?basisrel ceo:heeftProvincie/skos:prefLabel ?provincie ;
+    #           ceo:heeftGemeente/skos:prefLabel ?gemeente .
 
-    ?aard   skos:prefLabel ?monumentaard .
-    ?status skos:prefLabel ?juridischeStatus .
+    # BAG gegevens ophalen
+    optional {
+      ?rijksmonument (ceo:heeftBasisregistratieRelatie|ceo:bevatObject/ceo:heeftBasisregistratieRelatie)/ceo:heeftBAGRelatie ?bagrelatie .
+      ?bagrelatie ceo:volledigAdres ?adres ;
+                  ceo:postcode ?postcode ;
+                  ceo:woonplaatsnaam ?woonplaatsnaam .
+    }
+    
+    # Filter moet hier staan, nadat ?woonplaatsnaam is opgehaald
+ FILTER (regex(?woonplaatsnaam, "Amersfoort", "i"))
+
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies 
+      
+    }
   }
 
-  ########################################
-  # AFBEELDINGEN (koppeling!)
-  ########################################
+  optional {
+    graph graph:bebouwdeomgeving {
+      ?functies skos:prefLabel ?functie_ .
+      # We filteren op het label dat eindigt op ' (formeel standpunt)' of vergelijkbaar indien nodig
+      bind(replace(?functie_, "\\s\\(.*\\)", "") as ?functie)
+    }
+  }
+
   optional {
     service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
-      ?imgObj a schema:ImageObject ;
-        schema:about ?rijksmonument ;
-        schema:contentUrl ?image .
-    }
-  }
-
-  ########################################
-  # OWMS labels
-  ########################################
-  graph owms: {
-    ?prov skos:prefLabel ?provincie .
-    ?gem  skos:prefLabel ?gemeente .
-  }
-
-  ########################################
-  # WOONPLAATS
-  ########################################
-  optional {
-    {
-      select ?rijksmonument
-        (group_concat(distinct ?wp; separator=", ") as ?woonplaatsnaam)
-      where {
-        graph graph:instanties-rce {
-          ?rijksmonument
-            ( ceo:heeftBasisregistratieRelatie
-              | ceo:bevatObject/ceo:heeftBasisregistratieRelatie )
-            / ceo:heeftBAGRelatie
-            / ceo:woonplaatsnaam
-            ?wp .
-        }
+      graph <https://linkeddata.cultureelerfgoed.nl/graph/image> {
+        ?image schema:about ?rijksmonument ;
+               schema:name ?afbeeldingTitel ;
+               schema:contentUrl ?contentUrl ;
+               edm:isShownAt ?beeldbank .
       }
-      group by ?rijksmonument
-    }
-  }
-
-  ########################################
-  # ADRES
-  ########################################
-  optional {
-    {
-      select ?rijksmonument
-        (sample(?straat_) as ?straat)
-        (sample(?huisnummer_) as ?huisnummer)
-        (sample(?adres_) as ?adres)
-        (sample(?postcodeNetto) as ?postcode)
-      where {
-        graph graph:instanties-rce {
-
-          ?rijksmonument
-            ( ceo:heeftBasisregistratieRelatie
-              | ceo:bevatObject/ceo:heeftBasisregistratieRelatie )
-            / ceo:heeftBAGRelatie
-            ?bag .
-
-          optional {
-            ?bag ceo:openbareRuimte ?straat_
-          }
-          optional {
-            ?bag ceo:huisnummer ?huisnummer_
-          }
-          optional {
-            ?bag ceo:volledigAdres ?adres_
-          }
-          optional {
-            ?bag ceo:postcode ?pc .
-            bind(replace(str(?pc), "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcodeNetto)
-          }
-        }
-      }
-      group by ?rijksmonument
-    }
-  }
-
-  ########################################
-  # FUNCTIE
-  ########################################
-  optional {
-    {
-      select ?rijksmonument
-        (group_concat(distinct ?functieClean; separator=", ") as ?functie)
-      where {
-
-        graph graph:instanties-rce {
-          ?rijksmonument
-            ceo:heeftOorspronkelijkeFunctie ?fRel .
-
-          ?fRel ceo:formeelStandpunt true ;
-            ceo:heeftFunctieNaam ?fnConcept .
-        }
-
-        graph graph:bebouwdeomgeving {
-          ?fnConcept skos:prefLabel ?fnLabel .
-        }
-
-        bind(replace(?fnLabel, "\\s*\\(.*?\\)", "") as ?functieClean)
-      }
-      group by ?rijksmonument
     }
   }
 }

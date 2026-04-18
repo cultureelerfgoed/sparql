@@ -1,0 +1,80 @@
+#+ name: rijksmonumenten-complex-omschrijving
+#+ description: Deze query zoekt rijksmonumenten waarin ‘complex’ of een samenstelling daarop voorkomt in de omschrijving. Formele complexrelaties (hoofdobjecten en onderdelen van een complex) zijn uitgesloten, zodat alleen tekstuele vermeldingen overblijven. Veelvoorkomende formuleringen die naar een bestaand complex verwijzen, worden zoveel mogelijk gefilterd.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceox:  <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
+prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix rn:    <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+select distinct
+   (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rmnr)) as ?monumentenregister) 
+  #?rm #voor choi
+  ?rmnr #kan wrsch weg
+  ?gevondenOp
+  ?omschrijving
+where {
+  graph graph:instanties-rce {
+
+    ?rm a ceo:Rijksmonument ;
+      ceo:rijksmonumentnummer ?rmnr ;
+      ceo:heeftJuridischeStatus/skos:prefLabel "rijksmonument";
+      ceo:heeftMonumentAard/skos:prefLabel "onroerend gebouwd".
+    ?rm ceo:heeftOmschrijving ?standpunt_omschrijving.
+    ?standpunt_omschrijving ceo:omschrijving ?omschrijving.
+    ?standpunt_omschrijving ceo:formeelStandpunt "true"^^xsd:boolean.
+
+    bind(lcase(str(?omschrijving)) as ?oms)
+
+    # formele complexrelaties uitsluiten
+    filter not exists {
+      ?complex ceo:heeftHoofdobject ?rm .
+    }
+    filter not exists {
+      ?complex ceo:heeftRijksmonument ?rm .
+    }
+
+    # extra veiligheid: ook de inverse relaties uitsluiten als die in de data aanwezig zijn
+    filter not exists {
+      ?rm ceo:isHoofdobjectVanComplex ?complex2 .
+    }
+    filter not exists {
+      ?rm ceo:isOnderdeelVanComplex ?complex3 .
+    }
+
+    # brede zoekpatronen
+    values (?gevondenOp ?zoekPattern) {
+      ("los complex"
+        "(^|[^a-zà-ÿ])complex([^a-zà-ÿ]|$)")
+      ("los complexen"
+        "(^|[^a-zà-ÿ])complexen([^a-zà-ÿ]|$)")
+      ("samenstelling op -complex"
+        "(^|[^a-zà-ÿ])[a-zà-ÿ-]+complex([^a-zà-ÿ]|$)")
+      ("samenstelling op -complexen"
+        "(^|[^a-zà-ÿ])[a-zà-ÿ-]+complexen([^a-zà-ÿ]|$)")
+    }
+
+    filter(regex(?oms, ?zoekPattern))
+
+  #   # bekende tekstuele vals-positieven wegfilteren. Deze kan misschien ook verwijderd worden. 
+  #   filter(
+  #     !regex(
+  #       ?oms,
+  #       "onderdeel van (het|een) complex|onderdelen van (het|een) complex|andere onderdelen van het complex|deel uitmakend van het complex|deel van het complex|binnen het complex|behorende bij het complex|behorende tot het complex|ondergebracht in het complex|functioneel[- ]ruimtelijke relatie met de andere onderdelen van het complex|functionele samenhang met de andere onderdelen van het complex"
+  #     )
+  #   )
+
+  #   # nog een paar veelvoorkomende formuleringen met 'complex' die meestal naar een echt geheel verwijzen
+  #   filter(
+  #     !regex(
+  #       ?oms,
+  #       "onderdeel van een complex|onderdelen van een complex|deel van een complex|deel uitmakend van een complex|onderdeel van dit complex|onderdelen van dit complex|binnen dit complex|van het complex deel uitmakende"
+  #     )
+  #   )
+   }
+}
+order by ?rmnr ?gevondenOp

@@ -1,0 +1,53 @@
+#+ name: functie-rijksmonumenten-complex-oms
+#+ description: Deze query toont de verdeling van onderliggende functies (subfuncties) van rijksmonumenten waarin ‘complex’ voorkomt in de omschrijving. De hiërarchie van functies wordt gevolgd via de thesaurus, zodat ook meer specifieke functietypen zichtbaar worden.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX ceox:  <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn:    <https://data.cultureelerfgoed.nl/term/id/rn/>
+
+SELECT ?subfunctie (COUNT(DISTINCT ?rm) AS ?aantal)
+WHERE {
+  GRAPH graph:instanties-rce {
+
+    # basisset
+    ?rm a ceo:Rijksmonument ;
+        ceo:heeftJuridischeStatus/skos:prefLabel "rijksmonument" ;
+        ceo:heeftMonumentAard/skos:prefLabel "onroerend gebouwd" .
+
+    ?rm ceo:heeftOmschrijving ?standpunt_omschrijving .
+    ?standpunt_omschrijving ceo:omschrijving ?omschrijving ;
+                            ceo:formeelStandpunt "true"^^xsd:boolean .
+
+    ?rm ceo:heeftOorspronkelijkeFunctie ?functie_ .
+    ?functie_ ceo:heeftFunctieNaam ?functie ;
+               ceo:formeelStandpunt "true"^^xsd:boolean .
+
+    # tekstfilter
+    FILTER(
+      REGEX(LCASE(STR(?omschrijving)),
+        "(^|[^a-zà-ÿ])(complex|complexen|[a-zà-ÿ-]+complex|[a-zà-ÿ-]+complexen)([^a-zà-ÿ]|$)"
+      )
+    )
+
+    # geen formele complexrelaties
+    FILTER NOT EXISTS { ?c ceo:heeftHoofdobject ?rm }
+    FILTER NOT EXISTS { ?c ceo:heeftRijksmonument ?rm }
+  }
+
+  GRAPH graph:bebouwdeomgeving {
+
+    # functie-label
+    ?functie skos:prefLabel ?label .
+
+    # opschonen label
+    BIND(REPLACE(?label, "\\s\\(.*\\)|\\(.*\\)", "") AS ?subfunctie)
+  }
+}
+GROUP BY ?subfunctie
+ORDER BY DESC(?aantal)

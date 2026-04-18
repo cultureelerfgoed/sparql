@@ -1,0 +1,26 @@
+#+ name: Query-2-3-1-1
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
+PREFIX owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+PREFIX schema: <https://schema.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+
+
+SELECT ?rijksmonument ?image WHERE {
+
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/graph/instanties-rce> {
+    ?rijksmonument <https://linkeddata.cultureelerfgoed.nl/def/ceo#rijksmonumentnummer> ?nr .
+  }
+
+  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/afbeeldingen2/sparql> {
+    ?image schema:about ?rijksmonument .
+  }
+
+}
+LIMIT 50
