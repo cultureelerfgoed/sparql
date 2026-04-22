@@ -9,14 +9,14 @@ prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
 prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+prefix ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 
 select distinct ?rijksmonument
   (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
-  ?rijksmonumentnummer ?monumentaard ?straat ?huisnummer ?adres ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functie ?datumInschrijving
+  ?rijksmonumentnummer ?monumentaard ?straat ?huisnummer ?adres ?provincie ?gemeente ?postcode ?woonplaatsnaam ?functies ?datumInschrijving
 where {
 
   graph graph:instanties-rce {
-
     ?rijksmonument
       ceo:rijksmonumentnummer ?rijksmonumentnummer ;
       ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
@@ -24,55 +24,35 @@ where {
       ceo:heeftMonumentAard ?aard;
       ceo:heeftBasisregistratieRelatie ?basisrel .
 
+    optional {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functieInstantie .
+      ?functieInstantie ceo:heeftFunctieNaam ?functieURI ;
+                        ceo:formeelStandpunt "true"^^xsd:boolean .
+    }
+
     ?basisrel ceo:heeftProvincie ?prov .
     ?basisrel ceo:heeftGemeente  ?gem .
     ?aard skos:prefLabel ?monumentaard.
 
-    # ---- Kies 1 BAGRelatie per monument (uit 2 paden) ----
+    # ---- BAG relatie (ongewijzigd) ----
     optional {
       {
         select ?rijksmonument (sample(?bag) as ?bagrelatie)
         where {
-          # pad 1: direct onder rijksmonument
-          {
-            ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag .
-          }
+          { ?rijksmonument ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag . }
           union
-          # pad 2: via bevatObject (archeologie)
-          {
-            ?rijksmonument ceo:bevatObject/ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag .
-          }
+          { ?rijksmonument ceo:bevatObject/ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie ?bag . }
         }
         group by ?rijksmonument
       }
-
-      optional {
-        ?bagrelatie ceo:volledigAdres ?adres.
-      }
-      optional {
-        ?bagrelatie ceo:postcode ?postcode_.
-      }
-      optional {
-        ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam.
-      }
-      optional {
-        ?bagrelatie ceo:openbareRuimte ?straat.
-      }
-      optional {
-        ?bagrelatie ceo:huisnummer ?huisnummer.
-      }
+      optional { ?bagrelatie ceo:volledigAdres ?adres. }
+      optional { ?bagrelatie ceo:postcode ?postcode_. }
+      optional { ?bagrelatie ceo:woonplaatsnaam ?woonplaatsnaam. }
+      optional { ?bagrelatie ceo:openbareRuimte ?straat. }
+      optional { ?bagrelatie ceo:huisnummer ?huisnummer. }
     }
 
-    bind(
-      if(bound(?postcode_),
-        replace(str(?postcode_), "([0-9]{4})([A-Z]{2})", "$1 $2"),
-        ""
-      ) as ?postcode
-    )
-
-    optional {
-      ?rijksmonument ceo:heeftOorspronkelijkeFunctie/ceo:heeftFunctieNaam ?functies .
-    }
+    bind(if(bound(?postcode_), replace(str(?postcode_), "([0-9]{4})([A-Z]{2})", "$1 $2"), "") as ?postcode)
   }
 
   graph owms: {
@@ -80,15 +60,15 @@ where {
     ?gem  skos:prefLabel ?gemeente .
   }
 
+  # Haal nu het tekstlabel op in de juiste graph
   optional {
     graph graph:bebouwdeomgeving {
-      ?functies skos:prefLabel ?functie_ .
-      ?functie_ ceo:formeelStandpunt true .
-      bind(replace(?functie_, "\\s\\(.*\\)|\\(.*\\)", "") as ?functie)
+      ?functieURI skos:prefLabel ?functieLabel .
+      
+      bind(replace(str(?functieLabel), "\\s\\(.*\\)|\\(.*\\)", "") as ?functies)
     }
   }
 
-  # ---- test: zet aan als je 45593 wilt controleren ----
   # FILTER(?rijksmonumentnummer = "45593")
 }
 limit 20000
