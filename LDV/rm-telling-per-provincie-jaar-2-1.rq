@@ -1,4 +1,4 @@
-#+ name: rm-telling-per-provincie-jaar-2
+#+ name: rm-telling-per-provincie-jaar-2-1
 #+ description: DO NOT DELETE
 #- Deze query telt rijksmonumenten per provincie, gemeente, gemeentecode, monumentaard en hoofdcategorie voor een opgegeven jaar. Een rijksmonument telt mee wanneer het in dat jaar geldig was. Dat betekent:
 #- 
@@ -11,17 +11,17 @@
 #- U kunt extern filteren op jaar, provincie, gemeentecode en monumentaard. De query past deze filters toe op de onderliggende gegevens.
 #- 
 #- Het resultaat toont per combinatie van provincie, gemeente, gemeentecode, monumentaard en hoofdcategorie het aantal rijksmonumenten dat in het gekozen jaar geldig was.
+#- 
+#- NB dit zijn de gemeenten van > 01-01-2025
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
 prefix skos:  <http://www.w3.org/2004/02/skos/core#>
 prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
 prefix ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/2/>
-prefix owms: <http://standaarden.overheid.nl/owms/terms/>
-
-# Resultaat per provincie, gemeente, monumentaard en hoofdcategorie
-# inclusief het aantal rijksmonumenten binnen het gekozen jaar
+prefix owms:  <http://standaarden.overheid.nl/owms/terms/>
+prefix tooi:  <https://identifier.overheid.nl/tooi/def/ont/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 select
   ?provincie
@@ -29,40 +29,37 @@ select
   ?gemeente
   ?gemeentecode
   ?hoofdcategorie
-
   (count(?rijksmonument) as ?aantal)
+
 where {
 
   ######################################################################
-  # 1. Selecteer rijksmonumenten + basisregistratiegegevens (RCE-graph)
+  # 1. Rijksmonumenten (CEO)
   ######################################################################
   graph graph:instanties-rce {
 
-    # Rijksmonument met zijn basisregistratie-relatie
-  ?rijksmonument a ceo:Rijksmonument ;
-    ceo:heeftBasisregistratieRelatie ?basisrel ;
-    ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
-    ceo:heeftJuridischeStatus ?juridischeStatus ;
-    ceo:registratiedatum ?datumRegistratie ;
-    ceo:heeftOorspronkelijkeFunctie ?functie ;
-    ceo:heeftMonumentAard ?monumentAard_ .
+    ?rijksmonument a ceo:Rijksmonument ;
+      ceo:heeftBasisregistratieRelatie ?basisrel ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus ?juridischeStatus ;
+      ceo:registratiedatum ?datumRegistratie ;
+      ceo:heeftOorspronkelijkeFunctie ?functie ;
+      ceo:heeftMonumentAard ?monumentAard_ .
 
-  # Pak alleen de hoofdfunctie
-  ?functie ceo:hoofdfunctie true ;
-           ceo:heeftFunctieNaam ?uri .
+    
+    ?functie ceo:hoofdfunctie true ;
+      ceo:heeftFunctieNaam ?uri .
 
-    # Monumentaard label (onroerend e.d.)
     ?monumentAard_ skos:prefLabel ?monumentAard .
 
-    # Jaarwaarden voor filtering
     bind(year(xsd:dateTime(?datumInschrijving)) as ?jaarInschrijving)
     bind(year(xsd:dateTime(?datumRegistratie))  as ?jaarRegistratie)
 
-    # Provincie en gemeente → OWMS-URI’s
-    ?basisrel ceo:heeftProvincie ?prov .
-    ?basisrel ceo:heeftGemeente ?gem .
-
-    # Filter: monument moet in het gekozen jaar bestaan
+  #  ?basisrel ceo:heeftProvincie ?prov .
+    ?basisrel ceo:heeftProvincie ?provOud .
+      ?basisrel ceo:heeftGemeente ?gemOud .
+    bind(str(?gemOud) as ?gemOudUri)
+       bind(str(?provOud) as ?provOudUri)
     filter(
       (?jaarInschrijving <= ?jaar) &&
       (
@@ -72,13 +69,11 @@ where {
     )
   }
 
-
   ######################################################################
-  # 2. Koppel oorspronkelijke functie aan hoofdcategorie (bebouwde omgeving)
+  # 2. Hoofdcategorie
   ######################################################################
   graph graph:bebouwdeomgeving {
 
-    # Definieer hoofdcategorieën met de onderliggende smalle termen
     values (?hoofdcategorie ?narrow) {
       ("Archeologie (N)" <https://data.cultureelerfgoed.nl/term/id/rn/2/d60159d2-8b55-47b7-8301-5ac82b0f2d7f>)
       ("Bestuursgebouwen, rechtsgebouwen en overheidsgebouwen" <https://data.cultureelerfgoed.nl/term/id/rn/2/74a847b5-1e0f-4f66-b910-90d2c8d9fa04>)
@@ -95,31 +90,43 @@ where {
       ("Woningen en woningbouwcomplexen" <https://data.cultureelerfgoed.nl/term/id/rn/2/5b7dd16c-fa8d-4d68-984a-9ec0efc650d4>)
     }
 
-    # De smalle term moet matchen met de functie
     ?narrow skos:narrower+ ?uri .
-
   }
-    # Externe parameter: filter op één hoofdcategorie
-# Laat dit weg als ?hoofdcategorieFilter geen waarde heeft
-filter(!bound(?hoofdcategorieFilter) || ?hoofdcategorie = ?hoofdcategorieFilter)
+
+  filter(!bound(?hoofdcategorieFilter) || ?hoofdcategorie = ?hoofdcategorieFilter)
 
   ######################################################################
-  # 3. OWMS-gegevens ophalen (provincie, gemeente, gemeentecode)
+  # 3. Provincie via OWMS
   ######################################################################
   graph <https://linkeddata.cultureelerfgoed.nl/graph/owms> {
-    ?prov skos:prefLabel ?provincie .
-    ?gem  skos:prefLabel ?gemeente .
-
-    # Officiële CBS-gemeentecode
-    ?gem owms:CBSCode ?gemeentecode .
+   ?provOud skos:prefLabel ?provincie .
   }
-  # # 4. COROP-gebied ophalen via skos:broader
-  # graph <https://example.org/id/coropGraph> {
-  #   ?gem skos:broader ?corop .
-  #   ?corop skos:prefLabel ?coropLabel .
-  # }
-}
 
+  ######################################################################
+  # 4. Gemeente via TOOI (FEDERATIEF)
+  ######################################################################
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql> {
+
+  # gemeenten
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/gemeenten> {
+    ?gemActueel
+      tooi:owmsId ?gemOudUri ;
+      tooi:voorkeursnaamExclSoort ?gemeente ;
+      tooi:gemeentecode ?gemeentecode .
+
+    filter not exists {
+      ?gemActueel tooi:einddatum ?einddatumGemeente
+    }
+  }
+
+  # provincies (zelfde truc!)
+  graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/provincies> {
+    ?provActueel
+      tooi:owmsId ?provOudUri ;
+      rdfs:label ?provincie .
+  }
+}
+}
 group by
   ?provincie
   ?gemeente
