@@ -1,4 +1,4 @@
-#+ name: rm-telling-per-provincie-jaar-2-1
+#+ name: rm-telling-per-provincie-jaar-v3
 #+ description: DO NOT DELETE
 #- Deze query telt rijksmonumenten per provincie, gemeente, gemeentecode, monumentaard en hoofdcategorie voor een opgegeven jaar. Een rijksmonument telt mee wanneer het in dat jaar geldig was. Dat betekent:
 #- 
@@ -12,7 +12,7 @@
 #- 
 #- Het resultaat toont per combinatie van provincie, gemeente, gemeentecode, monumentaard en hoofdcategorie het aantal rijksmonumenten dat in het gekozen jaar geldig was.
 #- 
-#- NB dit zijn de gemeenten van > 01-01-2025
+#- NB dit zijn de gemeenten van > 01-01-2026
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
 prefix graph:     <https://linkeddata.cultureelerfgoed.nl/graph/>
@@ -48,7 +48,7 @@ where {
       ceo:heeftMonumentAard ?monumentAard_ .
 
     ?functie ceo:hoofdfunctie true ;
-             ceo:heeftFunctieNaam ?uri .
+      ceo:heeftFunctieNaam ?uri .
 
     ?monumentAard_ skos:prefLabel ?monumentAard .
 
@@ -115,7 +115,7 @@ where {
     # alleen de 12 provincies
     values ?provActueelOwms {
       <http://standaarden.overheid.nl/owms/terms/Groningen>
-      <http://standaarden.overheid.nl/owms/terms/Fryslân>
+      <http://standaarden.overheid.nl/owms/terms/Fryslan>
       <http://standaarden.overheid.nl/owms/terms/Drenthe>
       <http://standaarden.overheid.nl/owms/terms/Overijssel>
       <http://standaarden.overheid.nl/owms/terms/Flevoland>
@@ -134,16 +134,22 @@ where {
   # ######################################################################
   # # 4. Gemeente-label + code via TOOI (federatief)
   # ######################################################################
-  # service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql> {
-  #   graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/gemeenten> {
+  #optional {
+  service <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql> {
+    graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/gemeenten> {
 
-  #     ?gemTooi
-  #       tooi:owmsId ?gemActueelOwms ;
-  #       rdfs:label ?gemeente ;
-  #       tooi:gemeentecode ?gemeentecode .
-  #   }
-  # }
+      ?gemTooi
+        tooi:owmsId ?owmsIdLiteral ;
+        rdfs:label ?gemeente ;
+        tooi:gemeentecode ?gemeentecode .
+    }
+  }
 
+  bind(str(?gemActueelOwms) as ?owmsString)
+  bind(str(?owmsIdLiteral) as ?tooiString)
+
+  filter(?owmsString = ?tooiString)
+  #}
   # ######################################################################
   # 5. Optioneel: filter op provincie
   ######################################################################
