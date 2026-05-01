@@ -1,0 +1,75 @@
+#+ name: complex-en-onderdeel-1
+#+ description: Deze query berekent per formeel vastgesteld rijksmonumentcomplex het aantal unieke rijksmonumenten dat er onderdeel van is. Zowel hoofdobjecten als gekoppelde onderdelen worden meegeteld. De output bevat per complex het complexnummer, een link naar het monumentenregister en het aantal rijksmonumenten. Daarnaast wordt een totaalregel opgenomen met het totale aantal rijksmonumenten dat deel uitmaakt van een complex.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+select 
+  ?complex
+  ?urinaarcomplex
+  ?complexnummer
+  ?aantalRijksmonumenten
+where {
+
+  {
+    # per complex
+    select 
+      ?complex
+      (IRI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/complexen/", STR(?complexnummer))) as ?urinaarcomplex)
+      ?complexnummer
+      (COUNT(DISTINCT ?rm) as ?aantalRijksmonumenten)
+    where {
+      graph graph:instanties-rce {
+
+        minus {
+          ?complex ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>
+        }
+
+        ?complex ceo:complexnummer ?complexnummer .
+        ?complex ceo:heeftHoofdobject ?hoofdobject .
+
+        {
+          ?hoofdobject ceo:rijksmonumentnummer ?rm .
+        }
+        union
+        {
+          ?complex ceo:heeftRijksmonument ?onderdeel .
+          ?onderdeel ceo:rijksmonumentnummer ?rm .
+        }
+      }
+    }
+    group by ?complex ?complexnummer
+  }
+
+  union
+
+  {
+    # totaalregel
+    select
+      ("TOTAAL" as ?complex)
+      ("" as ?urinaarcomplex)
+      ("" as ?complexnummer)
+      (COUNT(DISTINCT ?rm) as ?aantalRijksmonumenten)
+    where {
+      graph graph:instanties-rce {
+
+        minus {
+          ?c ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/2/3e79bb7c-b459-4998-a9ed-78d91d069227>
+        }
+
+        ?c ceo:heeftHoofdobject ?hoofdobject .
+
+        {
+          ?hoofdobject ceo:rijksmonumentnummer ?rm .
+        }
+        union
+        {
+          ?c ceo:heeftRijksmonument ?onderdeel .
+          ?onderdeel ceo:rijksmonumentnummer ?rm .
+        }
+      }
+    }
+  }
+}
+order by ?complexnummer
