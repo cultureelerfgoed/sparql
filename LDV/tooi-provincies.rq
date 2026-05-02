@@ -11,6 +11,8 @@
 #- Bijvoorbeeld: pv20
 #- officieleNaamExclSoort
 #- Bijvoorbeeld: Groningen
+#- officieleNaamInclSoort
+#- Bijvoorbeeld: povincie Groningen
 #- owms
 #- Bijvoorbeeld: http://standaarden.overheid.nl/owms/terms/Groningen_(provincie)
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
@@ -24,6 +26,7 @@ select ?provincie
   ?afkorting
   ?organisatiecode
   ?officieleNaamExclSoort
+  ?officieleNaamInclSoort
   ?owms
 where {
   graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/provincies> {
@@ -31,6 +34,7 @@ where {
       rdfs:label        ?label ;
       tooi:afkorting ?afkorting ;
       tooi:organisatiecode ?organisatiecode ;
+      tooi:officieleNaamInclSoort ?officieleNaamInclSoort ;
       tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
       tooi:owmsId ?owms.
   }

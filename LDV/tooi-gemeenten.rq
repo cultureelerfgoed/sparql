@@ -4,6 +4,7 @@
 #- "gemeentecode" = "0003"
 #- "organisatiecode" = "gm0003"
 #- "officieleNaamExclSoort" = "Appingedam"
+#- "officieleNaamInclSoort" = "gemeente Appingedam"
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/tooi/sparql
 
 prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -15,6 +16,7 @@ select distinct ?gemeente
   ?gemeentecode
   ?organisatiecode
   ?officieleNaamExclSoort
+  ?officieleNaamInclSoort
   ?owms
 where {
   graph <https://linkeddata.cultureelerfgoed.nl/rce/tooi/graph/gemeenten> {
@@ -22,6 +24,7 @@ where {
       rdfs:label        ?label ;
       tooi:gemeentecode ?gemeentecode ;
       tooi:organisatiecode ?organisatiecode ;
+      tooi:officieleNaamInclSoort ?officieleNaamInclSoort ;
       tooi:officieleNaamExclSoort ?officieleNaamExclSoort ;
       tooi:owmsId ?owms.
     optional {
