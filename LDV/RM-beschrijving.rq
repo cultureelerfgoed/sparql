@@ -10,7 +10,7 @@ PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix rn: <https://data.cultureelerfgoed.nl/term/id/rn/>
 
-SELECT ?rijksmonumentnummer ?omschrijving 
+SELECT ?rijksmonumentnummer ?omschrijving ?functielabel
 
 WHERE 
 {
@@ -18,5 +18,7 @@ WHERE
     MINUS {?rijksmonument ceo:heeftJuridischeStatus <https://data.cultureelerfgoed.nl/term/id/rn/3e79bb7c-b459-4998-a9ed-78d91d069227>}
     ?rijksmonument ceo:rijksmonumentnummer ?rijksmonumentnummer.
     OPTIONAL {?rijksmonument ceo:heeftOmschrijving ?omschrijving1 . ?omschrijving1 ceo:omschrijving ?omschrijving  ; ceo:formeelStandpunt "1"^^xsd:boolean.}
+    OPTIONAL { ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?functie.
+    ?functie ceo:heeftFunctieNaam ?functienaam . ?functienaam skos:prefLabel ?functielabel }
 }
 }
