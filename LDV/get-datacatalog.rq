@@ -2,9 +2,14 @@
 #+ description: This query exposes the full RCE datacatalog as a DCAT-AP-NL compliant RDF graph. It is intended for harvesting and reuse by external and internal consumers (e.g. Netwerk Digitaal Erfgoed, DAP), providing a consistent and machine-readable overview of available RCE datasets and their metadata. The query returns the latest published version of the catalog without requiring additional transformation by the consumer.
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/datacatalog/sparql
 
+#v5
 CONSTRUCT { ?s ?p ?o . } 
 WHERE { 
-  GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/graphs/datacatalog-latest-graph> { 
+  {GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/graphs/datacatalog-latest-graph> { 
     ?s ?p ?o . 
-  } 
+  }}
+  UNION
+  {GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/graphs/multilingual> { 
+    ?s ?p ?o . 
+  }}
 }
