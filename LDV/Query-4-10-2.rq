@@ -1,6 +1,4 @@
 #+ name: Query-4-10-2
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
-
 PREFIX schema:<https://schema.org/>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>

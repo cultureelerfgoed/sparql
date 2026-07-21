@@ -1,6 +1,4 @@
 #+ name: Query-11-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
-
 prefix text: <http://jena.apache.org/text#>
 prefix schema: <https://schema.org/>
 prefix foaf: <http://xmlns.com/foaf/0.1/>
