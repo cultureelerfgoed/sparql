@@ -1,0 +1,71 @@
+#+ name: abr-v1-abr-v2-concordantie
+#+ description: Toont per Nederlands ABR-concept uit het geselecteerde conceptschema de v1- en v2-URI, het prefLabel, de ABR-code en de status in v2. De koppeling tussen v1 en v2 gebeurt op basis van de stabiele UUID.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT DISTINCT
+  ?conceptAbr
+  ?prefLabelAbr
+  ?codeAbr
+  ?conceptAbr2
+  ?prefLabelAbr2
+  ?codeAbr2
+  ?statusAbr2
+  ?statusLabelAbr2
+WHERE {
+
+  # ABR v1
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/thesaurus> {
+
+    ?conceptAbr
+      a skos:Concept ;
+      skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+      skos:prefLabel ?prefLabelAbr .
+
+    FILTER(LANG(?prefLabelAbr) = "nl")
+
+    OPTIONAL {
+      ?conceptAbr rnce:codeAbr ?codeAbr .
+    }
+  }
+
+  # De UUID blijft gelijk.
+  # Alleen /2/ wordt toegevoegd aan de v2-URI.
+  BIND(
+    IRI(
+      REPLACE(
+        STR(?conceptAbr),
+        "/term/id/abr/",
+        "/term/id/abr/2/"
+      )
+    )
+    AS ?conceptAbr2
+  )
+
+  # ABR v2
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/2/thesaurus> {
+
+    ?conceptAbr2
+      a skos:Concept ;
+      skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/2/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+      skos:prefLabel ?prefLabelAbr2 .
+
+    FILTER(LANG(?prefLabelAbr2) = "nl")
+
+    OPTIONAL {
+      ?conceptAbr2 rnce:codeAbr ?codeAbr2 .
+    }
+
+    OPTIONAL {
+      ?conceptAbr2 rnce:hasConceptStatus ?statusAbr2 .
+
+      OPTIONAL {
+        ?statusAbr2 skos:prefLabel ?statusLabelAbr2 .
+        FILTER(LANG(?statusLabelAbr2) = "nl")
+      }
+    }
+  }
+}
+ORDER BY LCASE(STR(?prefLabelAbr))

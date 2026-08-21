@@ -1,0 +1,58 @@
+#+ name: zoeken-abr-v2
+#+ description: Zoekt binnen ABR v2 naar Nederlandse begrippen op basis van een exacte ABR-code of een tekst in het voorkeurslabel. De query toont de concept-URI, het Nederlandse prefLabel, de ABR-code en de conceptstatus.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT DISTINCT
+  ?concept
+  ?label
+  ?abrCode
+  ?status
+  ?statusLabel
+WHERE {
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/2/thesaurus> {
+
+    ?concept
+      a skos:Concept ;
+      skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/2/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+      skos:prefLabel ?label .
+
+    FILTER(LANG(?label) = "nl")
+
+    OPTIONAL {
+      ?concept rnce:codeAbr ?abrCode .
+    }
+
+    OPTIONAL {
+      ?concept rnce:hasConceptStatus ?status .
+
+      OPTIONAL {
+        ?status skos:prefLabel ?statusLabel .
+        FILTER(LANG(?statusLabel) = "nl")
+      }
+    }
+  }
+
+  FILTER(
+    (
+      BOUND(?codeAbr)
+      &&
+      BOUND(?abrCode)
+      &&
+      UCASE(STR(?abrCode)) = UCASE(STR(?codeAbr))
+    )
+    ||
+    (
+      BOUND(?prefLabel)
+      &&
+      CONTAINS(
+        LCASE(STR(?label)),
+        LCASE(STR(?prefLabel))
+      )
+    )
+  )
+}
+ORDER BY ?label
