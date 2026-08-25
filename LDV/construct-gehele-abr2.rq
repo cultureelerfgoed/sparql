@@ -1,0 +1,72 @@
+#+ name: construct-gehele-abr2
+#+ description: Construct om de gehele ABR te downloaden via de API.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+CONSTRUCT {
+
+  # Concept
+  ?concept a skos:Concept ;
+           skos:inScheme ?scheme ;
+           skos:prefLabel ?prefLabel .
+
+  # Alternatieve termen en code
+  ?concept skos:altLabel ?altLabel .
+  ?concept skos:notation ?notation .
+  ?concept rnce:codeAbr ?rnceCode .
+
+  # Hiërarchie
+  ?concept skos:broader ?broader .
+
+  # Scope note
+  ?concept skos:scopeNote ?scopeNote .
+
+  # Label van het bovenliggende concept
+  ?broader skos:prefLabel ?broaderLabel .
+
+}
+WHERE {
+
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/2/thesaurus> {
+
+    VALUES ?scheme {
+      <https://data.cultureelerfgoed.nl/term/id/abr/2/b402446a-0a00-4fee-a9cd-1a7f307d651e>
+    }
+
+    ?concept a skos:Concept ;
+             skos:inScheme ?scheme ;
+             skos:prefLabel ?prefLabel .
+
+    FILTER(LANG(?prefLabel) = "nl")
+
+    OPTIONAL {
+      ?concept skos:altLabel ?altLabel .
+      FILTER(LANG(?altLabel) = "nl")
+    }
+
+    OPTIONAL {
+      ?concept skos:notation ?notation .
+    }
+
+    OPTIONAL {
+      ?concept rnce:codeAbr ?rnceCode .
+    }
+
+    OPTIONAL {
+      ?concept skos:scopeNote ?scopeNote .
+      FILTER(LANG(?scopeNote) = "nl")
+    }
+
+    OPTIONAL {
+      ?concept skos:broader ?broader .
+
+      OPTIONAL {
+        ?broader skos:prefLabel ?broaderLabel .
+        FILTER(LANG(?broaderLabel) = "nl")
+      }
+    }
+  }
+}

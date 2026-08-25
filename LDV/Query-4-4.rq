@@ -8,7 +8,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT (?childLabel AS ?node) (?parentLabel AS ?parent) ?scopeNote {
   # Retrieve the preferred label of the root concept
-  ?topConcept skos:prefLabel ?root.
+  ?topConcept skos:prefLabel ?rootLabel.
 
   # Retrieve concepts that have a transitive "broader" relationship with the root concept
   ?concept skos:broader+ ?topConcept.
@@ -27,7 +27,7 @@ SELECT (?childLabel AS ?node) (?parentLabel AS ?parent) ?scopeNote {
 
   # Filter the results
   FILTER(LANG(?parentLabel) = "nl" || !BOUND(?parentConcept))  # Filter based on parent label and existence of parent concept
-  FILTER(LANG(?root) = "nl")  # Filter based on root label language
+  FILTER(LANG(?rootLabel) = "nl")  # Filter based on root label language
   FILTER(LANG(?childLabel) = "nl")  # Filter based on child label language
   # Size and Color values can be assigned based on your requirements
   # Modify the values below accordingly

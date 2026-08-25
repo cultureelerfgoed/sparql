@@ -1,0 +1,35 @@
+#+ name: gehele-abr2
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+# ABR2. Inhoud van het conceptscheme "Archeologisch Basis Register" (ABR2) als thesaurus
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+SELECT ?concept
+  (SAMPLE(?prefLabel) AS ?label)
+  (GROUP_CONCAT(DISTINCT ?altLabel; separator=" | ") AS ?altLabels)
+  #(SAMPLE(?notation) AS ?code)
+  (GROUP_CONCAT(DISTINCT ?rnceCode; separator=" | ") AS ?rnceCodes)
+  (GROUP_CONCAT(DISTINCT ?broaderPair; separator=" | ") AS ?broaderConcepts)
+  (SAMPLE(?note) AS ?scopeNoteText)
+WHERE {
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/2/thesaurus> {
+    ?concept a skos:Concept ;
+      skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/2/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+      skos:prefLabel ?prefLabel .
+    OPTIONAL { ?concept skos:altLabel ?altLabel . }
+  #  OPTIONAL { ?concept skos:notation ?notation . }
+    OPTIONAL { ?concept rnce:codeAbr ?rnceCode . }
+    OPTIONAL { ?concept skos:scopeNote ?note . FILTER(lang(?note) = "nl") }
+    OPTIONAL {
+      ?concept skos:broader ?broader .
+      ?broader skos:inScheme <https://data.cultureelerfgoed.nl/term/id/abr/2/b402446a-0a00-4fee-a9cd-1a7f307d651e> ;
+        skos:prefLabel ?broaderLabel .
+      FILTER(lang(?broaderLabel) = "nl")
+      BIND(CONCAT(?broaderLabel, " <", STR(?broader), ">") AS ?broaderPair)
+    }
+  }
+  FILTER(lang(?prefLabel) = "nl")
+}
+GROUP BY ?concept
+ORDER BY ?label
