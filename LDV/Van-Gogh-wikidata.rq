@@ -1,0 +1,36 @@
+#+ name: Van-Gogh-wikidata
+#+ description: Toont afbeeldingen op Wikidata op basis van La Faille nummer.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Van-Gogh-World-Wide-RCE/sparql
+
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+
+SELECT DISTINCT
+    ?deLaFailleNummer
+    ?schilderij_wiki
+    ?schilderij
+
+WHERE {
+
+    ?schilderij_rce
+        a crm:E22_Human-Made_Object ;
+        crm:P1_is_identified_by ?id .
+
+    ?id
+        crm:P190_has_symbolic_content ?deLaFailleNummer ;
+        crm:P2_has_type <https://vangoghworldwide.org/data/concept/f_number> .
+
+    SERVICE <https://query.wikidata.org/sparql> {
+
+        ?schilderij_wiki
+            wdt:P31 wd:Q3305213 ;
+            wdt:P170 wd:Q5582 ;
+            wdt:P528 ?deLaFailleNummer ;
+            wdt:P1476 ?schilderij .
+
+        FILTER(LANG(?schilderij) = "en")
+    }
+}
+
+#LIMIT 10
