@@ -1,7 +1,5 @@
 #+ name: Query-3-8
 #+ description: Het rapport geeft informatie over het toegepaste materiaaltechnisch onderzoek en de analysemethode, het schilderijgenre en de ondergrond van het schilderij.
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Van-Gogh-World-Wide-RCE/services/Van-Gogh-World-Wide-RCE/sparql
-
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # Geeft aan op type schilderij waarop technisch rapport betrekking heeft.
