@@ -1,147 +1,204 @@
 #+ name: rijksmonumenten-gemeente-provincie-1
-#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/services/Rijksmonumenten-sdo-jena/sparql
+#+ description: Overzicht van gebouwde rijksmonumenten per provincie of gemeente.
+#- Bedoeld om een overzicht in CSV te maken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
 
-PREFIX text:  <http://jena.apache.org/text#>
-PREFIX schema:<https://schema.org/>
-PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX ceo:   <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-PREFIX edm:   <http://www.europeana.eu/schemas/edm/>
-PREFIX dc:    <http://purl.org/dc/elements/1.1/>
-PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
-
-SELECT DISTINCT
-  (URI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) AS ?monumentenregister)
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+select
+  (iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
   ?rijksmonumentnummer
-  ?naam
-  ?plaats
-  ?functies
-  ?literal
+  ?monumentaard
+  ?juridischeStatus
+  ?provincie
+  ?gemeente
+  ?straat
+  ?huisnummer
+  ?adres
+  ?postcode
+  ?woonplaatsnaam
+  ?hoofdfunctie
+  ?hoofdcategorie
+  ?subcategorie
+  ?functie
+  ?verbijzondering
+  ?toelichting
   ?omschrijving
   ?datumInschrijving
-  ?jaar
-  ?heeftVanwege
-  ?heeftMetConstructie
-  ?onderdelenGevonden
-  ?primaireRede
-
-WHERE {
-
-  #################################################################
-  # 1. Basis uit de endpoint waar u deze query draait (text:query)
-  #################################################################
-  (?choi ?sc ?literal) text:query (
-    schema:description
-    '("beschermd vanwege" OR "vanwege")'
-    'highlight:s:<strong class="hiLite">|e:</strong>|f:[...]<br>- '
-  ) .
-
-  ?choi schema:description      ?omschrijving ;
-        schema:identifier       ?rijksmonumentnummer ;
-        schema:addressLocality  ?plaats ;
-        schema:category         ?monumentaard .
-
-  OPTIONAL {
-    ?choi schema:additionalType ?functie .
-    BIND(REPLACE(?functie, "\\s\\(.*\\)|\\(.*\\)", "") AS ?functies)
+where {
+  ########################################
+  # BASIS: exact 1 rij per monument
+  ########################################
+  graph graph:instanties-rce {
+    ?rijksmonument
+      ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus ?status ;
+      ceo:heeftMonumentAard ?aard ;
+      ceo:heeftBasisregistratieRelatie ?basisrel .
+    ?basisrel ceo:heeftProvincie ?prov ;
+      ceo:heeftGemeente  ?gem .
+    ?aard   skos:prefLabel ?monumentaard .
+    ?status skos:prefLabel ?juridischeStatus .
   }
-  OPTIONAL { ?choi schema:name ?naam . }
-
-  # Normaliseer omschrijving voor matching
-  BIND(LCASE(STR(?omschrijving)) AS ?omslLc)
-
-  #################################################################
-  # Uitgebreide woordenlijst onderdelen
-  # inclusief kerkje / kerkgebouw varianten
-  #################################################################
-  BIND(
-    "kerkgebouw|kerkgebouwen|kerkje|kerkjes|kerk|kerken|herenbank|herenbanken|preekstoel|preekgestoelte|klok|klokken|bankenplan|preekstoelen|zerk|zerken|doopvont|doopvonten|luidklok|luidklokken|orgel|orgels"
-    AS ?patOnderdelen
-  )
-
-  # Heeft letterlijk 'vanwege'
-  BIND( REGEX(?omslLc, "\\bvanwege\\b") AS ?heeftVanwege )
-
-  #################################################################
-  # Detectie MET-constructie
-  #
-  # We definiëren twee hulpsignalen:
-  # 1. ?heeftMetWoord  -> er staat 'met' ergens
-  # 2. ?heeftOnderdeel -> er staat een relevant onderdeel ergens
-  #
-  # Let op: we staan leestekens direct na het onderdeel toe.
-  # We matchen dus bv "kerk," en "kerk." en "kerkje,".
-  #################################################################
-
-  # bevat 'met' als los woord
-  BIND( REGEX(?omslLc, "\\bmet\\b") AS ?heeftMetWoord )
-
-  # bevat minstens één van de onderdelen
-  BIND(
-    REGEX(
-      ?omslLc,
-      CONCAT("\\b(", ?patOnderdelen, ")(\\b|[,\\.;:\\)])")
-    ) AS ?heeftOnderdeel
-  )
-
-  # combinatie: dit beschouwen we als met-constructie
-  BIND( (?heeftMetWoord && ?heeftOnderdeel) AS ?heeftMetConstructie )
-
-  #################################################################
-  # OnderdelenGevonden als pipe-gescheiden lijst
-  #
-  # We testen varianten expliciet en plakken ze aaneen.
-  # We laten 'kerkgebouw' en 'kerkje' apart zien naast 'kerk'.
-  #################################################################
-  BIND(
-    CONCAT(
-      IF( REGEX(?omslLc, "\\bkerkgebouw(en)?\\b"),          "kerkgebouw|",     "" ),
-      IF( REGEX(?omslLc, "\\bkerkje(s)?\\b"),               "kerkje|",         "" ),
-      IF( REGEX(?omslLc, "\\bkerk(en)?\\b"),                "kerk|",           "" ),
-      IF( REGEX(?omslLc, "\\bherenbank(en)?\\b"),           "herenbank|",      "" ),
-      IF( REGEX(?omslLc, "\\bpreekstoel(en)?\\b"),          "preekstoel|",     "" ),
-      IF( REGEX(?omslLc, "\\bpreekgestoelte(n)?\\b"),       "preekgestoelte|", "" ),
-      IF( REGEX(?omslLc, "\\bbankenplan\\b"),               "bankenplan|",     "" ),
-      IF( REGEX(?omslLc, "\\bzerk(en)?\\b"),                "zerk|",           "" ),
-      IF( REGEX(?omslLc, "\\bdoopvont(en)?\\b"),            "doopvont|",       "" ),
-      IF( REGEX(?omslLc, "\\bluidklok(ken)?\\b"),           "luidklok|",       "" ),
-     IF( REGEX(?omslLc, "\\bklok(ken)?\\b"),           "klok|",       "" ),
-      IF( REGEX(?omslLc, "\\borgel(s)?\\b"),                "orgel|",          "" )
-    ) AS ?_onderdelenTmp
-  )
-  BIND(REPLACE(?_onderdelenTmp, "\\|$", "") AS ?onderdelenGevonden)
-
-  #################################################################
-  # Primaire rede
-  #################################################################
-  BIND(
-    IF(
-      ?heeftMetConstructie,
-      "met-constructie (bijv. 'kerk, met orgel' of 'kerkgebouw met bankenplan')",
-      IF(
-        ?heeftVanwege,
-        "beschermd vanwege / vanwege",
-        ""
-      )
-    ) AS ?primaireRede
-  )
-
-  # Alleen interessante gevallen
-  #FILTER( ?heeftVanwege || ?heeftMetConstructie )
-
-  #################################################################
-  # 2. Federated lookup naar cho-endpoint voor de inschrijfdatum
-  #################################################################
-  SERVICE <https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql> {
-    OPTIONAL {
-      ?choi ceo:datumInschrijvingInMonumentenregister ?datumInschrijving .
-      BIND( year(xsd:dateTime(?datumInschrijving)) AS ?jaar )
-
-      FILTER(
-        BOUND(?jaar) &&
-        ?jaar >= 1961 &&
-        ?jaar <= 1980
-      )
+  ########################################
+  # OWMS labels
+  ########################################
+  graph owms: {
+    ?prov skos:prefLabel ?provincie .
+    ?gem  skos:prefLabel ?gemeente .
+  }
+  ########################################
+  # WOONPLAATS (werkt voor archeologie + regulier)
+  ########################################
+  optional {
+    {
+      select ?rijksmonument
+        (group_concat(distinct ?wp; separator=", ") as ?woonplaatsnaam)
+      where {
+        graph graph:instanties-rce {
+          ?rijksmonument
+            ( ceo:heeftBasisregistratieRelatie
+              | ceo:bevatObject/ceo:heeftBasisregistratieRelatie
+            )
+            / ceo:heeftBAGRelatie
+            / ceo:woonplaatsnaam
+            ?wp .
+        }
+      }
+      group by ?rijksmonument
+    }
+  }
+  ########################################
+  # ADRESGEGEVENS (1 BAG, maar zonder SAMPLE)
+  ########################################
+  optional {
+    graph graph:instanties-rce {
+      ?rijksmonument
+        ( ceo:heeftBasisregistratieRelatie
+          | ceo:bevatObject/ceo:heeftBasisregistratieRelatie
+        )
+        / ceo:heeftBAGRelatie
+        ?bag .
+      optional {
+        ?bag ceo:openbareRuimte ?straat
+      }
+      optional {
+        ?bag ceo:huisnummer ?huisnummer
+      }
+      optional {
+        ?bag ceo:volledigAdres ?adres
+      }
+      optional {
+        ?bag ceo:postcode ?pc .
+        bind(
+          replace(str(?pc), "([0-9]{4})([A-Z]{2})", "$1 $2")
+          as ?postcode
+        )
+      }
+    }
+  }
+  ########################################
+  # FUNCTIE, opgesplitst naar hoofdcategorie/subcategorie/functie/verbijzondering
+  # LET OP: bij meerdere functierelaties per monument raken de kolommen
+  # onderling niet meer gekoppeld (elke kolom wordt los group_concat'd).
+  ########################################
+  optional {
+    {
+      select ?rijksmonument
+        (group_concat(distinct ?hoofdfunctieLabel; separator=", ") as ?hoofdfunctie)
+        (group_concat(distinct ?toelichtingTekst; separator=" | ") as ?toelichting)
+        (group_concat(distinct ?hoofdcategorieLabel; separator=", ") as ?hoofdcategorie)
+        (group_concat(distinct ?subcategorieLabel; separator=", ") as ?subcategorie)
+        (group_concat(distinct ?functieLabel; separator=", ") as ?functie)
+        (group_concat(distinct ?verbijzonderingLabel; separator=", ") as ?verbijzondering)
+      where {
+        graph graph:instanties-rce {
+          ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?fRel .
+          ?fRel ceo:formeelStandpunt true ;
+            ceo:heeftFunctieNaam ?fnConcept .
+          optional {
+            ?fRel ceo:hoofdfunctie ?hoofdfunctieVlag .
+            bind(if(?hoofdfunctieVlag, "Ja", "Nee") as ?hoofdfunctieLabel)
+          }
+          optional {
+            ?fRel ceo:kennisregistratieToelichting ?toelichtingTekst
+          }
+        }
+        graph graph:bebouwdeomgeving {
+          ?fnConcept skos:prefLabel ?fnLabelRaw .
+          bind(replace(?fnLabelRaw, "\\s*\\(.*?\\)", "") as ?fnLabel)
+          optional {
+            ?fnConcept skos:broader ?b1 .
+            ?b1 skos:prefLabel ?b1LabelRaw .
+            bind(replace(?b1LabelRaw, "\\s*\\(.*?\\)", "") as ?b1Label)
+            optional {
+              ?b1 skos:topConceptOf ?scheme1
+            }
+            optional {
+              ?b1 skos:broader ?b2 .
+              ?b2 skos:prefLabel ?b2LabelRaw .
+              bind(replace(?b2LabelRaw, "\\s*\\(.*?\\)", "") as ?b2Label)
+              optional {
+                ?b2 skos:topConceptOf ?scheme2
+              }
+              optional {
+                ?b2 skos:broader ?b3 .
+                ?b3 skos:prefLabel ?b3LabelRaw .
+                bind(replace(?b3LabelRaw, "\\s*\\(.*?\\)", "") as ?b3Label)
+                optional {
+                  ?b3 skos:topConceptOf ?scheme3
+                }
+                optional {
+                  ?b3 skos:broader ?b4 .
+                  optional {
+                    ?b4 skos:topConceptOf ?scheme4
+                  }
+                }
+              }
+            }
+          }
+        }
+        bind(
+          if(bound(?scheme1), ?fnLabel,
+            if(bound(?scheme2), ?b1Label,
+              if(bound(?scheme3), ?b2Label,
+                if(bound(?scheme4), ?b3Label, "")))) as ?hoofdcategorieLabel)
+        bind(
+          if(bound(?scheme1), "",
+            if(bound(?scheme2), ?fnLabel,
+              if(bound(?scheme3), ?b1Label,
+                if(bound(?scheme4), ?b2Label, "")))) as ?subcategorieLabel)
+        bind(
+          if(bound(?scheme1) || bound(?scheme2), "",
+            if(bound(?scheme3), ?fnLabel,
+              if(bound(?scheme4), ?b1Label, ""))) as ?functieLabel)
+        bind(
+          if(bound(?scheme4), ?fnLabel, "") as ?verbijzonderingLabel)
+      }
+      group by ?rijksmonument
+    }
+  }
+  ########################################
+  # OMSCHRIJVING (zonder duplicatie, alleen formeel standpunt)
+  ########################################
+  optional {
+    {
+      select ?rijksmonument
+        (group_concat(distinct ?omschrijvingTekst; separator=" | ") as ?omschrijving)
+      where {
+        graph graph:instanties-rce {
+          ?rijksmonument
+            ceo:heeftOmschrijving ?oRel .
+          ?oRel ceo:formeelStandpunt true ;
+            ceo:omschrijving ?omschrijvingTekst .
+        }
+      }
+      group by ?rijksmonument
     }
   }
 }
-ORDER BY ?rijksmonumentnummer
+limit 20000
