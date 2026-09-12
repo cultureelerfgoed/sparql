@@ -1,0 +1,209 @@
+#+ name: rijksmonumenten-gemeente-provincie-1-1
+#+ description: Overzicht van gebouwde rijksmonumenten per provincie of gemeente.
+#- Bedoeld om een overzicht in rdf te maken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix owms: <https://linkeddata.cultureelerfgoed.nl/graph/owms>
+prefix rmn: <https://data.joop.example/def/rijksmonumenten#>
+
+construct {
+  ?monumentenregister
+    ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+    ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+    ceo:heeftMonumentAard ?aard ;
+    ceo:heeftJuridischeStatus ?status ;
+    ceo:heeftOorspronkelijkeFunctie ?fRel ;
+    ceo:heeftOmschrijving ?oRel ;
+    ceo:bevatObject ?deelobject .
+
+  ?aard skos:prefLabel ?monumentaard .
+  ?status skos:prefLabel ?juridischeStatus .
+
+  ?bagHost ceo:heeftBasisregistratieRelatie ?basisrel .
+  ?basisrel
+    ceo:heeftProvincie ?prov ;
+    ceo:heeftGemeente ?gem ;
+    ceo:heeftBAGRelatie ?bag .
+  ?prov skos:prefLabel ?provincie .
+  ?gem skos:prefLabel ?gemeente .
+
+  ?bag
+    ceo:openbareRuimte ?straat ;
+    ceo:huisnummer ?huisnummer ;
+    ceo:volledigAdres ?adres ;
+    ceo:postcode ?postcode ;
+    ceo:woonplaatsnaam ?woonplaatsnaam .
+
+  ?fRel
+    ceo:formeelStandpunt true ;
+    ceo:heeftFunctieNaam ?fnConcept ;
+    ceo:hoofdfunctie ?hoofdfunctieVlag ;
+    ceo:kennisregistratieToelichting ?toelichtingTekst .
+
+  ?fnConcept
+    skos:prefLabel ?fnLabelRaw ;
+    rmn:hoofdcategorie ?hoofdcategorieOut ;
+    rmn:subcategorie ?subcategorieOut ;
+    rmn:functie ?functieOut ;
+    rmn:verbijzondering ?verbijzonderingOut .
+
+  ?oRel
+    ceo:formeelStandpunt true ;
+    ceo:omschrijving ?omschrijvingTekst .
+}
+where {
+  ########################################
+  # BASIS
+  ########################################
+  graph graph:instanties-rce {
+    ?rijksmonument
+      ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+      ceo:datumInschrijvingInMonumentenregister ?datumInschrijving ;
+      ceo:heeftJuridischeStatus ?status ;
+      ceo:heeftMonumentAard ?aard .
+    ?aard   skos:prefLabel ?monumentaard .
+    ?status skos:prefLabel ?juridischeStatus .
+  }
+  bind(iri(concat("https://monumentenregister.cultureelerfgoed.nl/monumenten/", ?rijksmonumentnummer)) as ?monumentenregister)
+
+  ########################################
+  # BASISREGISTRATIE, direct of via bevatObject (archeologie)
+  ########################################
+  optional {
+    graph graph:instanties-rce {
+      {
+        ?rijksmonument ceo:heeftBasisregistratieRelatie ?basisrel .
+        bind(?rijksmonument as ?bagHost)
+      }
+      union
+      {
+        ?rijksmonument ceo:bevatObject ?deelobject .
+        ?deelobject ceo:heeftBasisregistratieRelatie ?basisrel .
+        bind(?deelobject as ?bagHost)
+      }
+      ?basisrel ceo:heeftProvincie ?prov ;
+                ceo:heeftGemeente  ?gem ;
+                ceo:heeftBAGRelatie ?bag .
+      optional { ?bag ceo:openbareRuimte ?straat }
+      optional { ?bag ceo:huisnummer ?huisnummer }
+      optional { ?bag ceo:volledigAdres ?adres }
+      optional { ?bag ceo:woonplaatsnaam ?woonplaatsnaam }
+      optional {
+        ?bag ceo:postcode ?pc .
+        bind(replace(str(?pc), "([0-9]{4})([A-Z]{2})", "$1 $2") as ?postcode)
+      }
+    }
+    graph owms: {
+      ?prov skos:prefLabel ?provincie .
+      ?gem  skos:prefLabel ?gemeente .
+    }
+  }
+
+  ########################################
+  # FILTER: functienaam (optionele API-variabele)
+  ########################################
+  filter(
+    !bound(?functienaam) ||
+    exists {
+      graph graph:instanties-rce {
+        ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?fRelFilter .
+        ?fRelFilter ceo:formeelStandpunt true ;
+          ceo:heeftFunctieNaam ?fnConceptFilter .
+      }
+      graph graph:bebouwdeomgeving {
+        ?fnConceptFilter skos:prefLabel ?fnLabelFilterRaw .
+        bind(replace(?fnLabelFilterRaw, "\\s*\\(.*?\\)\\s*", "") as ?fnLabelFilter)
+        optional {
+          ?fnConceptFilter skos:broader ?b1Filter .
+          ?b1Filter skos:prefLabel ?b1LabelFilterRaw .
+          bind(replace(?b1LabelFilterRaw, "\\s*\\(.*?\\)\\s*", "") as ?b1LabelFilter)
+          optional {
+            ?b1Filter skos:broader ?b2Filter .
+            ?b2Filter skos:prefLabel ?b2LabelFilterRaw .
+            bind(replace(?b2LabelFilterRaw, "\\s*\\(.*?\\)\\s*", "") as ?b2LabelFilter)
+            optional {
+              ?b2Filter skos:broader ?b3Filter .
+              ?b3Filter skos:prefLabel ?b3LabelFilterRaw .
+              bind(replace(?b3LabelFilterRaw, "\\s*\\(.*?\\)\\s*", "") as ?b3LabelFilter)
+            }
+          }
+        }
+        filter(
+          str(?fnLabelFilter) = str(?functienaam) ||
+          str(?b1LabelFilter) = str(?functienaam) ||
+          str(?b2LabelFilter) = str(?functienaam) ||
+          str(?b3LabelFilter) = str(?functienaam)
+        )
+      }
+    }
+  )
+
+  ########################################
+  # FUNCTIE (per functierelatie, geen samenvoeging meer nodig)
+  ########################################
+  optional {
+    graph graph:instanties-rce {
+      ?rijksmonument ceo:heeftOorspronkelijkeFunctie ?fRel .
+      ?fRel ceo:formeelStandpunt true ;
+        ceo:heeftFunctieNaam ?fnConcept .
+      optional { ?fRel ceo:hoofdfunctie ?hoofdfunctieVlag }
+      optional { ?fRel ceo:kennisregistratieToelichting ?toelichtingTekst }
+    }
+    graph graph:bebouwdeomgeving {
+      ?fnConcept skos:prefLabel ?fnLabelRaw .
+      bind(replace(?fnLabelRaw, "\\s*\\(.*?\\)\\s*", "") as ?fnLabel)
+      optional {
+        ?fnConcept skos:broader ?b1 .
+        ?b1 skos:prefLabel ?b1LabelRaw .
+        bind(replace(?b1LabelRaw, "\\s*\\(.*?\\)\\s*", "") as ?b1Label)
+        optional { ?b1 skos:topConceptOf ?scheme1 }
+        optional {
+          ?b1 skos:broader ?b2 .
+          ?b2 skos:prefLabel ?b2LabelRaw .
+          bind(replace(?b2LabelRaw, "\\s*\\(.*?\\)\\s*", "") as ?b2Label)
+          optional { ?b2 skos:topConceptOf ?scheme2 }
+          optional {
+            ?b2 skos:broader ?b3 .
+            ?b3 skos:prefLabel ?b3LabelRaw .
+            bind(replace(?b3LabelRaw, "\\s*\\(.*?\\)\\s*", "") as ?b3Label)
+            optional { ?b3 skos:topConceptOf ?scheme3 }
+            optional {
+              ?b3 skos:broader ?b4 .
+              optional { ?b4 skos:topConceptOf ?scheme4 }
+            }
+          }
+        }
+      }
+    }
+    bind(
+      if(bound(?scheme1), ?fnLabel,
+        if(bound(?scheme2), ?b1Label,
+          if(bound(?scheme3), ?b2Label,
+            if(bound(?scheme4), ?b3Label, ?unbound1)))) as ?hoofdcategorieOut)
+    bind(
+      if(bound(?scheme2), ?fnLabel,
+        if(bound(?scheme3), ?b1Label,
+          if(bound(?scheme4), ?b2Label, ?unbound2))) as ?subcategorieOut)
+    bind(
+      if(bound(?scheme3), ?fnLabel,
+        if(bound(?scheme4), ?b1Label, ?unbound3)) as ?functieOut)
+    bind(
+      if(bound(?scheme4), ?fnLabel, ?unbound4) as ?verbijzonderingOut)
+  }
+
+  ########################################
+  # OMSCHRIJVING (per omschrijving, geen samenvoeging meer nodig)
+  ########################################
+  optional {
+    graph graph:instanties-rce {
+      ?rijksmonument ceo:heeftOmschrijving ?oRel .
+      ?oRel ceo:formeelStandpunt true ;
+        ceo:omschrijving ?omschrijvingTekst .
+    }
+  }
+}
+limit 20000
