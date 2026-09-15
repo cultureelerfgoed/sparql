@@ -1,0 +1,128 @@
+#+ name: gebedshuizen
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/sparql
+
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
+
+CONSTRUCT {
+
+  # Het gebedshuis zelf
+  ?gebedshuis ?p1 ?o1 .
+
+  # Direct gekoppelde objecten, zoals naam, adres,
+  # geometrie, denominatie, functie, gebeurtenis en type
+  ?o1 ?p2 ?o2 .
+
+  # Daaronder gekoppelde objecten, bijvoorbeeld
+  # dateringen en actor/rol bij gebeurtenissen
+  ?o2 ?p3 ?o3 .
+
+  # Eventueel nog één niveau dieper
+  ?o3 ?p4 ?o4 .
+}
+WHERE {
+
+  # Eerst bepalen welke gebedshuizen voldoen
+  {
+    SELECT DISTINCT ?gebedshuis
+    WHERE {
+      ?gebedshuis rdf:type ceox:Gebedshuis .
+
+      # -----------------------------
+      # NAAM
+      # -----------------------------
+      OPTIONAL {
+        ?gebedshuis ceox:heeftNaam ?naamResource .
+        ?naamResource ceox:naam ?naam .
+      }
+
+      # -----------------------------
+      # GEMEENTE
+      # -----------------------------
+      OPTIONAL {
+        ?gebedshuis ceox:heeftAdresgegevens ?adresResource .
+        ?adresResource ceox:heeftGemeente ?gemeenteURI .
+      }
+
+      # Zoek op naam, alleen wanneer zoekNaam is ingevuld
+      FILTER (
+        !BOUND(?zoekNaam)
+        ||
+        CONTAINS(
+          LCASE(STR(?naam)),
+          LCASE(STR(?zoekNaam))
+        )
+      )
+
+      # Zoek op gemeente, alleen wanneer zoekGemeente is ingevuld
+      #
+      # De gemeentenaam staat in de OWMS-URI, bijvoorbeeld:
+      # http://standaarden.overheid.nl/owms/terms/'s-Hertogenbosch
+      FILTER (
+        !BOUND(?zoekGemeente)
+        ||
+        CONTAINS(
+          LCASE(STR(?gemeenteURI)),
+          LCASE(STR(?zoekGemeente))
+        )
+      )
+
+      # Niet toestaan dat beide zoekvelden ontbreken
+      FILTER (
+        BOUND(?zoekNaam)
+        ||
+        BOUND(?zoekGemeente)
+      )
+    }
+  }
+
+  # =====================================================
+  # ALLE DATA VAN HET GEVONDEN GEBEDSHUIS
+  # =====================================================
+
+  ?gebedshuis ?p1 ?o1 .
+
+  # Alleen verder lopen over resources uit de
+  # Gebedshuizen-dataset zelf.
+  #
+  # Hierdoor gaan we niet ineens de hele CHT, RN,
+  # OWMS of de CEOn/CEOX-ontologie ophalen.
+  OPTIONAL {
+    FILTER(
+      isIRI(?o1)
+      &&
+      STRSTARTS(
+        STR(?o1),
+        "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
+      )
+    )
+
+    ?o1 ?p2 ?o2 .
+
+    OPTIONAL {
+      FILTER(
+        isIRI(?o2)
+        &&
+        STRSTARTS(
+          STR(?o2),
+          "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
+        )
+      )
+
+      ?o2 ?p3 ?o3 .
+
+      OPTIONAL {
+        FILTER(
+          isIRI(?o3)
+          &&
+          STRSTARTS(
+            STR(?o3),
+            "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
+          )
+        )
+
+        ?o3 ?p4 ?o4 .
+      }
+    }
+  }
+}
