@@ -2,127 +2,239 @@
 #+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/gebedshuizen/sparql
 
 PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ceox: <https://linkeddata.cultureelerfgoed.nl/def/ceox#>
 
 CONSTRUCT {
-
-  # Het gebedshuis zelf
   ?gebedshuis ?p1 ?o1 .
-
-  # Direct gekoppelde objecten, zoals naam, adres,
-  # geometrie, denominatie, functie, gebeurtenis en type
   ?o1 ?p2 ?o2 .
-
-  # Daaronder gekoppelde objecten, bijvoorbeeld
-  # dateringen en actor/rol bij gebeurtenissen
   ?o2 ?p3 ?o3 .
-
-  # Eventueel nog één niveau dieper
   ?o3 ?p4 ?o4 .
+  ?o4 ?p5 ?o5 .
+
+  ?gemeenteURI skos:prefLabel ?gemeenteLabel .
+  ?denominatieURI skos:prefLabel ?denominatieLabel .
 }
 WHERE {
 
-  # Eerst bepalen welke gebedshuizen voldoen
   {
     SELECT DISTINCT ?gebedshuis
     WHERE {
-      ?gebedshuis rdf:type ceox:Gebedshuis .
 
-      # -----------------------------
-      # NAAM
-      # -----------------------------
-      OPTIONAL {
-        ?gebedshuis ceox:heeftNaam ?naamResource .
-        ?naamResource ceox:naam ?naam .
-      }
+      GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/gebedshuizen/graphs/default> {
 
-      # -----------------------------
-      # GEMEENTE
-      # -----------------------------
-      OPTIONAL {
-        ?gebedshuis ceox:heeftAdresgegevens ?adresResource .
-        ?adresResource ceox:heeftGemeente ?gemeenteURI .
-      }
+        ?gebedshuis rdf:type ceox:Gebedshuis .
 
-      # Zoek op naam, alleen wanneer zoekNaam is ingevuld
-      FILTER (
-        !BOUND(?zoekNaam)
-        ||
-        CONTAINS(
-          LCASE(STR(?naam)),
-          LCASE(STR(?zoekNaam))
+        # Naam
+        FILTER(
+          !BOUND(?zoekNaam)
+          ||
+          EXISTS {
+            ?gebedshuis ceox:heeftNaam ?naamResource .
+            ?naamResource ceox:naam ?naam .
+
+            FILTER(
+              CONTAINS(
+                LCASE(STR(?naam)),
+                LCASE(STR(?zoekNaam))
+              )
+            )
+          }
         )
-      )
 
-      # Zoek op gemeente, alleen wanneer zoekGemeente is ingevuld
-      #
-      # De gemeentenaam staat in de OWMS-URI, bijvoorbeeld:
-      # http://standaarden.overheid.nl/owms/terms/'s-Hertogenbosch
-      FILTER (
-        !BOUND(?zoekGemeente)
-        ||
-        CONTAINS(
-          LCASE(STR(?gemeenteURI)),
-          LCASE(STR(?zoekGemeente))
+        # Gemeente
+        FILTER(
+          !BOUND(?zoekGemeente)
+          ||
+          EXISTS {
+            ?gebedshuis
+              ceox:heeftAdresgegevens ?adresResource .
+
+            ?adresResource
+              ceox:heeftGemeente ?gemeenteURI .
+
+            ?gemeenteURI
+              skos:prefLabel ?gemeenteLabel .
+
+            FILTER(
+              LANGMATCHES(
+                LANG(?gemeenteLabel),
+                "nl"
+              )
+            )
+
+            FILTER(
+              CONTAINS(
+                LCASE(STR(?gemeenteLabel)),
+                LCASE(STR(?zoekGemeente))
+              )
+            )
+          }
         )
-      )
 
-      # Niet toestaan dat beide zoekvelden ontbreken
-      FILTER (
-        BOUND(?zoekNaam)
-        ||
-        BOUND(?zoekGemeente)
-      )
+        # Woonplaats
+        FILTER(
+          !BOUND(?zoekWoonplaats)
+          ||
+          EXISTS {
+            ?gebedshuis
+              ceox:heeftAdresgegevens ?adresResource .
+
+            ?adresResource
+              ceox:woonplaats ?woonplaats .
+
+            FILTER(
+              CONTAINS(
+                LCASE(STR(?woonplaats)),
+                LCASE(STR(?zoekWoonplaats))
+              )
+            )
+          }
+        )
+
+        # Denominatie
+        FILTER(
+          !BOUND(?zoekDenominatie)
+          ||
+          EXISTS {
+            ?gebedshuis
+              ceox:heeftDenominatie ?denominatieResource .
+
+            ?denominatieResource
+              ceox:heeftDenominatieNaam ?denominatieURI .
+
+            ?denominatieURI
+              skos:prefLabel ?denominatieLabel .
+
+            FILTER(
+              LANGMATCHES(
+                LANG(?denominatieLabel),
+                "nl"
+              )
+            )
+
+            FILTER(
+              CONTAINS(
+                LCASE(STR(?denominatieLabel)),
+                LCASE(STR(?zoekDenominatie))
+              )
+            )
+          }
+        )
+
+        # Minimaal één zoekveld
+        FILTER(
+          BOUND(?zoekNaam)
+          ||
+          BOUND(?zoekGemeente)
+          ||
+          BOUND(?zoekWoonplaats)
+          ||
+          BOUND(?zoekDenominatie)
+        )
+      }
     }
   }
 
-  # =====================================================
-  # ALLE DATA VAN HET GEVONDEN GEBEDSHUIS
-  # =====================================================
+  # Alle data van gevonden gebedshuizen
+  GRAPH <https://linkeddata.cultureelerfgoed.nl/rce/gebedshuizen/graphs/default> {
 
-  ?gebedshuis ?p1 ?o1 .
-
-  # Alleen verder lopen over resources uit de
-  # Gebedshuizen-dataset zelf.
-  #
-  # Hierdoor gaan we niet ineens de hele CHT, RN,
-  # OWMS of de CEOn/CEOX-ontologie ophalen.
-  OPTIONAL {
-    FILTER(
-      isIRI(?o1)
-      &&
-      STRSTARTS(
-        STR(?o1),
-        "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
-      )
-    )
-
-    ?o1 ?p2 ?o2 .
+    ?gebedshuis ?p1 ?o1 .
 
     OPTIONAL {
+
       FILTER(
-        isIRI(?o2)
+        isIRI(?o1)
         &&
         STRSTARTS(
-          STR(?o2),
+          STR(?o1),
           "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
         )
       )
 
-      ?o2 ?p3 ?o3 .
+      ?o1 ?p2 ?o2 .
 
       OPTIONAL {
+
         FILTER(
-          isIRI(?o3)
+          isIRI(?o2)
           &&
           STRSTARTS(
-            STR(?o3),
+            STR(?o2),
             "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
           )
         )
 
-        ?o3 ?p4 ?o4 .
+        ?o2 ?p3 ?o3 .
+
+        OPTIONAL {
+
+          FILTER(
+            isIRI(?o3)
+            &&
+            STRSTARTS(
+              STR(?o3),
+              "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
+            )
+          )
+
+          ?o3 ?p4 ?o4 .
+
+          OPTIONAL {
+
+            FILTER(
+              isIRI(?o4)
+              &&
+              STRSTARTS(
+                STR(?o4),
+                "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/gebedshuizen/"
+              )
+            )
+
+            ?o4 ?p5 ?o5 .
+          }
+        }
       }
+    }
+
+    # Gemeentelabel meenemen
+    OPTIONAL {
+
+      ?gebedshuis
+        ceox:heeftAdresgegevens ?adresVoorGemeente .
+
+      ?adresVoorGemeente
+        ceox:heeftGemeente ?gemeenteURI .
+
+      ?gemeenteURI
+        skos:prefLabel ?gemeenteLabel .
+
+      FILTER(
+        LANGMATCHES(
+          LANG(?gemeenteLabel),
+          "nl"
+        )
+      )
+    }
+
+    # Denominatielabel meenemen
+    OPTIONAL {
+
+      ?gebedshuis
+        ceox:heeftDenominatie ?denominatieVoorLabel .
+
+      ?denominatieVoorLabel
+        ceox:heeftDenominatieNaam ?denominatieURI .
+
+      ?denominatieURI
+        skos:prefLabel ?denominatieLabel .
+
+      FILTER(
+        LANGMATCHES(
+          LANG(?denominatieLabel),
+          "nl"
+        )
+      )
     }
   }
 }
