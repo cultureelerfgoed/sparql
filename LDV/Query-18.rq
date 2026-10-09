@@ -27,7 +27,7 @@ WHERE {
   ?rijksmonument ceox:rijksmonumentnummer ?rmnr. 
  
   ?rijksmonument ceox:heeftGeometrie/wgs84:asWKT ?_shape.
-  bind(bif:st_geomfromtext(?_shape) as ?shape)
+  bind(strdt(str(bif:st_geomfromtext(?_shape)), geo:wktLiteral) as ?shape)
   ?rijksmonument ceox:heeftDenominatie/ceox:heeftDenominatieNaam ?den.
     ?den skos:prefLabel ?denominatie ;
                  rnce:hasChurchMovement/skos:prefLabel ?stroming.

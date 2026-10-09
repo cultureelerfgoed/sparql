@@ -77,7 +77,7 @@ WHERE {
   Bind(xsd:decimal(STRAFTER(?sshape, " ")) as ?wkt2a)
   Bind(?wkt2a+(?rand) as ?wkt2) 
   Bind(?wkt1a+(?rand) as ?wkt1) 
-  Bind(bif:st_geomfromtext(concat("POINT(",str(?wkt1)," ", str(?wkt2), ")")) as ?shape)
+  Bind(strdt(str(bif:st_geomfromtext(concat("POINT(",str(?wkt1)," ", str(?wkt2), ")"))), geo:wktLiteral) as ?shape)
   
   bind(YEAR(?overlijdensdatum) as ?overlijdensjaar)
   Filter(?overlijdensjaar >= "1600"^^<http://www.w3.org/2001/XMLSchema#integer> && ?overlijdensjaar <= "1830"^^<http://www.w3.org/2001/XMLSchema#integer>)
