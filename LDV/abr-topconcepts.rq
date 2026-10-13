@@ -1,0 +1,30 @@
+#+ name: abr-topconcepts
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/archeologischbasisregister/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rnce: <https://data.cultureelerfgoed.nl/id/rnce#>
+
+# Alle concepten onder één topconcept van het ABR
+# (bijv. "complextypen" of "periodes"), met label, ABR-code en URI.
+SELECT DISTINCT ?label ?codeAbr ?uri
+WHERE {
+  GRAPH <https://data.cultureelerfgoed.nl/term/id/abr/2/thesaurus> {
+
+    # Topconcept kiezen op label (API-variabele ?topconcept)
+    ?top skos:topConceptOf ?scheme ;
+         skos:prefLabel ?topLabel .
+    FILTER(STR(?topLabel) = STR(?topconcept))
+
+    # Alle onderliggende concepten, op elk niveau
+    ?uri skos:broader+ ?top ;
+         skos:prefLabel ?label .
+    FILTER(LANG(?label) IN ("nl", ""))
+
+    # Een deel van de codes eindigt op een regeleinde; dat halen we weg
+    OPTIONAL {
+      ?uri rnce:codeAbr ?rawCode .
+      BIND(REPLACE(STR(?rawCode), "[\r\n\t ]", "") AS ?codeAbr)
+    }
+  }
+}
+ORDER BY ?codeAbr ?label
