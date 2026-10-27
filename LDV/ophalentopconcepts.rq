@@ -1,0 +1,37 @@
+#+ name: ophalentopconcepts
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/thesauri/cht/sparql
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT
+  (STR(?childLabel) AS ?node)
+  (STR(?parentLabel) AS ?parent)
+  (STR(?scopeNote) AS ?tooltip)
+WHERE {
+
+  VALUES ?zoekterm { "abstracte begrippen" }
+
+  # Zoek het geselecteerde topconcept
+  ?startConcept skos:prefLabel ?startLabel .
+  FILTER(LANG(?startLabel) = "nl")
+  FILTER(STR(?startLabel) = ?zoekterm)
+
+  # Alleen de geselecteerde hiërarchie
+  ?concept skos:broader* ?startConcept .
+
+  ?concept skos:prefLabel ?childLabel .
+  FILTER(LANG(?childLabel) = "nl")
+
+  OPTIONAL {
+    ?concept skos:broader ?parentConcept .
+    ?parentConcept skos:broader* ?startConcept .
+    ?parentConcept skos:prefLabel ?parentLabel .
+    FILTER(LANG(?parentLabel) = "nl")
+  }
+
+  OPTIONAL {
+    ?concept skos:scopeNote ?scopeNote .
+    FILTER(LANG(?scopeNote) = "nl")
+  }
+}
+ORDER BY ?parent ?node
