@@ -1,0 +1,166 @@
+#+ name: boneinfo-construct
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/archeozoologie/boneinfo-elastic/sparql
+
+# BoneInfo zoekprojectie: één document per cluster (ceo:Vondstlocatie),
+# voor de TriplyDB-Elasticsearch-service op dataset archeozoologie/boneinfo.
+#
+# Zelfde recept als elastic-ceo/construct/alles.rq: één UNION-blok per veld,
+# elk blok leidt ?s ?p ?o onafhankelijk af uit ?s, zodat blokken nooit
+# cross-vermenigvuldigen. Multi-valued velden (diersoorten, literatuur)
+# komen vanzelf als meerdere triples met hetzelfde ?veld op hetzelfde ?s uit
+# - TriplyDB's Elastic-service maakt daar een array van in het document.
+#
+# Alle doelproperties in de nieuwe projectie-namespace boneinfo-elastic:
+# (be:), behalve geo:asWKT, die blijft standaardvocabulaire (zoals bij
+# elastic-ceo).
+
+PREFIX bo:     <https://linkeddata.cultureelerfgoed.nl/archeozoologie/id/boneinfo/>
+PREFIX graph:  <https://linkeddata.cultureelerfgoed.nl/archeozoologie/graph/>
+PREFIX ceo:    <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX be:     <https://linkeddata.cultureelerfgoed.nl/def/boneinfo-elastic#>
+PREFIX geo:    <http://www.opengis.net/ont/geosparql#>
+PREFIX dwc:    <http://rs.tdwg.org/dwc/terms/>
+PREFIX schema: <https://schema.org/>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT { ?s ?veld ?o }
+WHERE {
+  GRAPH graph:boneinfo { ?s a ceo:Vondstlocatie }
+
+  {
+    GRAPH graph:boneinfo { ?s bo:zoonr ?o }
+    BIND(be:zoonr AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s ceo:archis2Waarnemingsnummer ?o }
+    BIND(be:waarnemingsnummer AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s ceo:archis2Vondstmeldingsnummer ?o }
+    BIND(be:vondstmeldingsnummer AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s ceo:heeftLocatieAanduiding/ceo:locatienaam ?o }
+    BIND(be:locatienaam AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s schema:addressLocality ?o }
+    BIND(be:plaats AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:gemeente ?o }
+    BIND(be:gemeente AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:provincie ?o }
+    BIND(be:provincie AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:complextype ?o }
+    BIND(be:complextype AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s schema:description ?o }
+    BIND(be:omschrijving AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:opdrachtgever ?o }
+    BIND(be:opdrachtgever AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:onderzoeksinstantie ?o }
+    BIND(be:onderzoeksinstantie AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:onderzoeker ?o }
+    BIND(be:onderzoeker AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:invoerder ?o }
+    BIND(be:invoerder AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:verzamelwijze ?o }
+    BIND(be:verzamelwijze AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:vondstverwerving ?o }
+    BIND(be:vondstverwerving AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:omvang ?o }
+    BIND(be:omvang AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:gewogen ?o }
+    BIND(be:gewogen AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:vondstdatum ?o }
+    BIND(be:vondstdatum AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s bo:vondstjaar ?o }
+    BIND(be:vondstjaar AS ?veld)
+  } UNION {
+    # geometrie: standaardvocabulaire, niet herbenoemd (zoals bij elastic-ceo)
+    GRAPH graph:boneinfo { ?s ceo:heeftGeometrie/geo:asWKT ?o }
+    BIND(geo:asWKT AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:heeftDatering/ceo:heeftBeginDatering ?bd .
+      ?bd ceo:heeftPeriode ?periode .
+      ?periode skos:prefLabel ?o .
+    }
+    BIND(be:beginperiode AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:heeftDatering/ceo:heeftEindDatering ?ed .
+      ?ed ceo:heeftPeriode ?periode .
+      ?periode skos:prefLabel ?o .
+    }
+    BIND(be:eindperiode AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s ceo:heeftDatering/ceo:heeftBeginDatering/bo:jaar ?o }
+    BIND(be:beginjaar AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo { ?s ceo:heeftDatering/ceo:heeftEindDatering/bo:jaar ?o }
+    BIND(be:eindjaar AS ?veld)
+  } UNION {
+    # diersoorten: multi-valued, één triple per occurrence (soort-vermelding)
+    GRAPH graph:boneinfo {
+      ?s ceo:bevatObject ?occ .
+      ?occ bo:heeftTaxon ?taxon .
+      ?taxon dwc:vernacularName ?o .
+      FILTER(lang(?o) = "nl")
+    }
+    BIND(be:diersoort AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:bevatObject ?occ .
+      ?occ bo:heeftTaxon ?taxon .
+      ?taxon dwc:scientificName ?o .
+    }
+    BIND(be:wetenschappelijkeNaam AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:bevatObject ?occ .
+      ?occ bo:heeftTaxon ?taxon .
+      ?taxon bo:taxongroep ?o .
+    }
+    BIND(be:diergroep AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:bevatObject ?occ .
+      ?occ bo:heeftTaxon ?o .
+    }
+    BIND(be:taxonUri AS ?veld)
+  } UNION {
+    # literatuur: multi-valued, omgekeerd pad (publicatie wijst terug naar cluster)
+    GRAPH graph:boneinfo {
+      ?pub schema:about ?s ;
+           schema:author ?o .
+    }
+    BIND(be:auteur AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?pub schema:about ?s ;
+           schema:name ?o .
+    }
+    BIND(be:titel AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?pub schema:about ?s ;
+           schema:datePublished ?o .
+    }
+    BIND(be:publicatiejaar AS ?veld)
+  } UNION {
+    GRAPH graph:boneinfo {
+      ?pub schema:about ?s ;
+           schema:isPartOf/schema:name ?o .
+    }
+    BIND(be:tijdschrift AS ?veld)
+  }
+}

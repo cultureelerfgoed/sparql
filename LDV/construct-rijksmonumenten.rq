@@ -1,0 +1,63 @@
+#+ name: construct-rijksmonumenten
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+prefix graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+construct {
+  $this ?p1 ?o1 .
+  $this ceo:rijksmonumentnummer ?url .
+  ?o1 ?p2 ?o2 .
+  ?o2 ?p3 ?o3 .
+}
+where {
+  graph graph:instanties-rce {
+    {
+      select distinct $this {
+        $this a ceo:Rijksmonument ;
+              ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectnummer ;
+              ceo:rijksmonumentnummer ?rijksmonumentnummer ;
+              ceo:heeftBasisregistratieRelatie ?basisRelatie .
+
+        # Provincie Utrecht
+        ?basisRelatie ceo:heeftProvincie ?prov .
+        graph graph:owms {
+          ?prov skos:prefLabel ?provincie .
+        }
+        filter(str(?provincie) = "Utrecht")
+
+        # BAG optioneel: monumenten zonder BAG blijven erin
+        optional {
+          ?basisRelatie ceo:heeftBAGRelatie ?bagRelatie .
+          ?bagRelatie ceo:woonplaatsnaam ?woonplaatsnaam2 .
+        }
+        bind(?woonplaatsnaam as ?woonplaatsnaam1)
+        filter(!bound(?woonplaatsnaam1) || ?woonplaatsnaam1 = ?woonplaatsnaam2)
+
+        bind(?gemeentecode as ?gemeentecode1)
+        optional { ?basisRelatie ceo:heeftBRKRelatie/ceo:gemeentecode ?gemeentecode2 . }
+        filter(!bound(?gemeentecode1) || ?gemeentecode1 = ?gemeentecode2)
+
+        bind(?gemeentenaam as ?gemeentenaam1)
+        optional { ?basisRelatie ceo:heeftGemeente ?gemeentenaam2 . }
+        filter(!bound(?gemeentenaam1) || ?gemeentenaam1 = ?gemeentenaam2)
+
+        bind(?provinciecode as ?provinciecode1)
+        optional { ?basisRelatie ceo:heeftBRKRelatie/ceo:provinciecode ?provinciecode2 . }
+        filter(!bound(?provinciecode1) || ?provinciecode1 = ?provinciecode2)
+      }
+    }
+
+    $this ?p1 ?o1 .
+    filter(?p1 != ceo:rijksmonumentnummer)
+    $this ceo:rijksmonumentnummer ?rijksmonumentnummer .
+    bind(concat('https://monumentenregister.cultureelerfgoed.nl/monumenten/', str(?rijksmonumentnummer)) as ?url)
+
+    optional {
+      filter(?p1 not in (ceo:bevatObject, ceo:isHoofdobjectVanComplex, ceo:isOnderdeelVanComplex))
+      ?o1 ?p2 ?o2 .
+      optional { ?o2 ?p3 ?o3 . }
+    }
+  }
+}
