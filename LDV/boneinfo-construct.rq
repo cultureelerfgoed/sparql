@@ -70,6 +70,15 @@ WHERE {
     GRAPH graph:boneinfo { ?s bo:verzamelwijze ?o }
     BIND(be:verzamelwijze AS ?veld)
   } UNION {
+    GRAPH graph:boneinfo {
+      ?s ceo:heeftVerwerving ?concept .
+      ?concept skos:prefLabel ?o .
+      FILTER(lang(?o) = "nl")
+    }
+    BIND(be:vondstverwerving AS ?veld)
+  } UNION {
+    # vangnet: alleen gezet als bo:vondstverwerving geen CHT-match had (zie
+    # scripts/crosswalk.py); komt in de huidige dataset nergens voor.
     GRAPH graph:boneinfo { ?s bo:vondstverwerving ?o }
     BIND(be:vondstverwerving AS ?veld)
   } UNION {
