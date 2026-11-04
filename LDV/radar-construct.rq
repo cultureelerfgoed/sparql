@@ -1,0 +1,234 @@
+#+ name: radar-construct
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/archeobotanie/radar/sparql
+
+# RADAR zoekprojectie: één document per site (ceo:Vondstlocatie),
+# voor de TriplyDB-Elasticsearch-service op dataset archeobotanie/radar.
+#
+# Zelfde recept als BoneInfo (construct/boneinfo.rq) en elastic-ceo
+# (construct/alles.rq): één UNION-blok per veld, elk blok leidt ?s ?p ?o
+# onafhankelijk af uit ?s, zodat blokken nooit cross-vermenigvuldigen.
+# Multi-valued velden (taxa, sporen, literatuur) komen vanzelf als meerdere
+# triples met hetzelfde ?veld op hetzelfde ?s uit; RDF kent geen dubbele
+# triples, dus een taxon dat op een site 400 keer is gevonden komt één keer
+# in het document. TriplyDB's Elastic-service maakt er een array van.
+#
+# Alle doelproperties in de projectie-namespace radar-elastic: (re:), behalve
+# geo:asWKT, die blijft standaardvocabulaire (zoals bij elastic-ceo).
+#
+# Labels van ABR-periodes en TOOI-provincies staan als skos:prefLabel in de
+# brondataset zelf (door scripts/radar_to_rdf.py daar neergezet), omdat deze
+# query de externe thesaurus-graphs niet kan lezen.
+
+PREFIX rad:    <https://linkeddata.cultureelerfgoed.nl/archeobotanie/id/radar/>
+PREFIX graph:  <https://linkeddata.cultureelerfgoed.nl/archeobotanie/graph/>
+PREFIX ceo:    <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX re:     <https://linkeddata.cultureelerfgoed.nl/def/radar-elastic#>
+PREFIX geo:    <http://www.opengis.net/ont/geosparql#>
+PREFIX dwc:    <http://rs.tdwg.org/dwc/terms/>
+PREFIX schema: <https://schema.org/>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT { ?s ?veld ?o }
+WHERE {
+  GRAPH graph:radar { ?s a ceo:Vondstlocatie }
+
+  {
+    GRAPH graph:radar { ?s rad:siteNr ?o }
+    BIND(re:siteNr AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s rad:biaxId ?o }
+    BIND(re:biaxId AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:archis2Waarnemingsnummer ?o }
+    BIND(re:waarnemingsnummer AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s rad:waarnemingsnummerOnzeker ?o }
+    BIND(re:waarnemingsnummerOnzeker AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s rad:archisZaaknummer ?o }
+    BIND(re:zaaknummer AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:heeftLocatieAanduiding/ceo:locatienaam ?o }
+    BIND(re:locatienaam AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s schema:addressLocality ?o }
+    BIND(re:plaats AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s rad:heeftProvincie ?provincie .
+      ?provincie skos:prefLabel ?o .
+    }
+    BIND(re:provincie AS ?veld)
+  } UNION {
+    # complextype: het label uit de codelijst; de code alleen als de codelijst hem niet kent
+    GRAPH graph:radar {
+      ?s rad:heeftComplextype ?type .
+      ?type skos:prefLabel ?o .
+    }
+    BIND(re:complextype AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s rad:complextype ?o .
+      FILTER NOT EXISTS { ?s rad:heeftComplextype ?type }
+    }
+    BIND(re:complextype AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s rad:heeftArcheoregio ?regio .
+      ?regio skos:prefLabel ?o .
+    }
+    BIND(re:archeoregio AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s schema:description ?o }
+    BIND(re:omschrijving AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s rad:coordinaatNauwkeurigheid ?o }
+    BIND(re:coordinaatNauwkeurigheid AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s rad:dateringBron ?o }
+    BIND(re:dateringBron AS ?veld)
+  } UNION {
+    # geometrie: standaardvocabulaire, niet herbenoemd (zoals bij elastic-ceo)
+    GRAPH graph:radar { ?s ceo:heeftGeometrie/geo:asWKT ?o }
+    BIND(geo:asWKT AS ?veld)
+  } UNION {
+    # datering: het label van het ABR-concept (lokaal gecachet), de oorspronkelijke code en het jaar
+    GRAPH graph:radar {
+      ?s ceo:heeftDatering/ceo:heeftBeginDatering/ceo:heeftPeriode ?periode .
+      ?periode skos:prefLabel ?o .
+    }
+    BIND(re:beginperiode AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:heeftDatering/ceo:heeftEindDatering/ceo:heeftPeriode ?periode .
+      ?periode skos:prefLabel ?o .
+    }
+    BIND(re:eindperiode AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:heeftDatering/ceo:heeftBeginDatering/rad:periodecode ?o }
+    BIND(re:periodecode AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:heeftDatering/ceo:heeftEindDatering/rad:periodecode ?o }
+    BIND(re:periodecode AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:heeftDatering/ceo:heeftBeginDatering/rad:jaar ?o }
+    BIND(re:beginjaar AS ?veld)
+  } UNION {
+    GRAPH graph:radar { ?s ceo:heeftDatering/ceo:heeftEindDatering/rad:jaar ?o }
+    BIND(re:eindjaar AS ?veld)
+  } UNION {
+    # sporen: wat voor sporen er zijn onderzocht (kuil, waterput, ...), multi-valued
+    GRAPH graph:radar {
+      ?s ceo:bevatObject ?spoor .
+      ?spoor a ceo:Grondsporen ;
+             rad:soortSpoor ?o .
+    }
+    BIND(re:soortSpoor AS ?veld)
+  } UNION {
+    # aantallen: één getal per site
+    { SELECT ?s (COUNT(DISTINCT ?spoor) AS ?o)
+      WHERE { GRAPH graph:radar { ?s ceo:bevatObject ?spoor . ?spoor a ceo:Grondsporen } }
+      GROUP BY ?s }
+    BIND(re:aantalSporen AS ?veld)
+  } UNION {
+    { SELECT ?s (COUNT(DISTINCT ?monster) AS ?o)
+      WHERE { GRAPH graph:radar { ?s ceo:bevatObject/ceo:bevatObject ?monster } }
+      GROUP BY ?s }
+    BIND(re:aantalMonsters AS ?veld)
+  } UNION {
+    { SELECT ?s (COUNT(DISTINCT ?waarneming) AS ?o)
+      WHERE { GRAPH graph:radar { ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject ?waarneming } }
+      GROUP BY ?s }
+    BIND(re:aantalWaarnemingen AS ?veld)
+  } UNION {
+    # taxa: multi-valued, site -> spoor -> monster -> waarneming -> taxon
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject/rad:heeftTaxon ?taxon .
+      ?taxon dwc:scientificName ?o .
+    }
+    BIND(re:wetenschappelijkeNaam AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject/rad:heeftTaxon ?taxon .
+      ?taxon dwc:vernacularName ?o .
+      FILTER(lang(?o) = "nl")
+    }
+    BIND(re:plantnaam AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject/rad:heeftTaxon ?taxon .
+      ?taxon dwc:family ?o .
+    }
+    BIND(re:familie AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject/rad:heeftTaxon ?taxon .
+      ?taxon rad:gebruiksplantCategorie ?o .
+    }
+    BIND(re:gebruiksplantCategorie AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject/rad:heeftTaxon ?o .
+    }
+    BIND(re:taxonUri AS ?veld)
+  } UNION {
+    # kenmerken van de plantenregels: bewaringswijze (verkoold, waterlogged, ...) en plantdeel
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject ?waarneming .
+      ?waarneming rad:heeftBewaringswijze ?concept .
+      ?concept skos:prefLabel ?o .
+    }
+    BIND(re:bewaringswijze AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject/ceo:bevatObject ?waarneming .
+      ?waarneming rad:heeftPlantdeel ?concept .
+      ?concept skos:prefLabel ?o .
+    }
+    BIND(re:plantdeel AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?s ceo:bevatObject/ceo:bevatObject ?monster .
+      ?monster rad:heeftMonstertype ?concept .
+      ?concept skos:prefLabel ?o .
+    }
+    BIND(re:monstertype AS ?veld)
+  } UNION {
+    # literatuur: multi-valued, omgekeerd pad (publicatie wijst terug naar site)
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           schema:author ?o .
+    }
+    BIND(re:auteur AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           schema:name ?o .
+    }
+    BIND(re:titel AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           schema:datePublished ?o .
+    }
+    BIND(re:publicatiejaar AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           schema:isPartOf/schema:name ?o .
+    }
+    BIND(re:tijdschrift AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           rad:onderzoeksinstantie ?o .
+    }
+    BIND(re:onderzoeksinstantie AS ?veld)
+  } UNION {
+    GRAPH graph:radar {
+      ?pub schema:about ?s ;
+           schema:url ?o .
+    }
+    BIND(re:rapportUrl AS ?veld)
+  }
+}
