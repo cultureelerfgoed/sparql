@@ -1,0 +1,20 @@
+#+ name: de-handle-van-een-rijksmonumentnummer
+#+ description: Query om bij een CHO objectnummer het rijksmonumentnummer te vinden. Maar ook om bij en rijksmonumentnummer een CHO objectnummer te zoeken.
+#+ endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/sparql
+
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX graph: <https://linkeddata.cultureelerfgoed.nl/graph/>
+
+SELECT ?cho ?cultuurhistorischObjectNummer ?rijksmonumentnummer
+       (IRI(CONCAT("https://monumentenregister.cultureelerfgoed.nl/monumenten/",
+                   STR(?rijksmonumentnummer))) AS ?monumentenregister)
+       (IRI(CONCAT("https://hdl.handle.net/21.12144/",
+                   STR(?cultuurhistorischObjectNummer))) AS ?handle)
+WHERE {
+  GRAPH graph:instanties-rce {
+    ?cho a ceo:Rijksmonument ;
+         ceo:cultuurhistorischObjectnummer ?cultuurhistorischObjectNummer ;
+         ceo:rijksmonumentnummer ?rijksmonumentnummer .
+  }
+}
+LIMIT 10
